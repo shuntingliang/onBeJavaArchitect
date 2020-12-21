@@ -21,6 +21,7 @@ public class Test01 {
 		System.out.println("max memory:" + Runtime.getRuntime().maxMemory());
 		System.out.println("free memory:" + Runtime.getRuntime().freeMemory());
 		System.out.println("total memory:" + Runtime.getRuntime().totalMemory());
+		system.out.println("测试idea git提交，更新等");
 		
 		byte[] b2 = new byte[4*1024*1024];
 		System.out.println("分配了4M");
