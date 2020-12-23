@@ -19,6 +19,8 @@ public class MainExcute {
          * 2、BeanFactory是个Factory，也就是IOC容器或对象工厂，FactoryBean是个Bean。在Spring中，所有的Bean都是
          * 由BeanFactory(也就是IOC容器)来进行管理的。但对FactoryBean而言，这个Bean不是简单的Bean，而是一个能生产
          * 或者修饰对象生成的工厂Bean,它的实现与设计模式中的工厂模式和修饰器模式类似
+         * 3、getObject是延迟加载的，只有显示调用才能触发，spring在初始化启动单例bean实例化的时候并不会触发(Smar
+         * tFactoryBean除外）
          */
     }
 }
