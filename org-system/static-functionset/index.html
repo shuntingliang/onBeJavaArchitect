@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>职能集管理</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f0f2f5;
+      color: #333;
+      line-height: 1.5;
+    }
+    .page-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .page-header {
+      margin-bottom: 16px;
+    }
+    .page-title {
+      font-size: 20px;
+      font-weight: 500;
+      color: #333;
+    }
+    .page-subtitle {
+      font-size: 14px;
+      color: #999;
+      margin-top: 4px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .search-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: flex-end;
+    }
+    .search-item {
+      flex: 0 0 auto;
+      min-width: 200px;
+    }
+    .search-item.full {
+      flex: 1;
+      min-width: auto;
+      text-align: right;
+    }
+    .search-label {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .input {
+      width: 100%;
+      height: 32px;
+      padding: 4px 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    .input:focus {
+      border-color: #1890ff;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(24,144,255,0.2);
+    }
+    .select {
+      width: 100%;
+      height: 32px;
+      padding: 4px 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      font-size: 14px;
+      background: #fff;
+      cursor: pointer;
+    }
+    .select:focus {
+      border-color: #1890ff;
+      outline: none;
+    }
+    .btn {
+      height: 32px;
+      padding: 4px 16px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      background: #fff;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn:hover {
+      border-color: #1890ff;
+      color: #1890ff;
+    }
+    .btn-primary {
+      background: #1890ff;
+      border-color: #1890ff;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #40a9ff;
+      border-color: #40a9ff;
+      color: #fff;
+    }
+    .btn-danger {
+      color: #ff4d4f;
+      border-color: #ff4d4f;
+    }
+    .btn-danger:hover {
+      background: #ff4d4f;
+      color: #fff;
+    }
+    .btn-small {
+      height: 24px;
+      padding: 0 8px;
+      font-size: 12px;
+    }
+    .btn-link {
+      border: none;
+      background: transparent;
+      color: #1890ff;
+      padding: 0 4px;
+    }
+    .btn-link:hover {
+      color: #40a9ff;
+    }
+    .btn-link.danger {
+      color: #ff4d4f;
+    }
+    .btn-link.danger:hover {
+      color: #ff7875;
+    }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      text-align: left;
+    }
+    th {
+      background: #fafafa;
+      font-weight: 500;
+      color: #333;
+    }
+    tr:hover {
+      background: #f5f5f5;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      line-height: 20px;
+    }
+    .tag-green {
+      background: #f6ffed;
+      border: 1px solid #b7eb8f;
+      color: #52c41a;
+    }
+    .tag-default {
+      background: #fafafa;
+      border: 1px solid #d9d9d9;
+      color: #666;
+    }
+    .tag-blue {
+      background: #e6f7ff;
+      border: 1px solid #91d5ff;
+      color: #1890ff;
+    }
+    .action-cell {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .pagination {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 16px;
+    }
+    .pagination-info {
+      font-size: 14px;
+      color: #666;
+    }
+    .pagination-btn {
+      min-width: 32px;
+      height: 32px;
+      padding: 4px 8px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .pagination-btn:hover:not(:disabled) {
+      border-color: #1890ff;
+      color: #1890ff;
+    }
+    .pagination-btn:disabled {
+      background: #f5f5f5;
+      color: #999;
+      cursor: not-allowed;
+    }
+    .pagination-btn.active {
+      background: #1890ff;
+      border-color: #1890ff;
+      color: #fff;
+    }
+    .pagination-select {
+      height: 32px;
+      padding: 4px 8px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.45);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal {
+      background: #fff;
+      border-radius: 8px;
+      width: 520px;
+      max-width: 90vw;
+      max-height: 90vh;
+      overflow: auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .modal-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-title {
+      font-size: 16px;
+      font-weight: 500;
+    }
+    .modal-close {
+      cursor: pointer;
+      font-size: 20px;
+      color: #999;
+      line-height: 1;
+    }
+    .modal-close:hover {
+      color: #333;
+    }
+    .modal-body {
+      padding: 24px;
+    }
+    .modal-footer {
+      padding: 12px 24px;
+      border-top: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    
+    /* Form Styles */
+    .form-item {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .form-label.required::before {
+      content: '*';
+      color: #ff4d4f;
+      margin-right: 4px;
+    }
+    .form-input {
+      width: 100%;
+      height: 32px;
+      padding: 4px 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .form-input:focus {
+      border-color: #1890ff;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(24,144,255,0.2);
+    }
+    .form-input:disabled {
+      background: #f5f5f5;
+      color: #999;
+    }
+    .form-textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 100px;
+    }
+    .form-textarea:focus {
+      border-color: #1890ff;
+      outline: none;
+    }
+    .form-error {
+      font-size: 12px;
+      color: #ff4d4f;
+      margin-top: 4px;
+    }
+    
+    /* Drawer Styles */
+    .drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.45);
+      display: none;
+      z-index: 1000;
+    }
+    .drawer-overlay.active {
+      display: block;
+    }
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: -520px;
+      width: 520px;
+      max-width: 100vw;
+      height: 100vh;
+      background: #fff;
+      box-shadow: -2px 0 8px rgba(0,0,0,0.15);
+      transition: right 0.3s;
+      z-index: 1001;
+      display: flex;
+      flex-direction: column;
+    }
+    .drawer.active {
+      right: 0;
+    }
+    .drawer-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .drawer-title {
+      font-size: 16px;
+      font-weight: 500;
+    }
+    .drawer-close {
+      cursor: pointer;
+      font-size: 20px;
+      color: #999;
+    }
+    .drawer-close:hover {
+      color: #333;
+    }
+    .drawer-body {
+      padding: 24px;
+      flex: 1;
+      overflow: auto;
+    }
+    .drawer-footer {
+      padding: 12px 24px;
+      border-top: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    
+    /* Descriptions */
+    .descriptions {
+      margin-bottom: 16px;
+    }
+    .descriptions-title {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .descriptions-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .descriptions-table td {
+      padding: 12px 16px;
+      border: 1px solid #f0f0f0;
+      font-size: 14px;
+    }
+    .descriptions-label {
+      background: #fafafa;
+      width: 120px;
+      color: #666;
+    }
+    .descriptions-content {
+      color: #333;
+    }
+    
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: #f0f0f0;
+      margin: 16px 0;
+    }
+    .divider-text {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+    
+    /* Position List */
+    .position-item {
+      padding: 8px 12px;
+      border: 1px solid #f0f0f0;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+    .position-name {
+      font-weight: 500;
+    }
+    .position-code {
+      color: #999;
+      font-size: 12px;
+    }
+    
+    /* Dropdown */
+    .dropdown-wrapper {
+      position: relative;
+    }
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      min-width: 120px;
+      padding: 4px 0;
+      display: none;
+      z-index: 100;
+    }
+    .dropdown-menu.active {
+      display: block;
+    }
+    .dropdown-item {
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dropdown-item:hover {
+      background: #f5f5f5;
+    }
+    .dropdown-item.danger {
+      color: #ff4d4f;
+    }
+    .dropdown-divider {
+      height: 1px;
+      background: #f0f0f0;
+      margin: 4px 0;
+    }
+    
+    /* Confirm Modal */
+    .confirm-content {
+      font-size: 14px;
+      color: #333;
+      padding: 24px 0;
+    }
+    
+    /* Empty */
+    .empty {
+      text-align: center;
+      padding: 32px;
+      color: #999;
+    }
+    
+    /* Icon simulation with Unicode/Emoji */
+    .icon-search::before { content: "🔍"; }
+    .icon-reload::before { content: "🔄"; }
+    .icon-plus::before { content: "+"; font-weight: bold; }
+    .icon-edit::before { content: "✏️"; }
+    .icon-stop::before { content: "⏸️"; }
+    .icon-play::before { content: "▶️"; }
+    .icon-delete::before { content: "🗑️"; }
+    .icon-more::before { content: "⋯"; font-weight: bold; }
+    .icon-eye::before { content: "👁️"; }
+    .icon-rollback::before { content: "↩️"; }
+    .icon-setting::before { content: "⚙️"; }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .search-item {
+        min-width: 100%;
+      }
+      .toolbar {
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-container">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1 class="page-title">职能集管理</h1>
+      <p class="page-subtitle">管理系统职能集及权限配置</p>
+    </div>
+    
+    <!-- Search Card -->
+    <div class="card">
+      <div class="search-row">
+        <div class="search-item">
+          <div class="search-label">职能集名称/编码</div>
+          <input type="text" class="input" id="keywordInput" placeholder="请输入名称/编码">
+        </div>
+        <div class="search-item">
+          <div class="search-label">状态</div>
+          <select class="select" id="statusSelect">
+            <option value="ALL">全部</option>
+            <option value="ACTIVE">启用</option>
+            <option value="INACTIVE">停用</option>
+            <option value="DELETED">已删除</option>
+          </select>
+        </div>
+        <div class="search-item full">
+          <button class="btn btn-primary" onclick="handleSearch()">
+            <span class="icon-search"></span> 查询
+          </button>
+          <button class="btn" onclick="handleReset()">
+            <span class="icon-reload"></span> 重置
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Table Card -->
+    <div class="card">
+      <div class="toolbar">
+        <button class="btn btn-primary" onclick="handleAdd()">
+          <span class="icon-plus"></span> 新建职能集
+        </button>
+      </div>
+      
+      <div class="table-container">
+        <table id="dataTable">
+          <thead>
+            <tr>
+              <th style="width: 140px;">职能集编码</th>
+              <th style="width: 160px;">职能集名称</th>
+              <th style="width: 120px;">关联岗位数</th>
+              <th style="width: 100px;">状态</th>
+              <th style="width: 170px;">创建时间</th>
+              <th style="width: 280px;">操作</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Dynamic content -->
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="pagination">
+        <span class="pagination-info" id="paginationInfo">共 0 条</span>
+        <select class="pagination-select" id="pageSizeSelect" onchange="changePageSize()">
+          <option value="10">10条/页</option>
+          <option value="20">20条/页</option>
+          <option value="50">50条/页</option>
+        </select>
+        <button class="pagination-btn" onclick="changePage(-1)" id="prevBtn">上一页</button>
+        <span id="pageButtons"></span>
+        <button class="pagination-btn" onclick="changePage(1)" id="nextBtn">下一页</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Add/Edit Modal -->
+  <div class="modal-overlay" id="formModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" id="modalTitle">新建职能集</span>
+        <span class="modal-close" onclick="closeFormModal()">×</span>
+      </div>
+      <div class="modal-body">
+        <div class="form-item">
+          <label class="form-label">职能集编码</label>
+          <input type="text" class="form-input" id="formCode" disabled>
+        </div>
+        <div class="form-item">
+          <label class="form-label required">职能集名称</label>
+          <input type="text" class="form-input" id="formName" placeholder="请输入职能集名称" maxlength="50">
+          <div class="form-error" id="nameError"></div>
+        </div>
+        <div class="form-item">
+          <label class="form-label">描述</label>
+          <textarea class="form-textarea" id="formDescription" placeholder="请输入描述" maxlength="200"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeFormModal()">取消</button>
+        <button class="btn btn-primary" onclick="submitForm()">确定</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Confirm Modal -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal" style="width: 400px;">
+      <div class="modal-header">
+        <span class="modal-title" id="confirmTitle">确认</span>
+        <span class="modal-close" onclick="closeConfirmModal()">×</span>
+      </div>
+      <div class="modal-body">
+        <div class="confirm-content" id="confirmContent"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeConfirmModal()">取消</button>
+        <button class="btn btn-danger" id="confirmBtn">确认</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Detail Drawer -->
+  <div class="drawer-overlay" id="detailDrawerOverlay" onclick="closeDetailDrawer()"></div>
+  <div class="drawer" id="detailDrawer">
+    <div class="drawer-header">
+      <span class="drawer-title">职能集详情</span>
+      <span class="drawer-close" onclick="closeDetailDrawer()">×</span>
+    </div>
+    <div class="drawer-body" id="detailDrawerBody">
+      <!-- Dynamic content -->
+    </div>
+  </div>
+
+  <script>
+    // Mock Data
+    let functionSets = [
+      { id: 'fs-001', code: 'FNS_0001', name: '超级管理员', status: 'ACTIVE', description: '拥有系统全部权限', resourceIds: ['res-001', 'res-002', 'res-003'], createdAt: '2025-01-01 10:00:00' },
+      { id: 'fs-002', code: 'FNS_0002', name: '组织管理', status: 'ACTIVE', description: '组织架构管理权限', resourceIds: ['res-001', 'res-002'], createdAt: '2025-01-15 14:30:00' },
+      { id: 'fs-003', code: 'FNS_0003', name: '用户管理', status: 'ACTIVE', description: '用户账号管理权限', resourceIds: ['res-005', 'res-006'], createdAt: '2025-02-01 09:00:00' },
+      { id: 'fs-004', code: 'FNS_0004', name: '技术管理', status: 'ACTIVE', description: '技术团队管理权限', resourceIds: ['res-008'], createdAt: '2025-02-15 11:00:00' },
+      { id: 'fs-005', code: 'FNS_0005', name: '开发人员', status: 'ACTIVE', description: '开发人员基础权限', resourceIds: ['res-008', 'res-009'], createdAt: '2025-03-01 08:00:00' },
+      { id: 'fs-006', code: 'FNS_0006', name: '测试人员', status: 'INACTIVE', description: '测试人员权限', resourceIds: ['res-010'], createdAt: '2025-03-10 16:00:00' },
+      { id: 'fs-007', code: 'FNS_0007', name: '项目管理', status: 'ACTIVE', description: '项目管理权限', resourceIds: ['res-011'], createdAt: '2025-03-20 10:30:00' },
+      { id: 'fs-008', code: 'FNS_0008', name: '产品管理', status: 'INACTIVE', description: '产品管理权限（已停用）', resourceIds: ['res-012'], createdAt: '2025-04-01 09:00:00' },
+      { id: 'fs-009', code: 'FNS_0009', name: '市场管理', status: 'ACTIVE', description: '市场运营管理权限', resourceIds: ['res-013'], createdAt: '2025-04-10 14:00:00' },
+      { id: 'fs-010', code: 'FNS_0010', name: '人力资源', status: 'ACTIVE', description: '人力资源管理权限', resourceIds: ['res-014'], createdAt: '2025-04-20 11:00:00' },
+      { id: 'fs-011', code: 'FNS_0011', name: '销售管理', status: 'DELETED', description: '销售团队管理权限', resourceIds: ['res-015'], createdAt: '2025-05-01 08:30:00' },
+    ];
+    
+    let positions = [
+      { id: 'pos-001', code: 'POS_0001', name: '集团CEO', functionSetIds: ['fs-001', 'fs-002'] },
+      { id: 'pos-002', code: 'POS_0002', name: '分公司总经理', functionSetIds: ['fs-001', 'fs-003'] },
+      { id: 'pos-003', code: 'POS_0003', name: '技术总监', functionSetIds: ['fs-004'] },
+      { id: 'pos-004', code: 'POS_0004', name: '高级开发工程师', functionSetIds: ['fs-005'] },
+      { id: 'pos-005', code: 'POS_0005', name: '项目经理', functionSetIds: ['fs-007'] },
+      { id: 'pos-006', code: 'POS_0006', name: 'HR经理', functionSetIds: ['fs-010'] },
+    ];
+    
+    // State
+    let currentPage = 1;
+    let pageSize = 10;
+    let keyword = '';
+    let statusFilter = 'ALL';
+    let editingId = null;
+    let confirmCallback = null;
+    
+    // Utility Functions
+    function getNextCode() {
+      const maxNum = functionSets.reduce((max, fs) => {
+        const num = parseInt(fs.code.replace('FNS_', ''), 10);
+        return num > max ? num : max;
+      }, 0);
+      return 'FNS_' + String(maxNum + 1).padStart(4, '0');
+    }
+    
+    function formatDate(dateStr) {
+      return dateStr || '-';
+    }
+    
+    function getStatusTag(status) {
+      const map = {
+        'ACTIVE': { class: 'tag-green', text: '启用' },
+        'INACTIVE': { class: 'tag-default', text: '停用' },
+        'DELETED': { class: 'tag-default', text: '已删除' }
+      };
+      const info = map[status] || map['ACTIVE'];
+      return '<span class="tag ' + info.class + '">' + info.text + '</span>';
+    }
+    
+    function getPositionCount(fsId) {
+      return positions.filter(p => p.functionSetIds.includes(fsId)).length;
+    }
+    
+    function getPositionsByFunctionSet(fsId) {
+      return positions.filter(p => p.functionSetIds.includes(fsId));
+    }
+    
+    // Filter and Pagination
+    function getFilteredData() {
+      let result = [...functionSets];
+      if (keyword) {
+        const kw = keyword.toLowerCase();
+        result = result.filter(fs => 
+          fs.name.toLowerCase().includes(kw) ||
+          fs.code.toLowerCase().includes(kw) ||
+          (fs.description && fs.description.toLowerCase().includes(kw))
+        );
+      }
+      if (statusFilter !== 'ALL') {
+        result = result.filter(fs => fs.status === statusFilter);
+      }
+      return result;
+    }
+    
+    function getPagedData() {
+      const filtered = getFilteredData();
+      const start = (currentPage - 1) * pageSize;
+      return {
+        data: filtered.slice(start, start + pageSize),
+        total: filtered.length
+      };
+    }
+    
+    // Render Table
+    function renderTable() {
+      const { data, total } = getPagedData();
+      const tbody = document.getElementById('tableBody');
+      
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty">暂无数据</td></tr>';
+      } else {
+        tbody.innerHTML = data.map(fs => {
+          const isDeleted = fs.status === 'DELETED';
+          const actions = isDeleted ? 
+            '<button class="btn-link" onclick="handleRestore(\'' + fs.id + '\')"><span class="icon-rollback"></span> 恢复</button>' :
+            '<button class="btn-link" onclick="handleEdit(\'' + fs.id + '\')"><span class="icon-edit"></span> 编辑</button>' +
+            (fs.status === 'ACTIVE' ? 
+              '<button class="btn-link" onclick="handleDeactivate(\'' + fs.id + '\')"><span class="icon-stop"></span> 停用</button>' :
+              '<button class="btn-link" onclick="handleActivate(\'' + fs.id + '\')"><span class="icon-play"></span> 启用</button>') +
+            '<div class="dropdown-wrapper">' +
+              '<button class="btn-link" onclick="toggleDropdown(\'' + fs.id + '\')"><span class="icon-more"></span> 更多</button>' +
+              '<div class="dropdown-menu" id="dropdown-' + fs.id + '">' +
+                '<div class="dropdown-item" onclick="handleViewDetail(\'' + fs.id + '\')"><span class="icon-eye"></span> 查看详情</div>' +
+                '<div class="dropdown-divider"></div>' +
+                '<div class="dropdown-item danger" onclick="handleDelete(\'' + fs.id + '\')"><span class="icon-delete"></span> 删除</div>' +
+              '</div>' +
+            '</div>';
+          
+          return '<tr>' +
+            '<td>' + fs.code + '</td>' +
+            '<td>' + fs.name + '</td>' +
+            '<td>' + getPositionCount(fs.id) + '</td>' +
+            '<td>' + getStatusTag(fs.status) + '</td>' +
+            '<td>' + formatDate(fs.createdAt) + '</td>' +
+            '<td><div class="action-cell">' + actions + '</div></td>' +
+          '</tr>';
+        }).join('');
+      }
+      
+      renderPagination(total);
+    }
+    
+    function renderPagination(total) {
+      const totalPages = Math.ceil(total / pageSize);
+      
+      document.getElementById('paginationInfo').textContent = '共 ' + total + ' 条';
+      document.getElementById('prevBtn').disabled = currentPage <= 1;
+      document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+      
+      let pageBtns = '';
+      const maxBtns = 5;
+      let startPage = Math.max(1, currentPage - Math.floor(maxBtns / 2));
+      let endPage = Math.min(totalPages, startPage + maxBtns - 1);
+      if (endPage - startPage < maxBtns - 1) {
+        startPage = Math.max(1, endPage - maxBtns + 1);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        const activeClass = i === currentPage ? ' active' : '';
+        pageBtns += '<button class="pagination-btn' + activeClass + '" onclick="goToPage(' + i + ')">' + i + '</button>';
+      }
+      
+      document.getElementById('pageButtons').innerHTML = pageBtns;
+    }
+    
+    // Handlers
+    function handleSearch() {
+      keyword = document.getElementById('keywordInput').value;
+      currentPage = 1;
+      renderTable();
+    }
+    
+    function handleReset() {
+      document.getElementById('keywordInput').value = '';
+      document.getElementById('statusSelect').value = 'ALL';
+      keyword = '';
+      statusFilter = 'ALL';
+      currentPage = 1;
+      renderTable();
+    }
+    
+    function changePageSize() {
+      pageSize = parseInt(document.getElementById('pageSizeSelect').value);
+      currentPage = 1;
+      renderTable();
+    }
+    
+    function changePage(delta) {
+      const total = getFilteredData().length;
+      const totalPages = Math.ceil(total / pageSize);
+      currentPage = Math.max(1, Math.min(totalPages, currentPage + delta));
+      renderTable();
+    }
+    
+    function goToPage(page) {
+      currentPage = page;
+      renderTable();
+    }
+    
+    // Dropdown
+    function toggleDropdown(id) {
+      const dropdown = document.getElementById('dropdown-' + id);
+      const isActive = dropdown.classList.contains('active');
+      
+      // Close all dropdowns
+      document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('active'));
+      
+      if (!isActive) {
+        dropdown.classList.add('active');
+      }
+    }
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.dropdown-wrapper')) {
+        document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('active'));
+      }
+    });
+    
+    // Status filter change
+    document.getElementById('statusSelect').addEventListener('change', function() {
+      statusFilter = this.value;
+      currentPage = 1;
+      renderTable();
+    });
+    
+    // Form Modal
+    function handleAdd() {
+      editingId = null;
+      document.getElementById('modalTitle').textContent = '新建职能集';
+      document.getElementById('formCode').value = getNextCode();
+      document.getElementById('formName').value = '';
+      document.getElementById('formDescription').value = '';
+      document.getElementById('nameError').textContent = '';
+      document.getElementById('formModal').classList.add('active');
+    }
+    
+    function handleEdit(id) {
+      const fs = functionSets.find(f => f.id === id);
+      if (!fs) return;
+      
+      editingId = id;
+      document.getElementById('modalTitle').textContent = '编辑职能集';
+      document.getElementById('formCode').value = fs.code;
+      document.getElementById('formName').value = fs.name;
+      document.getElementById('formDescription').value = fs.description || '';
+      document.getElementById('nameError').textContent = '';
+      document.getElementById('formModal').classList.add('active');
+    }
+    
+    function closeFormModal() {
+      document.getElementById('formModal').classList.remove('active');
+    }
+    
+    function submitForm() {
+      const name = document.getElementById('formName').value.trim();
+      const description = document.getElementById('formDescription').value.trim();
+      
+      if (!name) {
+        document.getElementById('nameError').textContent = '请输入职能集名称';
+        return;
+      }
+      
+      if (editingId) {
+        // Edit
+        const fs = functionSets.find(f => f.id === editingId);
+        if (fs) {
+          fs.name = name;
+          fs.description = description;
+        }
+      } else {
+        // Add
+        functionSets.push({
+          id: 'fs-' + String(functionSets.length + 1).padStart(3, '0'),
+          code: getNextCode(),
+          name: name,
+          description: description,
+          status: 'ACTIVE',
+          resourceIds: [],
+          createdAt: new Date().toISOString().replace('T', ' ').substring(0, 19)
+        });
+      }
+      
+      closeFormModal();
+      renderTable();
+    }
+    
+    // Confirm Modal
+    function showConfirm(title, content, onConfirm, btnText = '确认', isDanger = false) {
+      document.getElementById('confirmTitle').textContent = title;
+      document.getElementById('confirmContent').textContent = content;
+      const btn = document.getElementById('confirmBtn');
+      btn.textContent = btnText;
+      btn.className = isDanger ? 'btn btn-danger' : 'btn btn-primary';
+      confirmCallback = onConfirm;
+      document.getElementById('confirmModal').classList.add('active');
+    }
+    
+    function closeConfirmModal() {
+      document.getElementById('confirmModal').classList.remove('active');
+      confirmCallback = null;
+    }
+    
+    document.getElementById('confirmBtn').addEventListener('click', function() {
+      if (confirmCallback) {
+        confirmCallback();
+      }
+      closeConfirmModal();
+    });
+    
+    // Actions
+    function handleDeactivate(id) {
+      const fs = functionSets.find(f => f.id === id);
+      if (!fs) return;
+      showConfirm('确认停用', '确定要停用职能集 "' + fs.name + '" 吗？', function() {
+        fs.status = 'INACTIVE';
+        renderTable();
+      }, '确认停用', true);
+    }
+    
+    function handleActivate(id) {
+      const fs = functionSets.find(f => f.id === id);
+      if (!fs) return;
+      showConfirm('确认启用', '确定要启用职能集 "' + fs.name + '" 吗？', function() {
+        fs.status = 'ACTIVE';
+        renderTable();
+      }, '确认启用');
+    }
+    
+    function handleDelete(id) {
+      const fs = functionSets.find(f => f.id === id);
+      if (!fs) return;
+      showConfirm('确认删除', '确定要删除职能集 "' + fs.name + '" 吗？删除后将解除与岗位的关联关系。', function() {
+        fs.status = 'DELETED';
+        renderTable();
+      }, '确认删除', true);
+    }
+    
+    function handleRestore(id) {
+      const fs = functionSets.find(f => f.id === id);
+      if (!fs) return;
+      showConfirm('确认恢复', '确定要恢复职能集 "' + fs.name + '" 吗？', function() {
+        fs.status = 'ACTIVE';
+        renderTable();
+      }, '确认恢复');
+    }
+    
+    // Detail Drawer
+    function handleViewDetail(id) {
+      const fs = functionSets.find(f => f.id === id);
+      if (!fs) return;
+      
+      const relatedPositions = getPositionsByFunctionSet(id);
+      
+      const html = 
+        '<div class="descriptions">' +
+          '<div class="descriptions-title">基本信息</div>' +
+          '<table class="descriptions-table">' +
+            '<tr><td class="descriptions-label">职能集编码</td><td class="descriptions-content">' + fs.code + '</td></tr>' +
+            '<tr><td class="descriptions-label">职能集名称</td><td class="descriptions-content">' + fs.name + '</td></tr>' +
+            '<tr><td class="descriptions-label">状态</td><td class="descriptions-content">' + getStatusTag(fs.status) + '</td></tr>' +
+            '<tr><td class="descriptions-label">描述</td><td class="descriptions-content">' + (fs.description || '-') + '</td></tr>' +
+            '<tr><td class="descriptions-label">创建时间</td><td class="descriptions-content">' + formatDate(fs.createdAt) + '</td></tr>' +
+          '</table>' +
+        '</div>' +
+        '<div class="descriptions">' +
+          '<div class="descriptions-title">关联统计</div>' +
+          '<table class="descriptions-table">' +
+            '<tr><td class="descriptions-label">关联岗位数</td><td class="descriptions-content">' + relatedPositions.length + '</td></tr>' +
+          '</table>' +
+        '</div>' +
+        '<div class="divider-text">关联岗位列表</div>' +
+        (relatedPositions.length > 0 ? 
+          relatedPositions.map(p => 
+            '<div class="position-item">' +
+              '<div class="position-name">' + p.name + '</div>' +
+              '<div class="position-code">' + p.code + '</div>' +
+            '</div>'
+          ).join('') :
+          '<div class="empty">暂无关联岗位</div>'
+        );
+      
+      document.getElementById('detailDrawerBody').innerHTML = html;
+      document.getElementById('detailDrawerOverlay').classList.add('active');
+      document.getElementById('detailDrawer').classList.add('active');
+    }
+    
+    function closeDetailDrawer() {
+      document.getElementById('detailDrawerOverlay').classList.remove('active');
+      document.getElementById('detailDrawer').classList.remove('active');
+    }
+    
+    // Initialize
+    renderTable();
+  </script>
+</body>
+</html>
