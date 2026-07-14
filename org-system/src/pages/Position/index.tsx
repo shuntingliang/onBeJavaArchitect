@@ -81,7 +81,7 @@ export default function PositionPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
 
-  const [orgTypeTab, setOrgTypeTab] = useState<'VERTICAL' | 'HORIZONTAL'>('VERTICAL');
+  const [orgTypeTab, setOrgTypeTab] = useState<'VERTICAL' | 'HORIZONTAL' | 'OUTER'>('VERTICAL');
   const [treeSearchKeyword, setTreeSearchKeyword] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
 
@@ -128,10 +128,10 @@ export default function PositionPage() {
   );
 
   const buildTreeData = useCallback(
-    (orgType: 'VERTICAL' | 'HORIZONTAL'): TreeNodeData[] => {
+    (orgType: 'VERTICAL' | 'HORIZONTAL' | 'OUTER'): TreeNodeData[] => {
       const buildDepartmentNodes = (parentId: string): TreeNodeData[] => {
         const departments = buildOrgTree(parentId, ['DEPARTMENT']).filter(
-          (dept) => dept.orgType === orgType
+          (dept) => orgType === 'OUTER' ? dept.innerOuter === 'OUTER' : dept.orgType === orgType && dept.innerOuter !== 'OUTER'
         );
         return departments.map((dept) => {
           return {
@@ -151,11 +151,11 @@ export default function PositionPage() {
 
       const buildProgramNodes = (parentId: string): TreeNodeData[] => {
         const programs = buildOrgTree(parentId, ['PROGRAM']).filter(
-          (prog) => prog.orgType === orgType
+          (prog) => orgType === 'OUTER' ? prog.innerOuter === 'OUTER' : prog.orgType === orgType && prog.innerOuter !== 'OUTER'
         );
         return programs.map((prog) => {
           const projects = buildOrgTree(prog.id, ['PROJECT']).filter(
-            (proj) => proj.orgType === orgType
+            (proj) => orgType === 'OUTER' ? proj.innerOuter === 'OUTER' : proj.orgType === orgType && proj.innerOuter !== 'OUTER'
           );
           const projectNodes: TreeNodeData[] = projects.map((proj) => {
             return {
@@ -188,16 +188,21 @@ export default function PositionPage() {
       };
 
       const rootGroups = orgNodes.filter(
-        (n) => n.parentId === null && n.status !== 'DELETED'
+        (n) => n.parentId === null && n.status !== 'DELETED' &&
+          (orgType === 'OUTER' ? n.innerOuter === 'OUTER' : n.innerOuter !== 'OUTER')
       );
       let companies: OrgNode[] = [];
       if (rootGroups.length > 0) {
         rootGroups.forEach((group) => {
-          const groupCompanies = buildOrgTree(group.id, ['COMPANY']);
+          const groupCompanies = buildOrgTree(group.id, ['COMPANY']).filter(
+            (c) => orgType === 'OUTER' ? c.innerOuter === 'OUTER' : c.innerOuter !== 'OUTER'
+          );
           companies = [...companies, ...groupCompanies];
         });
       } else {
-        companies = buildOrgTree(null, ['COMPANY']);
+        companies = buildOrgTree(null, ['COMPANY']).filter(
+          (c) => orgType === 'OUTER' ? c.innerOuter === 'OUTER' : c.innerOuter !== 'OUTER'
+        );
       }
 
       return companies.map((company) => {
@@ -613,9 +618,6 @@ export default function PositionPage() {
           <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
             编辑
           </Button>
-          <Button type="link" size="small" icon={<TeamOutlined />} onClick={() => handleAssignFunctionSet(record)}>
-            关联职能集
-          </Button>
           {record.status === 'DELETED' ? (
             <Button type="link" size="small" icon={<RollbackOutlined />} onClick={() => handleRestore(record)}>
               恢复
@@ -624,6 +626,13 @@ export default function PositionPage() {
             <Dropdown
               menu={{
                 items: [
+                  {
+                    key: 'assignFunctionSet',
+                    icon: <TeamOutlined />,
+                    label: '关联职能集',
+                    onClick: () => handleAssignFunctionSet(record),
+                  },
+                  { type: 'divider' as const },
                   ...(record.status === 'ACTIVE'
                     ? [
                         {
@@ -677,7 +686,7 @@ export default function PositionPage() {
             <Tabs
               activeKey={orgTypeTab}
               onChange={(key) => {
-                setOrgTypeTab(key as 'VERTICAL' | 'HORIZONTAL');
+                setOrgTypeTab(key as 'VERTICAL' | 'HORIZONTAL' | 'OUTER');
                 setSelectedOrgNodeId(null);
                 setExpandedKeys([]);
               }}
@@ -686,6 +695,7 @@ export default function PositionPage() {
               items={[
                 { key: 'VERTICAL', label: '职能型' },
                 { key: 'HORIZONTAL', label: '项目型' },
+                { key: 'OUTER', label: '外部组织' },
               ]}
             />
             <div style={{ padding: '0 12px 12px 12px' }}>
@@ -775,6 +785,71 @@ export default function PositionPage() {
                 onChange: (page, pageSize) => setPagination({ current: page, pageSize }),
               }}
               scroll={{ x: 1000 }}
+            />
+          </Card>
+
+          <Card title="岗位规则说明" style={{ marginTop: 16, borderRadius: 8 }}>
+            <Table
+              columns={[
+                { title: '功能模块', dataIndex: 'module', key: 'module', width: 120 },
+                { title: '功能点', dataIndex: 'point', key: 'point', width: 140 },
+                { title: '功能描述', dataIndex: 'description', key: 'description' },
+                { title: '适用范围', dataIndex: 'scope', key: 'scope', width: 120 },
+              ]}
+              dataSource={[
+                {
+                  key: '1',
+                  module: '岗位管理',
+                  point: '创建岗位',
+                  description: '1. 岗位编码可手动输入，非必填，系统自动生成\n2. 同一组织下岗位编码、名称不可重复\n3. 岗位类型分为管理岗和非管理岗\n4. 岗位级别支持P0/P1/P2三个级别',
+                  scope: '岗位聚合',
+                },
+                {
+                  key: '2',
+                  module: '岗位管理',
+                  point: '编辑岗位',
+                  description: '岗位编码不允许修改，同一组织下岗位名称不可重复',
+                  scope: '岗位聚合',
+                },
+                {
+                  key: '3',
+                  module: '岗位管理',
+                  point: '停用岗位',
+                  description: '1. 允许启用、删除、编辑、详情、关联职能集\n2. 停用：状态更新为"停用"，关联用户同步失效',
+                  scope: '岗位聚合',
+                },
+                {
+                  key: '4',
+                  module: '岗位管理',
+                  point: '启用岗位',
+                  description: '1. 允许创建子岗位，编辑、停用、删除，关联职能集\n2. 启用：状态更新为启用',
+                  scope: '岗位聚合',
+                },
+                {
+                  key: '5',
+                  module: '岗位管理',
+                  point: '删除岗位',
+                  description: '删除岗位前必须无关联用户，删除后允许恢复删除',
+                  scope: '岗位聚合',
+                },
+                {
+                  key: '6',
+                  module: '岗位管理',
+                  point: '恢复删除',
+                  description: '恢复删除状态更新为"启用"',
+                  scope: '岗位聚合',
+                },
+                {
+                  key: '7',
+                  module: '岗位管理',
+                  point: '关联职能集',
+                  description: '岗位可关联多个职能集，职能集用于定义岗位职责范围',
+                  scope: '岗位聚合',
+                },
+              ]}
+              pagination={false}
+              size="small"
+              scroll={{ x: 1200 }}
             />
           </Card>
         </Col>

@@ -114,7 +114,7 @@ export default function UserManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const [orgTypeTab, setOrgTypeTab] = useState<'VERTICAL' | 'HORIZONTAL'>('VERTICAL');
+  const [orgTypeTab, setOrgTypeTab] = useState<'VERTICAL' | 'HORIZONTAL' | 'OUTER'>('VERTICAL');
   const [selectedTreeKey, setSelectedTreeKey] = useState<string | undefined>(undefined);
   const [treeSearchKeyword, setTreeSearchKeyword] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>(() => {
@@ -326,10 +326,10 @@ export default function UserManagement() {
   );
 
   const buildTreeData = useCallback(
-    (orgType: 'VERTICAL' | 'HORIZONTAL'): TreeNodeData[] => {
+    (orgType: 'VERTICAL' | 'HORIZONTAL' | 'OUTER'): TreeNodeData[] => {
       const buildDepartmentNodes = (parentId: string): TreeNodeData[] => {
         const departments = buildOrgTree(parentId, ['DEPARTMENT']).filter(
-          (dept) => dept.orgType === orgType
+          (dept) => orgType === 'OUTER' ? dept.innerOuter === 'OUTER' : dept.orgType === orgType && dept.innerOuter !== 'OUTER'
         );
         return departments.map((dept) => {
           const deptPositions = activePositions.filter((p) => p.orgNodeId === dept.id);
@@ -364,7 +364,7 @@ export default function UserManagement() {
 
       const buildProgramNodes = (parentId: string): TreeNodeData[] => {
         const programs = buildOrgTree(parentId, ['PROGRAM']).filter(
-          (prog) => prog.orgType === orgType
+          (prog) => orgType === 'OUTER' ? prog.innerOuter === 'OUTER' : prog.orgType === orgType && prog.innerOuter !== 'OUTER'
         );
         return programs.map((prog) => {
           const progPositions = activePositions.filter((p) => p.orgNodeId === prog.id);
@@ -383,7 +383,7 @@ export default function UserManagement() {
           }));
 
           const projects = buildOrgTree(prog.id, ['PROJECT']).filter(
-            (proj) => proj.orgType === orgType
+            (proj) => orgType === 'OUTER' ? proj.innerOuter === 'OUTER' : proj.orgType === orgType && proj.innerOuter !== 'OUTER'
           );
           const projectNodes: TreeNodeData[] = projects.map((proj) => {
             const projPositions = activePositions.filter((p) => p.orgNodeId === proj.id);
@@ -431,16 +431,21 @@ export default function UserManagement() {
       };
 
       const rootGroups = nodes.filter(
-        (n) => n.parentId === null && n.status !== 'DELETED'
+        (n) => n.parentId === null && n.status !== 'DELETED' &&
+          (orgType === 'OUTER' ? n.innerOuter === 'OUTER' : n.innerOuter !== 'OUTER')
       );
       let companies: OrgNode[] = [];
       if (rootGroups.length > 0) {
         rootGroups.forEach((group) => {
-          const groupCompanies = buildOrgTree(group.id, ['COMPANY']);
+          const groupCompanies = buildOrgTree(group.id, ['COMPANY']).filter(
+            (c) => orgType === 'OUTER' ? c.innerOuter === 'OUTER' : c.innerOuter !== 'OUTER'
+          );
           companies = [...companies, ...groupCompanies];
         });
       } else {
-        companies = buildOrgTree(null, ['COMPANY']);
+        companies = buildOrgTree(null, ['COMPANY']).filter(
+          (c) => orgType === 'OUTER' ? c.innerOuter === 'OUTER' : c.innerOuter !== 'OUTER'
+        );
       }
 
       return companies.map((company) => {
@@ -945,7 +950,7 @@ export default function UserManagement() {
             <Tabs
               activeKey={orgTypeTab}
               onChange={(key) => {
-                setOrgTypeTab(key as 'VERTICAL' | 'HORIZONTAL');
+                setOrgTypeTab(key as 'VERTICAL' | 'HORIZONTAL' | 'OUTER');
                 setSelectedTreeKey(undefined);
                 setExpandedKeys([]);
                 setCurrentPage(1);
@@ -955,6 +960,7 @@ export default function UserManagement() {
               items={[
                 { key: 'VERTICAL', label: '职能型' },
                 { key: 'HORIZONTAL', label: '项目型' },
+                { key: 'OUTER', label: '外部组织' },
               ]}
             />
             <div style={{ padding: '0 12px 12px 12px' }}>

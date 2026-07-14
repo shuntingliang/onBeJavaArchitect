@@ -290,7 +290,7 @@ export default function Organization({ mode = 'inner' }: OrganizationProps) {
         if (tab === 'VERTICAL') {
           return ['GROUP', 'COMPANY', 'DEPARTMENT'];
         }
-        return ['PROGRAM', 'PROJECT'];
+        return ['GROUP', 'COMPANY', 'PROGRAM', 'PROJECT'];
       };
 
       const validTypes = getValidNodeTypes();
@@ -373,7 +373,7 @@ export default function Organization({ mode = 'inner' }: OrganizationProps) {
       return activeNodes.filter((n) => ['GROUP', 'COMPANY', 'DEPARTMENT'].includes(n.type));
     }
     if (mode === 'horizontal') {
-      return activeNodes.filter((n) => ['PROGRAM', 'PROJECT'].includes(n.type));
+      return activeNodes.filter((n) => ['GROUP', 'COMPANY', 'PROGRAM', 'PROJECT'].includes(n.type));
     }
     return filteredNodes;
   }, [activeNodes, mode, filteredNodes]);

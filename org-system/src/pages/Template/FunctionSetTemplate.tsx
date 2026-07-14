@@ -11,17 +11,11 @@ import {
   Tag,
   Drawer,
   message,
-  Empty,
   Typography,
-  Row,
-  Col,
-  Pagination,
   Radio,
-  Tooltip,
   Descriptions,
   Tree,
   Divider,
-  Checkbox,
   Dropdown,
 } from 'antd';
 import {
@@ -31,8 +25,6 @@ import {
   SearchOutlined,
   EyeOutlined,
   HistoryOutlined,
-  AppstoreOutlined,
-  UnorderedListOutlined,
   StopOutlined,
   PlayCircleOutlined,
   RollbackOutlined,
@@ -50,7 +42,7 @@ import type { Template, TemplateStatus, Resource, OrgNode, DataPermissionConfig 
 import { resources as resourceData } from '@/mock/resourceData';
 import { orgNodes as orgData } from '@/mock/orgData';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Search } = Input;
 const { Option } = Select;
 const { TextArea } = Input;
@@ -136,7 +128,6 @@ export default function FunctionSetTemplate() {
 
   const [searchKeyword, setSearchKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
-  const [viewMode, setViewMode] = useState<'card' | 'list'>('list');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(9);
 
@@ -193,11 +184,6 @@ export default function FunctionSetTemplate() {
 
     return result.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   }, [latestVersions, statusFilter, searchKeyword]);
-
-  const paginatedTemplates = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredTemplates.slice(start, start + pageSize);
-  }, [filteredTemplates, currentPage, pageSize]);
 
   const templateVersions = useMemo(() => {
     if (!currentTemplate) return [];
@@ -754,19 +740,6 @@ export default function FunctionSetTemplate() {
                 </Option>
               ))}
             </Select>
-            <Radio.Group
-              value={viewMode}
-              onChange={(e) => setViewMode(e.target.value)}
-              optionType="button"
-              buttonStyle="solid"
-            >
-              <Radio.Button value="card">
-                <AppstoreOutlined /> 卡片视图
-              </Radio.Button>
-              <Radio.Button value="list">
-                <UnorderedListOutlined /> 列表视图
-              </Radio.Button>
-            </Radio.Group>
           </Space>
           <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
             新建模板
@@ -775,207 +748,25 @@ export default function FunctionSetTemplate() {
       </Card>
 
       {/* 模板列表 */}
-      {viewMode === 'card' ? (
-        <Card bodyStyle={{ padding: 16 }}>
-          {paginatedTemplates.length > 0 ? (
-            <>
-              <Row gutter={[16, 16]}>
-                {paginatedTemplates.map((template) => (
-                  <Col xs={24} sm={12} md={8} key={template.id}>
-                    <Card
-                      hoverable
-                      style={{ height: '100%' }}
-                      bodyStyle={{ padding: 16, display: 'flex', flexDirection: 'column', height: '100%' }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <Title level={5} style={{ margin: 0, marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {template.name}
-                          </Title>
-                          <Text type="secondary" style={{ fontSize: 12 }}>{template.code}</Text>
-                        </div>
-                      </div>
-
-                      <div style={{ marginBottom: 12 }}>
-                        <Space size={[8, 8]} wrap>
-                          <Tag color="blue">{template.version}</Tag>
-                          <StatusTag status={getStatusTagType(template.status)} text={getStatusText(template.status)} />
-                        </Space>
-                      </div>
-
-                      <div
-                        style={{
-                          flex: 1,
-                          marginBottom: 12,
-                          color: '#666',
-                          fontSize: 13,
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                          minHeight: 36,
-                        }}
-                      >
-                        {template.content || '暂无描述'}
-                      </div>
-
-                      <div style={{ marginBottom: 12, fontSize: 12, color: '#999' }}>
-                        更新时间：{formatDateTime(template.updatedAt)}
-                      </div>
-
-                      <div style={{ marginBottom: 12 }}>
-                        <Space wrap size={[4, 4]}>
-                          <Tag color="geekblue" style={{ margin: 0 }}>
-                            <SafetyOutlined /> {getResourceIdsFromTemplate(template).length} 个功能
-                          </Tag>
-                          <Tag color="purple" style={{ margin: 0 }}>
-                            <DatabaseOutlined /> {getDataScopeText(getDataPermissionFromTemplate(template).scope)}
-                          </Tag>
-                        </Space>
-                      </div>
-
-                      <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: 12, marginTop: 'auto' }}>
-                        <Space size={[4, 4]} wrap>
-                          <Tooltip title="查看详情">
-                            <Button
-                              type="text"
-                              size="small"
-                              icon={<EyeOutlined />}
-                              onClick={() => openDetailDrawer(template)}
-                            />
-                          </Tooltip>
-                          <Tooltip title="编辑">
-                            <Button
-                              type="text"
-                              size="small"
-                              icon={<EditOutlined />}
-                              onClick={() => openEditModal(template)}
-                              disabled={template.status === 'DELETED'}
-                            />
-                          </Tooltip>
-                          <Tooltip title="版本历史">
-                            <Button
-                              type="text"
-                              size="small"
-                              icon={<HistoryOutlined />}
-                              onClick={() => openVersionDrawer(template)}
-                            />
-                          </Tooltip>
-                          <Tooltip title="功能权限">
-                            <Button
-                              type="text"
-                              size="small"
-                              icon={<SafetyOutlined />}
-                              onClick={() => openFunctionPermissionDrawer(template)}
-                              disabled={template.status === 'DELETED'}
-                            />
-                          </Tooltip>
-                          <Tooltip title="数据权限">
-                            <Button
-                              type="text"
-                              size="small"
-                              icon={<DatabaseOutlined />}
-                              onClick={() => openDataPermissionDrawer(template)}
-                              disabled={template.status === 'DELETED'}
-                            />
-                          </Tooltip>
-                          {template.status === 'DRAFT' && (
-                            <Tooltip title="发布">
-                              <Button
-                                type="text"
-                                size="small"
-                                icon={<PlayCircleOutlined />}
-                                onClick={() => handlePublish(template)}
-                              />
-                            </Tooltip>
-                          )}
-                          {template.status === 'PUBLISHED' && (
-                            <Tooltip title="停用">
-                              <Button
-                                type="text"
-                                size="small"
-                                danger
-                                icon={<StopOutlined />}
-                                onClick={() => handleDeactivate(template)}
-                              />
-                            </Tooltip>
-                          )}
-                          {template.status === 'INACTIVE' && (
-                            <Tooltip title="启用">
-                              <Button
-                                type="text"
-                                size="small"
-                                icon={<PlayCircleOutlined />}
-                                onClick={() => handleActivate(template)}
-                              />
-                            </Tooltip>
-                          )}
-                          {template.status === 'DELETED' ? (
-                            <Tooltip title="恢复">
-                              <Button
-                                type="text"
-                                size="small"
-                                icon={<RollbackOutlined />}
-                                onClick={() => handleRestore(template)}
-                              />
-                            </Tooltip>
-                          ) : (
-                            <Tooltip title="删除">
-                              <Button
-                                type="text"
-                                size="small"
-                                danger
-                                icon={<DeleteOutlined />}
-                                onClick={() => handleDelete(template)}
-                              />
-                            </Tooltip>
-                          )}
-                        </Space>
-                      </div>
-                    </Card>
-                  </Col>
-                ))}
-              </Row>
-              <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center' }}>
-                <Pagination
-                  current={currentPage}
-                  pageSize={pageSize}
-                  total={filteredTemplates.length}
-                  onChange={(page, size) => {
-                    setCurrentPage(page);
-                    setPageSize(size);
-                  }}
-                  showSizeChanger
-                  pageSizeOptions={['9', '12', '24', '48']}
-                  showTotal={(total) => `共 ${total} 个模板`}
-                />
-              </div>
-            </>
-          ) : (
-            <Empty description="暂无模板数据" style={{ padding: '60px 0' }} />
-          )}
-        </Card>
-      ) : (
-        <Card bodyStyle={{ padding: 0 }}>
-          <Table
-            dataSource={filteredTemplates}
-            columns={tableColumns}
-            rowKey="id"
-            pagination={{
-              current: currentPage,
-              pageSize: pageSize,
-              total: filteredTemplates.length,
-              onChange: (page, size) => {
-                setCurrentPage(page);
-                setPageSize(size);
-              },
-              showSizeChanger: true,
-              pageSizeOptions: ['10', '20', '50', '100'],
-              showTotal: (total) => `共 ${total} 个模板`,
-            }}
-          />
-        </Card>
-      )}
+      <Card bodyStyle={{ padding: 0 }}>
+        <Table
+          dataSource={filteredTemplates}
+          columns={tableColumns}
+          rowKey="id"
+          pagination={{
+            current: currentPage,
+            pageSize: pageSize,
+            total: filteredTemplates.length,
+            onChange: (page, size) => {
+              setCurrentPage(page);
+              setPageSize(size);
+            },
+            showSizeChanger: true,
+            pageSizeOptions: ['10', '20', '50', '100'],
+            showTotal: (total) => `共 ${total} 个模板`,
+          }}
+        />
+      </Card>
 
       {/* 新建模板模态框 */}
       <Modal
