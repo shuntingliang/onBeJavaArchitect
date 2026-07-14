@@ -22,6 +22,7 @@ import {
   Alert,
   List,
   Tree,
+  Segmented,
 } from 'antd';
 import type { MenuProps } from 'antd';
 import type { TableProps } from 'antd/es/table';
@@ -201,6 +202,8 @@ export default function Organization({ mode = 'inner' }: OrganizationProps) {
     });
     return keys;
   });
+
+  const [viewMode, setViewMode] = useState<'table' | 'chart'>('table');
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -578,6 +581,7 @@ export default function Organization({ mode = 'inner' }: OrganizationProps) {
     try {
       const values = await form.validateFields();
       if (editingNode) {
+        const sort = values.sort ? parseInt(values.sort, 10) : editingNode.sort;
         updateNode(editingNode.id, {
           name: values.name,
           code: values.code || editingNode.code,
@@ -586,7 +590,8 @@ export default function Organization({ mode = 'inner' }: OrganizationProps) {
           businessInfo: values.businessInfo,
           innerOuter: values.innerOuter,
           orgType: values.orgType,
-          sort: editingNode.sort,
+          parentId: values.parentId !== undefined ? values.parentId : editingNode.parentId,
+          sort,
           remark: values.remark,
           extId: values.extId,
           orgId: values.orgId,
@@ -764,6 +769,7 @@ export default function Organization({ mode = 'inner' }: OrganizationProps) {
 
     const orgType = template.templateMode || 'VERTICAL';
     const idMap = new Map<string, string>();
+    const targetParentId = selectedNode?.id || null;
 
     const createNodeFromTemplate = (
       templateNode: TemplateNode,
@@ -794,14 +800,22 @@ export default function Organization({ mode = 'inner' }: OrganizationProps) {
       return newId;
     };
 
-    const rootNodes = template.nodes.filter((n) => !n.parentId || n.parentNodeName === '根节点');
-    rootNodes.forEach((rootNode) => {
-      createNodeFromTemplate(rootNode, null);
+    const rootTemplateNodes = template.nodes.filter((n) => !n.parentId || n.parentNodeName === '根节点');
+    rootTemplateNodes.forEach((rootNode) => {
+      if (rootNode.children && rootNode.children.length > 0) {
+        rootNode.children.forEach((child) => {
+          createNodeFromTemplate(child, targetParentId);
+        });
+      }
     });
 
     message.success('组织架构创建成功');
     setTemplateModalOpen(false);
-    setExpandedKeys((prev) => [...prev, ...Array.from(idMap.values())]);
+    if (targetParentId) {
+      setExpandedKeys((prev) => [...prev, targetParentId, ...Array.from(idMap.values())]);
+    } else {
+      setExpandedKeys((prev) => [...prev, ...Array.from(idMap.values())]);
+    }
   };
 
   const orgTemplates = useMemo(() => {
@@ -1263,41 +1277,20 @@ export default function Organization({ mode = 'inner' }: OrganizationProps) {
           </Form.Item>
         </Form>
 
-        {/* 规则说明 */}
-        <Alert
-          type="info"
-          showIcon
-          style={{ marginBottom: 16 }}
-          message={
-            <div>
-              <Text strong>规则说明：</Text>
-              <Space size="small" wrap style={{ marginTop: 4 }}>
-                {mode === 'inner' && <Tag color="blue">内部组织架构：仅展示内部节点</Tag>}
-                {mode === 'outer' && <Tag color="orange">外部组织架构：仅展示外部节点</Tag>}
-                {mode === 'vertical' && <Tag color="blue">职能型：节点类型 = 集团 → 公司 → 部门</Tag>}
-                {mode === 'horizontal' && <Tag color="cyan">项目型：节点类型 = 项目集 → 项目</Tag>}
-                {mode === 'inner' && (
-                  <>
-                    <Tag color="blue">职能型：节点类型 = 集团 → 公司 → 部门</Tag>
-                    <Tag color="cyan">项目型：节点类型 = 项目集 → 项目</Tag>
-                  </>
-                )}
-                {mode === 'outer' && (
-                  <Tag color="blue">职能型：节点类型 = 集团 → 公司 → 部门</Tag>
-                )}
-                <Tag color="green">新建节点默认状态：启用</Tag>
-                <Tag color="orange">节点编码可手动输入，非必填</Tag>
-              </Space>
-            </div>
-          }
-        />
-
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <Space>
             <span>{pageTitle}</span>
             <Tag color="green">{modeActiveNodes.length}</Tag>
           </Space>
           <Space>
+            <Segmented
+              value={viewMode}
+              onChange={(value) => setViewMode(value as 'table' | 'chart')}
+              options={[
+                { label: '列表视图', value: 'table' },
+                { label: '组织架构图', value: 'chart' },
+              ]}
+            />
             {mode === 'inner' && (
               <Button
                 size="small"
@@ -1318,29 +1311,207 @@ export default function Organization({ mode = 'inner' }: OrganizationProps) {
           </Space>
         </div>
 
-        {treeTableData.length > 0 ? (
-          <Table<TableTreeNodeData>
-            dataSource={treeTableData}
-            columns={treeTableColumns}
-            rowKey="id"
-            size="middle"
-            pagination={false}
-            defaultExpandAllRows
-            expandedRowKeys={expandedKeys}
-            onExpand={onExpand}
-            scroll={{ x: 1000 }}
-            onRow={(record) => ({
-              onClick: () => onRowClick(record),
-              style: {
-                cursor: 'pointer',
-                backgroundColor: record.id === selectedNodeId ? '#e6f7ff' : undefined,
-              },
-            })}
-          />
+        {viewMode === 'table' ? (
+          treeTableData.length > 0 ? (
+            <Table<TableTreeNodeData>
+              dataSource={treeTableData}
+              columns={treeTableColumns}
+              rowKey="id"
+              size="middle"
+              pagination={false}
+              defaultExpandAllRows
+              expandedRowKeys={expandedKeys}
+              onExpand={onExpand}
+              scroll={{ x: 1000 }}
+              onRow={(record) => ({
+                onClick: () => onRowClick(record),
+                style: {
+                  cursor: 'pointer',
+                  backgroundColor: record.id === selectedNodeId ? '#e6f7ff' : undefined,
+                },
+              })}
+            />
+          ) : (
+            <Empty description="暂无数据" style={{ marginTop: 60 }} />
+          )
         ) : (
-          <Empty description="暂无数据" style={{ marginTop: 60 }} />
+          <div style={{ padding: 24, minHeight: 500, overflow: 'auto' }}>
+            {treeTableData.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                {treeTableData.map((root, rootIdx) => (
+                  <div key={root.id} style={{ marginBottom: 40 }}>
+                    <div
+                      style={{
+                        padding: '12px 24px',
+                        background: selectedNodeId === root.id ? '#e6f7ff' : '#fff',
+                        border: `2px solid ${selectedNodeId === root.id ? '#1677ff' : '#d9d9d9'}`,
+                        borderRadius: 8,
+                        cursor: 'pointer',
+                        minWidth: 160,
+                        textAlign: 'center',
+                        fontWeight: 500,
+                      }}
+                      onClick={() => onRowClick(root)}
+                    >
+                      {root.name}
+                      <Tag color="blue" style={{ marginLeft: 8 }}>
+                        {NODE_TYPE_LABELS[root.type]}
+                      </Tag>
+                    </div>
+                    {root.children && root.children.length > 0 && (
+                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20, gap: 24 }}>
+                        {root.children.map((child) => (
+                          <div key={child.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <div
+                              style={{
+                                padding: '10px 20px',
+                                background: selectedNodeId === child.id ? '#e6f7ff' : '#f9f9f9',
+                                border: `1px solid ${selectedNodeId === child.id ? '#1677ff' : '#d9d9d9'}`,
+                                borderRadius: 6,
+                                cursor: 'pointer',
+                                minWidth: 140,
+                                textAlign: 'center',
+                              }}
+                              onClick={() => onRowClick(child)}
+                            >
+                              {child.name}
+                              <Tag color="green" style={{ marginLeft: 6, fontSize: 11 }}>
+                                {NODE_TYPE_LABELS[child.type]}
+                              </Tag>
+                            </div>
+                            {child.children && child.children.length > 0 && (
+                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 16, gap: 12 }}>
+                                {child.children.map((grandchild) => (
+                                  <div
+                                    key={grandchild.id}
+                                    style={{
+                                      padding: '8px 16px',
+                                      background: selectedNodeId === grandchild.id ? '#e6f7ff' : '#fff',
+                                      border: `1px solid ${selectedNodeId === grandchild.id ? '#1677ff' : '#e8e8e8'}`,
+                                      borderRadius: 4,
+                                      cursor: 'pointer',
+                                      minWidth: 120,
+                                      textAlign: 'center',
+                                      fontSize: 13,
+                                    }}
+                                    onClick={() => onRowClick(grandchild)}
+                                  >
+                                    {grandchild.name}
+                                    <Tag color="purple" style={{ marginLeft: 4, fontSize: 10 }}>
+                                      {NODE_TYPE_LABELS[grandchild.type]}
+                                    </Tag>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <Empty description="暂无数据" style={{ marginTop: 60 }} />
+            )}
+          </div>
         )}
       </Card>
+
+      {mode === 'inner' && activeTab === 'VERTICAL' && (
+        <Card title="组织架构规则说明" style={{ marginTop: 16 }}>
+          <Table
+            columns={[
+              { title: '功能模块', dataIndex: 'module', key: 'module', width: 120 },
+              { title: '功能点', dataIndex: 'point', key: 'point', width: 140 },
+              { title: '功能描述', dataIndex: 'description', key: 'description' },
+              { title: '适用范围', dataIndex: 'scope', key: 'scope', width: 120 },
+            ]}
+            dataSource={[
+              {
+                key: '1',
+                module: '组织架构',
+                point: '创建组织节点',
+                description: '1. 租户ID、节点ID自动生成且不可编辑\n2. 同一组织下组织节点编码、名称不可重复\n3. 组织架构层级挂载职能型组织架构：[集团 -> 分公司 -> 部门]，分公司下禁止挂载集团\n4. 横向组织架构：[项目集 -> 项目]，项目下禁止挂载项目集',
+                scope: '组织聚合',
+              },
+              {
+                key: '2',
+                module: '组织架构',
+                point: '编辑组织节点',
+                description: '租户ID、节点ID不允许修改，同一组织下组织节点名称、编码不可重复',
+                scope: '组织聚合',
+              },
+              {
+                key: '3',
+                module: '组织架构',
+                point: '停用组织节点',
+                description: '1. 允许启用、删除、编辑、详情、查询关联岗位\n2. 停用：状态更新为"停用"，关联子节点同步停用',
+                scope: '组织聚合',
+              },
+              {
+                key: '4',
+                module: '组织架构',
+                point: '启用组织节点',
+                description: '1. 允许创建子节点，编辑、停用、删除，派生独立组织、合并、迁移，查询关联岗位\n2. 启用：状态更新为启用，关联子节点同步启用',
+                scope: '组织聚合',
+              },
+              {
+                key: '5',
+                module: '组织架构',
+                point: '删除组织节点',
+                description: '删除节点前必须无子节点、无岗位、无关联用户，根节点不允许删除，删除后允许恢复删除',
+                scope: '组织聚合',
+              },
+              {
+                key: '6',
+                module: '组织架构',
+                point: '恢复删除',
+                description: '恢复删除状态更新为"启用"',
+                scope: '组织聚合',
+              },
+              {
+                key: '7',
+                module: '组织架构',
+                point: '派生独立组织',
+                description: '组织节点类型（部门）复制创建新组织结构，挂载到根节点',
+                scope: '组织聚合',
+              },
+              {
+                key: '8',
+                module: '组织架构',
+                point: '合并组织节点规则',
+                description: '选择源组织节点ID与目标组织节点ID，填写合并后新组织节点，合并后源节点及关联子节点ID更新岗位关联合并后的节点ID',
+                scope: '组织聚合',
+              },
+              {
+                key: '9',
+                module: '组织架构',
+                point: '迁移组织节点',
+                description: '选择组织节点类型（部门）及下级节点迁移到其他节点下，更新归属节点ID',
+                scope: '组织聚合',
+              },
+              {
+                key: '10',
+                module: '组织架构',
+                point: '查询关联岗位',
+                description: '组织节点ID查询关联岗位列表',
+                scope: '组织聚合',
+              },
+              {
+                key: '11',
+                module: '组织架构',
+                point: '使用模版创建',
+                description: '1. 根节点=集团，仅可选用模板类型=集团类型，用于生成下级组织架构\n2. 节点类型=分公司，仅可选用模板类型=分公司类型，节点下无任何子节点允许使用「分公司类型」模板创建子结构\n3. 所有模板根节点为虚拟节点，仅作架构生成载体，不落地保存至组织节点树',
+                scope: '组织聚合',
+              },
+            ]}
+            pagination={false}
+            size="small"
+            scroll={{ x: 1200 }}
+          />
+        </Card>
+      )}
 
       {/* 创建模态框 */}
       <Modal
@@ -1619,8 +1790,16 @@ export default function Organization({ mode = 'inner' }: OrganizationProps) {
           </Row>
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item label="上级节点">
-                <Input value={parentNode?.name || '根节点'} disabled />
+              <Form.Item label="上级节点" name="parentId">
+                <Select
+                  placeholder="根节点"
+                  allowClear
+                  showSearch
+                  optionFilterProp="label"
+                  options={activeNodes
+                    .filter((n) => n.parentId === null)
+                    .map((n) => ({ label: n.name, value: n.id }))}
+                />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -1637,8 +1816,8 @@ export default function Organization({ mode = 'inner' }: OrganizationProps) {
           </Row>
           <Row gutter={16}>
             <Col span={24}>
-              <Form.Item label="显示排序">
-                <Input value={editingNode?.sort} disabled />
+              <Form.Item label="显示排序" name="sort">
+                <Input type="number" placeholder="请输入排序号" />
               </Form.Item>
             </Col>
           </Row>
@@ -1778,11 +1957,13 @@ export default function Organization({ mode = 'inner' }: OrganizationProps) {
           </Form.Item>
           <Form.Item label="挂载到" name="newParentId">
             <Select
-              placeholder="根节点（无上级）"
+              placeholder="根节点"
               allowClear
               showSearch
               optionFilterProp="label"
-              options={orgSelectOptions}
+              options={activeNodes
+                .filter((n) => n.parentId === null)
+                .map((n) => ({ label: n.name, value: n.id }))}
             />
           </Form.Item>
           <div style={{ color: '#999', fontSize: 12 }}>

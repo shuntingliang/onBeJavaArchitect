@@ -278,25 +278,12 @@ export default function PositionPage() {
       );
     }
 
-    if (selectedOrgNodeId) {
-      const getDescendantIds = (parentId: string): string[] => {
-        const ids: string[] = [parentId];
-        const children = orgNodes.filter((n) => n.parentId === parentId);
-        children.forEach((child) => {
-          ids.push(...getDescendantIds(child.id));
-        });
-        return ids;
-      };
-      const orgIds = getDescendantIds(selectedOrgNodeId);
-      result = result.filter((p) => orgIds.includes(p.orgNodeId));
-    }
-
     if (statusFilter !== 'all') {
       result = result.filter((p) => p.status === statusFilter);
     }
 
     return result;
-  }, [positions, searchKeyword, selectedOrgNodeId, statusFilter, orgNodes]);
+  }, [positions, searchKeyword, statusFilter]);
 
   const paginatedPositions = useMemo(() => {
     const start = (pagination.current - 1) * pagination.pageSize;
@@ -343,6 +330,7 @@ export default function PositionPage() {
     form.resetFields();
     form.setFieldsValue({
       code: getNextCode(),
+      orgNodeId: selectedOrgNodeId || undefined,
     });
     setModalVisible(true);
   };
