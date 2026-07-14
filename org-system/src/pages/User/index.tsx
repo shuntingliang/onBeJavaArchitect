@@ -19,6 +19,7 @@ import {
   Tooltip,
   Tabs,
   Empty,
+  Switch,
 } from 'antd';
 import type { ColumnsType, TableRowSelection } from 'antd/es/table/interface';
 import type { DataNode } from 'antd/es/tree';
@@ -113,6 +114,7 @@ export default function UserManagement() {
   const [statusFilter, setStatusFilter] = useState<string>('NORMAL,LOCKED,DISABLED');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [showDeleted, setShowDeleted] = useState(false);
 
   const [orgTypeTab, setOrgTypeTab] = useState<'VERTICAL' | 'HORIZONTAL' | 'OUTER'>('VERTICAL');
   const [selectedTreeKey, setSelectedTreeKey] = useState<string | undefined>(undefined);
@@ -260,6 +262,10 @@ export default function UserManagement() {
   const filteredUsers = useMemo(() => {
     let result = [...users];
 
+    if (!showDeleted) {
+      result = result.filter((u) => u.status !== 'DELETED');
+    }
+
     if (keyword) {
       const kw = keyword.toLowerCase();
       result = result.filter(
@@ -301,6 +307,7 @@ export default function UserManagement() {
     keyword,
     selectedTreeKey,
     statusFilter,
+    showDeleted,
     getNodeById,
     getCompanyAndDescendantIds,
     getDepartmentIds,
@@ -1018,6 +1025,8 @@ export default function UserManagement() {
               </Col>
               <Col xs={24} sm={24} md={8} lg={12} style={{ textAlign: 'right' }}>
                 <Space>
+                  <span style={{ color: '#666' }}>展示已删除记录</span>
+                  <Switch checked={showDeleted} onChange={(checked) => { setShowDeleted(checked); setCurrentPage(1); }} />
                   <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                     查询
                   </Button>

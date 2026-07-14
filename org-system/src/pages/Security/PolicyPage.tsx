@@ -88,6 +88,7 @@ export default function PolicyPage() {
   } = useSecurityStore();
 
   const [activeTab, setActiveTab] = useState('password');
+  const [showDeleted, setShowDeleted] = useState(false);
   const [passwordForm] = Form.useForm<PasswordPolicyFormValues>();
   const [lockForm] = Form.useForm<LockRuleFormValues>();
 
@@ -186,13 +187,26 @@ export default function PolicyPage() {
   const handleDeletePasswordPolicy = (policy: PasswordPolicy) => {
     Modal.confirm({
       title: '确认删除',
-      content: `确定要删除密码策略 "${policy.name}" 吗？`,
+      content: `确定要删除密码策略 "${policy.name}" 吗？删除后可在"已删除"状态中恢复。`,
       okText: '确认删除',
       okButtonProps: { danger: true },
       cancelText: '取消',
       onOk: () => {
-        deletePasswordPolicy(policy.id);
+        updatePasswordPolicy(policy.id, { status: 'DELETED' });
         message.success('密码策略已删除');
+      },
+    });
+  };
+
+  const handleRestorePasswordPolicy = (policy: PasswordPolicy) => {
+    Modal.confirm({
+      title: '确认恢复',
+      content: `确定要恢复密码策略 "${policy.name}" 吗？恢复后状态将变为启用。`,
+      okText: '确认恢复',
+      cancelText: '取消',
+      onOk: () => {
+        updatePasswordPolicy(policy.id, { status: 'ACTIVE' });
+        message.success('密码策略已恢复');
       },
     });
   };
@@ -276,13 +290,26 @@ export default function PolicyPage() {
   const handleDeleteLockRule = (rule: LockRule) => {
     Modal.confirm({
       title: '确认删除',
-      content: `确定要删除锁定规则 "${rule.name}" 吗？`,
+      content: `确定要删除锁定规则 "${rule.name}" 吗？删除后可在"已删除"状态中恢复。`,
       okText: '确认删除',
       okButtonProps: { danger: true },
       cancelText: '取消',
       onOk: () => {
-        deleteLockRule(rule.id);
+        updateLockRule(rule.id, { status: 'DELETED' });
         message.success('锁定规则已删除');
+      },
+    });
+  };
+
+  const handleRestoreLockRule = (rule: LockRule) => {
+    Modal.confirm({
+      title: '确认恢复',
+      content: `确定要恢复锁定规则 "${rule.name}" 吗？恢复后状态将变为启用。`,
+      okText: '确认恢复',
+      cancelText: '取消',
+      onOk: () => {
+        updateLockRule(rule.id, { status: 'ACTIVE' });
+        message.success('锁定规则已恢复');
       },
     });
   };
@@ -325,6 +352,10 @@ export default function PolicyPage() {
   };
 
   const PasswordPolicyList = () => {
+    const filteredPolicies = showDeleted
+      ? passwordPolicies
+      : passwordPolicies.filter((p) => p.status !== 'DELETED');
+
     const columns = [
       {
         title: '策略名称',
@@ -338,9 +369,9 @@ export default function PolicyPage() {
         dataIndex: 'status',
         key: 'status',
         width: 120,
-        render: (status: string) => (
-          <Tag color={status === 'ACTIVE' ? 'green' : 'default'}>
-            {status === 'ACTIVE' ? '有效' : '无效'}
+        render: (status: OrgNodeStatus) => (
+          <Tag color={status === 'ACTIVE' ? 'green' : status === 'INACTIVE' ? 'default' : 'default'}>
+            {status === 'ACTIVE' ? '有效' : status === 'INACTIVE' ? '无效' : '已删除'}
           </Tag>
         ),
       },
@@ -355,58 +386,80 @@ export default function PolicyPage() {
         title: '操作',
         key: 'actions',
         width: 180,
-        render: (_: any, record: PasswordPolicy) => (
-          <Space size={4}>
-            <Button
-              type="link"
-              size="small"
-              icon={<EditOutlined />}
-              onClick={() => handleEditPasswordPolicy(record)}
-            >
-              编辑
-            </Button>
-            <Dropdown
-              menu={{
-                items: [
-                  {
-                    key: 'toggle',
-                    icon: record.status === 'ACTIVE' ? <StopOutlined /> : <PlayCircleOutlined />,
-                    label: record.status === 'ACTIVE' ? '停用' : '启用',
-                    onClick: () => handleTogglePasswordStatus(record),
-                  },
-                  {
-                    key: 'delete',
-                    icon: <DeleteOutlined />,
-                    label: '删除',
-                    danger: true,
-                    onClick: () => handleDeletePasswordPolicy(record),
-                  },
-                ],
-              }}
-            >
-              <Button type="link" size="small" icon={<MoreOutlined />}>
-                更多
+        render: (_: any, record: PasswordPolicy) => {
+          if (record.status === 'DELETED') {
+            return (
+              <Space size={4}>
+                <Button
+                  type="link"
+                  size="small"
+                  icon={<PlayCircleOutlined />}
+                  onClick={() => handleRestorePasswordPolicy(record)}
+                >
+                  恢复
+                </Button>
+              </Space>
+            );
+          }
+          return (
+            <Space size={4}>
+              <Button
+                type="link"
+                size="small"
+                icon={<EditOutlined />}
+                onClick={() => handleEditPasswordPolicy(record)}
+              >
+                编辑
               </Button>
-            </Dropdown>
-          </Space>
-        ),
+              <Dropdown
+                menu={{
+                  items: [
+                    {
+                      key: 'toggle',
+                      icon: record.status === 'ACTIVE' ? <StopOutlined /> : <PlayCircleOutlined />,
+                      label: record.status === 'ACTIVE' ? '停用' : '启用',
+                      onClick: () => handleTogglePasswordStatus(record),
+                    },
+                    {
+                      key: 'delete',
+                      icon: <DeleteOutlined />,
+                      label: '删除',
+                      danger: true,
+                      onClick: () => handleDeletePasswordPolicy(record),
+                    },
+                  ],
+                }}
+              >
+                <Button type="link" size="small" icon={<MoreOutlined />}>
+                  更多
+                </Button>
+              </Dropdown>
+            </Space>
+          );
+        },
       },
     ];
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ fontWeight: 500, fontSize: 16 }}>策略列表</div>
-          <Button type="primary" size="small" icon={<PlusOutlined />} onClick={handleAddPasswordPolicy}>
-            新建策略
-          </Button>
+          <Space>
+            <Space>
+              <span>展示已删除记录</span>
+              <Switch checked={showDeleted} onChange={setShowDeleted} />
+            </Space>
+            <Button type="primary" size="small" icon={<PlusOutlined />} onClick={handleAddPasswordPolicy}>
+              新建策略
+            </Button>
+          </Space>
         </div>
         <div style={{ flex: 1, overflow: 'auto' }}>
-          {passwordPolicies.length === 0 ? (
+          {filteredPolicies.length === 0 ? (
             <Empty description="暂无密码策略" style={{ marginTop: 40 }} />
           ) : (
             <Table
-              dataSource={passwordPolicies}
+              dataSource={filteredPolicies}
               columns={columns}
               rowKey="id"
               size="small"
@@ -489,6 +542,10 @@ export default function PolicyPage() {
   };
 
   const LockRuleList = () => {
+    const filteredRules = showDeleted
+      ? lockRules
+      : lockRules.filter((r) => r.status !== 'DELETED');
+
     const columns = [
       {
         title: '策略名称',
@@ -502,9 +559,9 @@ export default function PolicyPage() {
         dataIndex: 'status',
         key: 'status',
         width: 120,
-        render: (status: string) => (
-          <Tag color={status === 'ACTIVE' ? 'green' : 'default'}>
-            {status === 'ACTIVE' ? '有效' : '无效'}
+        render: (status: OrgNodeStatus) => (
+          <Tag color={status === 'ACTIVE' ? 'green' : status === 'INACTIVE' ? 'default' : 'default'}>
+            {status === 'ACTIVE' ? '有效' : status === 'INACTIVE' ? '无效' : '已删除'}
           </Tag>
         ),
       },
@@ -519,58 +576,80 @@ export default function PolicyPage() {
         title: '操作',
         key: 'actions',
         width: 180,
-        render: (_: any, record: LockRule) => (
-          <Space size={4}>
-            <Button
-              type="link"
-              size="small"
-              icon={<EditOutlined />}
-              onClick={() => handleEditLockRule(record)}
-            >
-              编辑
-            </Button>
-            <Dropdown
-              menu={{
-                items: [
-                  {
-                    key: 'toggle',
-                    icon: record.status === 'ACTIVE' ? <StopOutlined /> : <PlayCircleOutlined />,
-                    label: record.status === 'ACTIVE' ? '停用' : '启用',
-                    onClick: () => handleToggleLockStatus(record),
-                  },
-                  {
-                    key: 'delete',
-                    icon: <DeleteOutlined />,
-                    label: '删除',
-                    danger: true,
-                    onClick: () => handleDeleteLockRule(record),
-                  },
-                ],
-              }}
-            >
-              <Button type="link" size="small" icon={<MoreOutlined />}>
-                更多
+        render: (_: any, record: LockRule) => {
+          if (record.status === 'DELETED') {
+            return (
+              <Space size={4}>
+                <Button
+                  type="link"
+                  size="small"
+                  icon={<PlayCircleOutlined />}
+                  onClick={() => handleRestoreLockRule(record)}
+                >
+                  恢复
+                </Button>
+              </Space>
+            );
+          }
+          return (
+            <Space size={4}>
+              <Button
+                type="link"
+                size="small"
+                icon={<EditOutlined />}
+                onClick={() => handleEditLockRule(record)}
+              >
+                编辑
               </Button>
-            </Dropdown>
-          </Space>
-        ),
+              <Dropdown
+                menu={{
+                  items: [
+                    {
+                      key: 'toggle',
+                      icon: record.status === 'ACTIVE' ? <StopOutlined /> : <PlayCircleOutlined />,
+                      label: record.status === 'ACTIVE' ? '停用' : '启用',
+                      onClick: () => handleToggleLockStatus(record),
+                    },
+                    {
+                      key: 'delete',
+                      icon: <DeleteOutlined />,
+                      label: '删除',
+                      danger: true,
+                      onClick: () => handleDeleteLockRule(record),
+                    },
+                  ],
+                }}
+              >
+                <Button type="link" size="small" icon={<MoreOutlined />}>
+                  更多
+                </Button>
+              </Dropdown>
+            </Space>
+          );
+        },
       },
     ];
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ fontWeight: 500, fontSize: 16 }}>规则列表</div>
-          <Button type="primary" size="small" icon={<PlusOutlined />} onClick={handleAddLockRule}>
-            新建规则
-          </Button>
+          <Space>
+            <Space>
+              <span>展示已删除记录</span>
+              <Switch checked={showDeleted} onChange={setShowDeleted} />
+            </Space>
+            <Button type="primary" size="small" icon={<PlusOutlined />} onClick={handleAddLockRule}>
+              新建规则
+            </Button>
+          </Space>
         </div>
         <div style={{ flex: 1, overflow: 'auto' }}>
-          {lockRules.length === 0 ? (
+          {filteredRules.length === 0 ? (
             <Empty description="暂无锁定规则" style={{ marginTop: 40 }} />
           ) : (
             <Table
-              dataSource={lockRules}
+              dataSource={filteredRules}
               columns={columns}
               rowKey="id"
               size="small"

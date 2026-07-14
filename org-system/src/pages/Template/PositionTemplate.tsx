@@ -20,6 +20,7 @@ import {
   Divider,
   Dropdown,
   List,
+  Switch,
 } from 'antd';
 import {
   PlusOutlined,
@@ -93,6 +94,7 @@ export default function PositionTemplate() {
 
   const [searchKeyword, setSearchKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [showDeleted, setShowDeleted] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(9);
 
@@ -129,6 +131,10 @@ export default function PositionTemplate() {
   const filteredTemplates = useMemo(() => {
     let result = latestVersions;
 
+    if (!showDeleted) {
+      result = result.filter((t) => t.status !== 'DELETED');
+    }
+
     if (statusFilter !== 'ALL') {
       result = result.filter((t) => t.status === statusFilter);
     }
@@ -143,7 +149,7 @@ export default function PositionTemplate() {
     }
 
     return result.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-  }, [latestVersions, statusFilter, searchKeyword]);
+  }, [latestVersions, statusFilter, searchKeyword, showDeleted]);
 
   const templateVersions = useMemo(() => {
     if (!currentTemplate) return [];
@@ -584,6 +590,16 @@ export default function PositionTemplate() {
                 </Option>
               ))}
             </Select>
+            <Space>
+              <span>展示已删除记录</span>
+              <Switch
+                checked={showDeleted}
+                onChange={(checked) => {
+                  setShowDeleted(checked);
+                  setCurrentPage(1);
+                }}
+              />
+            </Space>
           </Space>
           <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
             新建模板

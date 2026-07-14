@@ -23,6 +23,7 @@ import {
   Row,
   Col,
   Tabs,
+  Switch,
   type MenuProps,
 } from 'antd';
 import {
@@ -80,6 +81,7 @@ export default function PositionPage() {
   const [selectedOrgNodeId, setSelectedOrgNodeId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
+  const [showDeleted, setShowDeleted] = useState(false);
 
   const [orgTypeTab, setOrgTypeTab] = useState<'VERTICAL' | 'HORIZONTAL' | 'OUTER'>('VERTICAL');
   const [treeSearchKeyword, setTreeSearchKeyword] = useState('');
@@ -274,6 +276,10 @@ export default function PositionPage() {
   const filteredPositions = useMemo(() => {
     let result = [...positions];
 
+    if (!showDeleted) {
+      result = result.filter((p) => p.status !== 'DELETED');
+    }
+
     if (searchKeyword) {
       const kw = searchKeyword.toLowerCase();
       result = result.filter(
@@ -288,7 +294,7 @@ export default function PositionPage() {
     }
 
     return result;
-  }, [positions, searchKeyword, statusFilter]);
+  }, [positions, searchKeyword, statusFilter, showDeleted]);
 
   const paginatedPositions = useMemo(() => {
     const start = (pagination.current - 1) * pagination.pageSize;
@@ -749,6 +755,8 @@ export default function PositionPage() {
               </Col>
               <Col xs={24} sm={24} md={8} lg={12} style={{ textAlign: 'right' }}>
                 <Space>
+                  <span style={{ color: '#666' }}>展示已删除记录</span>
+                  <Switch checked={showDeleted} onChange={(checked) => { setShowDeleted(checked); setPagination({ ...pagination, current: 1 }); }} />
                   <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                     查询
                   </Button>

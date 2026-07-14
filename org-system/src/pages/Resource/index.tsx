@@ -83,6 +83,7 @@ export default function ResourceManagement() {
 
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
+  const [showDeleted, setShowDeleted] = useState(false);
   const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -111,9 +112,9 @@ export default function ResourceManagement() {
   const tableData = useMemo(() => {
     const buildTree = (items: Resource[]): any[] => {
       return items
-        .filter((r) => r.status !== 'DELETED')
+        .filter((r) => showDeleted || r.status !== 'DELETED')
         .map((r) => {
-          const hasChildren = r.children && r.children.length > 0 && r.children.some((c) => c.status !== 'DELETED');
+          const hasChildren = r.children && r.children.length > 0 && r.children.some((c) => showDeleted || c.status !== 'DELETED');
           return {
             ...r,
             children: hasChildren ? buildTree(r.children!) : undefined,
@@ -121,7 +122,7 @@ export default function ResourceManagement() {
         });
     };
     return buildTree(getTree());
-  }, [getTree]);
+  }, [getTree, showDeleted]);
 
   const filteredData = useMemo(() => {
     if (!keyword && !statusFilter) return tableData;
@@ -147,7 +148,7 @@ export default function ResourceManagement() {
     };
 
     return filterTree(tableData);
-  }, [keyword, statusFilter, tableData]);
+  }, [keyword, statusFilter, tableData, showDeleted]);
 
   const hasChildren = (resourceId: string): boolean => {
     const descendants = getDescendants(resourceId);
@@ -300,6 +301,19 @@ export default function ResourceManagement() {
     });
   };
 
+  const handleRestore = (resource: Resource) => {
+    Modal.confirm({
+      title: '确认恢复',
+      content: `确定要恢复资源 "${resource.name}" 吗？恢复后状态将变为启用。`,
+      okText: '确认恢复',
+      cancelText: '取消',
+      onOk: () => {
+        updateResource(resource.id, { status: 'ACTIVE' });
+        message.success('资源已恢复');
+      },
+    });
+  };
+
   const columns: ColumnsType<Resource> = [
     {
       title: '资源名称',
@@ -341,8 +355,8 @@ export default function ResourceManagement() {
       width: 80,
       align: 'center',
       render: (status: OrgNodeStatus) => (
-        <Tag color={status === 'ACTIVE' ? 'green' : 'default'}>
-          {status === 'ACTIVE' ? '启用' : '停用'}
+        <Tag color={statusTagMap[status].color}>
+          {statusTagMap[status].text}
         </Tag>
       ),
     },
@@ -365,57 +379,73 @@ export default function ResourceManagement() {
       key: 'actions',
       width: 240,
       fixed: 'right',
-      render: (_: any, record: Resource) => (
-        <Space size={4}>
-          <Button
-            type="link"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
-            编辑
-          </Button>
-          {(record.type === 'CATALOG' || record.type === 'MENU') && (
+      render: (_: any, record: Resource) => {
+        if (record.status === 'DELETED') {
+          return (
+            <Space size={4}>
+              <Button
+                type="link"
+                size="small"
+                icon={<PlayCircleOutlined />}
+                onClick={() => handleRestore(record)}
+              >
+                恢复
+              </Button>
+            </Space>
+          );
+        }
+        return (
+          <Space size={4}>
             <Button
               type="link"
               size="small"
-              icon={<PlusOutlined />}
-              onClick={() => handleAdd(record.id)}
+              icon={<EditOutlined />}
+              onClick={() => handleEdit(record)}
             >
-              新增
+              编辑
             </Button>
-          )}
-          {record.status === 'ACTIVE' ? (
+            {(record.type === 'CATALOG' || record.type === 'MENU') && (
+              <Button
+                type="link"
+                size="small"
+                icon={<PlusOutlined />}
+                onClick={() => handleAdd(record.id)}
+              >
+                新增
+              </Button>
+            )}
+            {record.status === 'ACTIVE' ? (
+              <Button
+                type="link"
+                size="small"
+                danger
+                icon={<StopOutlined />}
+                onClick={() => handleDeactivate(record)}
+              >
+                停用
+              </Button>
+            ) : (
+              <Button
+                type="link"
+                size="small"
+                icon={<PlayCircleOutlined />}
+                onClick={() => handleActivate(record)}
+              >
+                启用
+              </Button>
+            )}
             <Button
               type="link"
               size="small"
               danger
-              icon={<StopOutlined />}
-              onClick={() => handleDeactivate(record)}
+              icon={<DeleteOutlined />}
+              onClick={() => handleDelete(record)}
             >
-              停用
+              删除
             </Button>
-          ) : (
-            <Button
-              type="link"
-              size="small"
-              icon={<PlayCircleOutlined />}
-              onClick={() => handleActivate(record)}
-            >
-              启用
-            </Button>
-          )}
-          <Button
-            type="link"
-            size="small"
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record)}
-          >
-            删除
-          </Button>
-        </Space>
-      ),
+          </Space>
+        );
+      },
     },
   ];
 
@@ -443,9 +473,16 @@ export default function ResourceManagement() {
               >
                 <Option value="ACTIVE">正常</Option>
                 <Option value="INACTIVE">停用</Option>
+                <Option value="DELETED">已删除</Option>
               </Select>
             </Col>
-            <Col span={10} style={{ textAlign: 'right' }}>
+            <Col span={5}>
+              <Space>
+                <span style={{ color: '#666' }}>展示已删除记录</span>
+                <Switch checked={showDeleted} onChange={setShowDeleted} />
+              </Space>
+            </Col>
+            <Col span={5} style={{ textAlign: 'right' }}>
               <Space>
                 <Button icon={<SearchOutlined />} type="primary">
                   搜索

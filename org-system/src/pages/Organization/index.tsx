@@ -23,6 +23,7 @@ import {
   List,
   Tree,
   Segmented,
+  Switch,
 } from 'antd';
 import type { MenuProps } from 'antd';
 import type { TableProps } from 'antd/es/table';
@@ -187,6 +188,7 @@ export default function Organization({ mode = 'inner' }: OrganizationProps) {
   const [searchType, setSearchType] = useState<OrgNodeType | null>(null);
   const [searchStatus, setSearchStatus] = useState<string | null>(null);
   const [searchDateRange, setSearchDateRange] = useState<[Dayjs | null, Dayjs | null] | null>(null);
+  const [showDeleted, setShowDeleted] = useState(false);
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>(() => {
     // 默认展开到第三级
     const keys: React.Key[] = [];
@@ -229,8 +231,8 @@ export default function Organization({ mode = 'inner' }: OrganizationProps) {
   const [detailNode, setDetailNode] = useState<OrgNode | null>(null);
 
   const activeNodes = useMemo(
-    () => nodes.filter((n) => n.status !== 'DELETED'),
-    [nodes]
+    () => showDeleted ? nodes : nodes.filter((n) => n.status !== 'DELETED'),
+    [nodes, showDeleted]
   );
 
   const selectedNode = useMemo(
@@ -1252,6 +1254,8 @@ export default function Organization({ mode = 'inner' }: OrganizationProps) {
           </Form.Item>
           <Form.Item>
             <Space>
+              <span style={{ color: '#666' }}>展示已删除记录</span>
+              <Switch checked={showDeleted} onChange={setShowDeleted} />
               <Button
                 type="primary"
                 onClick={() => {

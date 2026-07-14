@@ -22,6 +22,7 @@ import {
   Divider,
   Dropdown,
   theme,
+  Switch,
 } from 'antd';
 import {
   PlusOutlined,
@@ -183,6 +184,7 @@ export default function OrganizationTemplate() {
 
   const [searchKeyword, setSearchKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [showDeleted, setShowDeleted] = useState(false);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('list');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(9);
@@ -217,6 +219,10 @@ export default function OrganizationTemplate() {
   const filteredTemplates = useMemo(() => {
     let result = latestVersions;
 
+    if (!showDeleted) {
+      result = result.filter((t) => t.status !== 'DELETED');
+    }
+
     if (statusFilter !== 'ALL') {
       result = result.filter((t) => t.status === statusFilter);
     }
@@ -231,7 +237,7 @@ export default function OrganizationTemplate() {
     }
 
     return result.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-  }, [latestVersions, statusFilter, searchKeyword]);
+  }, [latestVersions, statusFilter, searchKeyword, showDeleted]);
 
   const paginatedTemplates = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
@@ -738,6 +744,16 @@ export default function OrganizationTemplate() {
                 </Option>
               ))}
             </Select>
+            <Space>
+              <span>展示已删除记录</span>
+              <Switch
+                checked={showDeleted}
+                onChange={(checked) => {
+                  setShowDeleted(checked);
+                  setCurrentPage(1);
+                }}
+              />
+            </Space>
           </Space>
           <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
             新建模板
@@ -782,89 +798,6 @@ export default function OrganizationTemplate() {
                 showSizeChanger: true,
                 pageSizeOptions: ['10', '20', '50', '100'],
                 showTotal: (total) => `共 ${total} 个模板`,
-              }}
-              expandedRowRender={(record: Template) => {
-                if (!record.nodes || record.nodes.length === 0) {
-                  return <div style={{ padding: 16, textAlign: 'center', color: '#999' }}>暂无架构节点</div>;
-                }
-                const treeData = buildTreeData(record.nodes);
-
-                const renderListNodeRow = (node: any, level: number = 0) => {
-                  const hasChildren = node.children && node.children.length > 0;
-                  const nodeTypeLabel = NODE_TYPE_OPTIONS.find((o: any) => o.value === node.nodeType)?.label || '-';
-                  const nodeTypeColor = NODE_TYPE_COLOR_MAP[node.nodeType] || 'default';
-                  const isRoot = level === 0;
-                  const indent = level * 24;
-
-                  const row = (
-                    <div
-                      key={node.id}
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'minmax(220px, 1fr) 120px 120px',
-                        padding: '10px 12px',
-                        alignItems: 'center',
-                        borderBottom: '1px solid #f0f0f0',
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingLeft: indent }}>
-                        {hasChildren ? (
-                          <CaretDownOutlined style={{ fontSize: 12, color: token.colorTextSecondary, width: 16 }} />
-                        ) : (
-                          <div style={{ width: 16, height: 16 }} />
-                        )}
-                        {isRoot && <FolderOutlined style={{ color: '#faad14', fontSize: 14 }} />}
-                        {!isRoot && <FileTextOutlined style={{ color: '#bfbfbf', fontSize: 14 }} />}
-                        <span style={{ fontWeight: isRoot ? 600 : 500 }}>{node.nodeName}</span>
-                      </div>
-                      <div style={{ paddingLeft: 0 }}>
-                        <Text type="secondary" style={{ fontSize: 12 }}>{node.nodeCode}</Text>
-                      </div>
-                      <div>
-                        <Tag color={nodeTypeColor} style={{ margin: 0 }}>{nodeTypeLabel}</Tag>
-                      </div>
-                    </div>
-                  );
-
-                  if (hasChildren) {
-                    return (
-                      <>
-                        {row}
-                        {node.children.map((child: any) => renderListNodeRow(child, level + 1))}
-                      </>
-                    );
-                  }
-                  return row;
-                };
-
-                return (
-                  <div style={{ padding: '8px 24px 16px' }}>
-                    <div
-                      style={{
-                        border: '1px solid #f0f0f0',
-                        borderRadius: 6,
-                        overflow: 'hidden',
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: 'grid',
-                          gridTemplateColumns: 'minmax(220px, 1fr) 120px 120px',
-                          padding: '10px 12px',
-                          background: '#fafafa',
-                          fontWeight: 500,
-                          borderBottom: '1px solid #f0f0f0',
-                          fontSize: 13,
-                        }}
-                      >
-                        <span>节点名称</span>
-                        <span>节点编码</span>
-                        <span>节点类型</span>
-                      </div>
-                      {treeData.map((node) => renderListNodeRow(node, 0))}
-                    </div>
-                  </div>
-                );
               }}
             />
           </Card>

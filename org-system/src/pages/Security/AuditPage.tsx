@@ -15,6 +15,7 @@ import {
   Descriptions,
   message,
   Form,
+  Switch,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
@@ -57,6 +58,7 @@ export default function AuditPage() {
     startTime: dayjs().subtract(7, 'day').startOf('day').toISOString(),
     endTime: dayjs().endOf('day').toISOString(),
   });
+  const [showDeleted, setShowDeleted] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<SearchFilters>(filters);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -133,6 +135,7 @@ export default function AuditPage() {
     };
     setFilters(defaultFilters);
     setAppliedFilters(defaultFilters);
+    setShowDeleted(false);
     setCurrentPage(1);
   };
 
@@ -260,6 +263,14 @@ export default function AuditPage() {
                   <Option value="SUCCESS">成功</Option>
                   <Option value="FAIL">失败</Option>
                 </Select>
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={24} md={4}>
+              <Form.Item label="已删除记录" style={{ marginBottom: 0, width: '100%' }}>
+                <Space>
+                  <span>展示已删除记录</span>
+                  <Switch checked={showDeleted} onChange={setShowDeleted} />
+                </Space>
               </Form.Item>
             </Col>
             <Col xs={24} sm={24} md={8}>

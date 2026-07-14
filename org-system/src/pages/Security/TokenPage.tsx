@@ -13,6 +13,7 @@ import {
   Typography,
   Row,
   Col,
+  Switch,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table/interface';
 import {
@@ -50,6 +51,7 @@ export default function TokenPage() {
 
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
+  const [showDeleted, setShowDeleted] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -90,6 +92,7 @@ export default function TokenPage() {
   const handleReset = () => {
     setKeyword('');
     setStatusFilter('');
+    setShowDeleted(false);
     setCurrentPage(1);
   };
 
@@ -258,7 +261,14 @@ export default function TokenPage() {
               ))}
             </Select>
           </Col>
-          <Col xs={24} sm={24} md={8} lg={12} style={{ textAlign: 'right' }}>
+          <Col xs={24} sm={24} md={8} lg={6}>
+            <div style={{ marginBottom: 8, color: '#666' }}>已删除记录</div>
+            <Space>
+              <span>展示已删除记录</span>
+              <Switch checked={showDeleted} onChange={setShowDeleted} />
+            </Space>
+          </Col>
+          <Col xs={24} sm={24} md={8} lg={6} style={{ textAlign: 'right' }}>
             <Space>
               <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                 查询

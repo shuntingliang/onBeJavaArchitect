@@ -19,6 +19,7 @@ import {
   Tree,
   Radio,
   Divider,
+  Switch,
 } from 'antd';
 import type { ColumnsType, TableRowSelection } from 'antd/es/table/interface';
 import type { DataNode } from 'antd/es/tree';
@@ -90,6 +91,7 @@ export default function FunctionSetManagement() {
 
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [showDeleted, setShowDeleted] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -114,6 +116,10 @@ export default function FunctionSetManagement() {
   const filteredFunctionSets = useMemo(() => {
     let result = [...functionSets];
 
+    if (!showDeleted) {
+      result = result.filter((fs) => fs.status !== 'DELETED');
+    }
+
     if (keyword) {
       const kw = keyword.toLowerCase();
       result = result.filter(
@@ -129,7 +135,7 @@ export default function FunctionSetManagement() {
     }
 
     return result;
-  }, [functionSets, keyword, statusFilter]);
+  }, [functionSets, keyword, statusFilter, showDeleted]);
 
   const paginatedFunctionSets = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
@@ -492,7 +498,14 @@ export default function FunctionSetManagement() {
               ))}
             </Select>
           </Col>
-          <Col xs={24} sm={24} md={8} lg={24} style={{ textAlign: 'right' }}>
+          <Col xs={24} sm={24} md={8} lg={6}>
+            <div style={{ marginBottom: 8, color: '#666' }}>已删除记录</div>
+            <Space>
+              <span>展示已删除记录</span>
+              <Switch checked={showDeleted} onChange={setShowDeleted} />
+            </Space>
+          </Col>
+          <Col xs={24} sm={24} md={8} lg={6} style={{ textAlign: 'right' }}>
             <Space>
               <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                 查询
