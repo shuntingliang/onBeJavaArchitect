@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Input,
   List,
@@ -22,6 +22,7 @@ import {
   MenuOutlined,
   TeamOutlined,
   UserOutlined,
+  SolutionOutlined,
 } from '@ant-design/icons';
 import PageContainer from '@/components/PageContainer';
 import { useFunctionSetStore } from '@/store/functionSetStore';
@@ -54,7 +55,6 @@ export default function PlatformPermission() {
   const [keyword, setKeyword] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('function');
-  const [positionOrgType, setPositionOrgType] = useState<'VERTICAL' | 'HORIZONTAL'>('VERTICAL');
 
   const [checkedResourceKeys, setCheckedResourceKeys] = useState<React.Key[]>([]);
 
@@ -142,41 +142,6 @@ export default function PlatformPermission() {
     return buildTree(getOrgTree() as OrgTreeNode[]);
   }, [getOrgTree]);
 
-  const filterTreeByOrgType = useCallback((tree: DataNode[], orgType: 'VERTICAL' | 'HORIZONTAL'): DataNode[] => {
-    const orgNodes = getOrgTree();
-    const getNodeOrgType = (key: string): string | undefined => {
-      const findNode = (nodes: any[]): any => {
-        for (const node of nodes) {
-          if (node.id === key) return node;
-          if (node.children) {
-            const found = findNode(node.children);
-            if (found) return found;
-          }
-        }
-        return null;
-      };
-      const found = findNode(orgNodes as any[]);
-      return found?.orgType;
-    };
-
-    const filter = (nodes: DataNode[]): DataNode[] => {
-      return nodes
-        .map((node) => {
-          const nodeOrgType = getNodeOrgType(node.key as string);
-          const filteredChildren = node.children ? filter(node.children) : [];
-          if (nodeOrgType === orgType || filteredChildren.length > 0) {
-            return {
-              ...node,
-              children: filteredChildren.length > 0 ? filteredChildren : node.children,
-            };
-          }
-          return null;
-        })
-        .filter(Boolean) as DataNode[];
-    };
-    return filter(tree);
-  }, [getOrgTree]);
-
   const handleSelectItem = (id: string) => {
     setSelectedId(id);
     setCheckedResourceKeys([]);
@@ -209,26 +174,36 @@ export default function PlatformPermission() {
   };
 
   const buildPositionTree = useMemo<DataNode[]>(() => {
-    const filteredTree = filterTreeByOrgType(orgTreeData, positionOrgType);
     const addPositionsToNodes = (nodes: DataNode[]): DataNode[] => {
       return nodes.map((node) => {
         const nodePositions = positions.filter(
           (p) => p.orgNodeId === node.key && p.status === 'ACTIVE'
         );
         const positionChildren: DataNode[] = nodePositions.map((p) => ({
-          title: p.name,
+          title: (
+            <Space>
+              <SolutionOutlined style={{ color: '#faad14', fontSize: 14 }} />
+              <span>{p.name}</span>
+            </Space>
+          ),
           key: p.id,
           isLeaf: true,
         }));
         const childNodes = node.children ? addPositionsToNodes(node.children) : [];
         return {
           ...node,
+          title: (
+            <Space>
+              <TeamOutlined style={{ color: '#722ed1', fontSize: 14 }} />
+              <span>{typeof node.title === 'string' ? node.title : ''}</span>
+            </Space>
+          ),
           children: [...childNodes, ...positionChildren],
         };
       });
     };
-    return addPositionsToNodes(filteredTree);
-  }, [orgTreeData, positions, positionOrgType, filterTreeByOrgType]);
+    return addPositionsToNodes(orgTreeData);
+  }, [orgTreeData, positions]);
 
   const buildUserTree = useMemo<DataNode[]>(() => {
     const addUsersToNodes = (nodes: DataNode[]): DataNode[] => {
@@ -241,12 +216,22 @@ export default function PlatformPermission() {
             (u) => u.positionIds.includes(p.id) && u.status === 'NORMAL'
           );
           const userChildren: DataNode[] = positionUsers.map((u) => ({
-            title: u.name,
+            title: (
+              <Space>
+                <UserOutlined style={{ color: '#1890ff', fontSize: 14 }} />
+                <span>{u.name}</span>
+              </Space>
+            ),
             key: u.id,
             isLeaf: true,
           }));
           return {
-            title: p.name,
+            title: (
+              <Space>
+                <SolutionOutlined style={{ color: '#faad14', fontSize: 14 }} />
+                <span>{p.name}</span>
+              </Space>
+            ),
             key: p.id,
             children: userChildren,
           };
@@ -254,6 +239,12 @@ export default function PlatformPermission() {
         const childNodes = node.children ? addUsersToNodes(node.children) : [];
         return {
           ...node,
+          title: (
+            <Space>
+              <TeamOutlined style={{ color: '#722ed1', fontSize: 14 }} />
+              <span>{typeof node.title === 'string' ? node.title : ''}</span>
+            </Space>
+          ),
           children: [...childNodes, ...positionChildren],
         };
       });
@@ -294,30 +285,18 @@ export default function PlatformPermission() {
     }
     if (leftTab === 'position') {
       return (
-        <div>
-          <Tabs
-            activeKey={positionOrgType}
-            onChange={(key) => { setPositionOrgType(key as 'VERTICAL' | 'HORIZONTAL'); setSelectedId(null); }}
-            size="small"
-            style={{ padding: '0 12px' }}
-            items={[
-              { key: 'VERTICAL', label: '职能型' },
-              { key: 'HORIZONTAL', label: '项目型' },
-            ]}
+        <div style={{ padding: '0 8px' }}>
+          <Tree
+            treeData={buildPositionTree}
+            selectedKeys={selectedId ? [selectedId] : []}
+            onSelect={(keys) => {
+              const key = keys[0] as string;
+              if (key && positions.some((p) => p.id === key)) {
+                handleSelectItem(key);
+              }
+            }}
+            defaultExpandAll
           />
-          <div style={{ padding: '0 8px' }}>
-            <Tree
-              treeData={buildPositionTree}
-              selectedKeys={selectedId ? [selectedId] : []}
-              onSelect={(keys) => {
-                const key = keys[0] as string;
-                if (key && positions.some((p) => p.id === key)) {
-                  handleSelectItem(key);
-                }
-              }}
-              defaultExpandAll
-            />
-          </div>
         </div>
       );
     }
