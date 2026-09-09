@@ -4,7 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>建筑冷源系统优化平台原型</title>
-  <link rel="stylesheet" href="https://unpkg.com/element-plus@2.4.4/dist/index.css" />
+  <link rel="stylesheet" href="./vendor/element-plus.css" />
+  <style>
+    #boot-error { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; margin: 12px; padding: 16px 20px; background: #fff1f0; border: 1px solid #ffa39e; border-radius: 6px; color: #cf1322; font-family: monospace; font-size: 13px; white-space: pre-wrap; word-break: break-all; box-shadow: 0 2px 8px rgba(0,0,0,.15); display: none; }
+    #boot-status { position: fixed; bottom: 8px; right: 12px; z-index: 9999; padding: 4px 10px; background: #fff; border: 1px solid #d9d9d9; border-radius: 4px; color: #595959; font-size: 11px; font-family: monospace; }
+  </style>
   <style>
     html, body, #app { height: 100%; margin: 0; padding: 0; }
     body { font-family: -apple-system, "Microsoft YaHei", Arial, sans-serif; background: #f0f2f5; }
@@ -26,63 +30,47 @@
   </style>
 </head>
 <body>
-  <div id="app">
-    <el-container style="height:100%;">
-      <el-aside class="layout-aside" :width="collapsed ? '64px' : '220px'">
-        <div class="layout-logo">{{ collapsed ? '冷源' : '建筑冷源优化平台' }}</div>
-        <el-menu
-          :default-active="activeMenu"
-          :collapse="collapsed"
-          background-color="#001529"
-          text-color="#bfc7d2"
-          active-text-color="#fff"
-          @select="handleMenuSelect"
-        >
-          <el-menu-item index="project">
-            <el-icon><Document /></el-icon>
-            <template #title>项目信息</template>
-          </el-menu-item>
-          <el-menu-item index="history">
-            <el-icon><Histogram /></el-icon>
-            <template #title>历史运行</template>
-          </el-menu-item>
-          <el-menu-item index="algorithm">
-            <el-icon><Setting /></el-icon>
-            <template #title>算法参数配置</template>
-          </el-menu-item>
-          <el-menu-item index="strategy">
-            <el-icon><Files /></el-icon>
-            <template #title>策略库</template>
-          </el-menu-item>
-          <el-menu-item index="optimal">
-            <el-icon><Trophy /></el-icon>
-            <template #title>最优策略</template>
-          </el-menu-item>
-        </el-menu>
-      </el-aside>
-      <el-container>
-        <el-header class="layout-header">
-          <el-button text @click="collapsed = !collapsed">
-            <el-icon size="20"><Fold v-if="!collapsed" /><Expand v-else /></el-icon>
-          </el-button>
-          <h2>{{ menuTitle }}</h2>
-        </el-header>
-        <el-main class="layout-main">
-          <component :is="currentPage"></component>
-        </el-main>
-      </el-container>
-    </el-container>
-  </div>
+  <div id="boot-error"></div>
+  <div id="boot-status">boot: 等待脚本...</div>
+  <div id="app"></div>
+  <!-- 根布局模板作为字符串定义在 app.js 中，避免浏览器对 in-DOM 模板的 HTML 解析（自闭合标签会破坏 v-if/v-else 相邻关系） -->
 
-  <script src="https://unpkg.com/vue@3.4.21/dist/vue.global.prod.js"></script>
-  <script src="https://unpkg.com/element-plus@2.4.4/dist/index.full.min.js"></script>
-  <script src="https://unpkg.com/@element-plus/icons-vue@2.3.1/dist/index.iife.min.js"></script>
+
+  <script>
+    // 启动错误捕获：把任何加载/运行错误直接显示在页面上，便于定位真实问题
+    (function () {
+      var errEl = document.getElementById('boot-error');
+      var stEl = document.getElementById('boot-status');
+      function showErr(msg) {
+        try { errEl.textContent = String(msg); errEl.style.display = 'block'; } catch (e) {}
+        try { stEl.textContent = 'boot: 出错'; } catch (e) {}
+      }
+      window.addEventListener('error', function (e) {
+        // 忽略跨域 previewer-tools 脚本的 Script error
+        if (e.message === 'Script error.' && (e.filename || '').indexOf('unpkg') === -1 && !e.lineno) return;
+        showErr('window.error: ' + (e.message || '(unknown)') + '\nfile: ' + (e.filename || '?') + ':' + (e.lineno || '?') + ':' + (e.colno || '?'));
+      });
+      window.addEventListener('unhandledrejection', function (e) {
+        showErr('Promise rejection: ' + (e.reason && e.reason.stack ? e.reason.stack : e.reason));
+      });
+      window.__bootShowErr = showErr;
+      window.__bootSetStatus = function (s) { try { stEl.textContent = 'boot: ' + s; } catch (e) {} };
+    })();
+  </script>
+  <script src="./vendor/vue.global.prod.js" onerror="window.__bootShowErr('加载失败: vendor/vue.global.prod.js')"></script>
+  <script>window.__bootSetStatus('Vue 加载: ' + (typeof Vue !== 'undefined'));</script>
+  <script src="./vendor/element-plus.full.min.js" onerror="window.__bootShowErr('加载失败: vendor/element-plus.full.min.js')"></script>
+  <script>window.__bootSetStatus('EP 加载: ' + (typeof ElementPlus !== 'undefined'));</script>
+  <script src="./vendor/icons-vue.iife.min.js" onerror="window.__bootShowErr('加载失败: vendor/icons-vue.iife.min.js')"></script>
+  <script>window.__bootSetStatus('Icons 加载: ' + (typeof ElementPlusIconsVue !== 'undefined'));</script>
   <!-- 页面组件 -->
   <script src="./js/pages/project-info.js"></script>
   <script src="./js/pages/history-run.js"></script>
   <script src="./js/pages/algorithm-config.js"></script>
   <script src="./js/pages/strategy-library.js"></script>
   <script src="./js/pages/optimal-strategy.js"></script>
-  <script src="./js/app.js"></script>
+  <script>window.__bootSetStatus('页面组件已注册: ' + Object.keys(window.PageComponents || {}).join(','));</script>
+  <script src="./js/app.js" onerror="window.__bootShowErr('app.js 执行/加载失败')"></script>
+  <script>window.__bootSetStatus('app.js 执行完成');</script>
 </body>
 </html>
