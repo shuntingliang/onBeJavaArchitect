@@ -555,23 +555,15 @@ const IMPORT_STATUS = {
 };
 
 /* ============================
-   2. 角色定义
+   2. 当前用户（原型演示：不区分角色，全部功能可访问）
    ============================ */
-const ROLES = [
-  { key: 'CONTRIBUTOR', name: '资产贡献者', role: '投稿人', initials: 'C', color: '#3B6CFF', desc: '选择资源、生成版本、执行校验、创建/提交投稿、处理退回' },
-  { key: 'REVIEWER',    name: '投稿审核人员', role: '审批人', initials: 'R', color: '#F79009', desc: '查看投稿及对应快照、通过现有工作流处理审批、查看审批结果' },
-  { key: 'ADMIN',       name: '资产管理员', role: '管理员', initials: 'A', color: '#7A3AF0', desc: '在授权范围内管理资产、执行发布及生命周期操作' },
-  { key: 'CONSUMER',    name: '平台资产使用者', role: '使用者', initials: 'U', color: '#12B76A', desc: '检索目录、查看详情、申请/使用授权、获取资产包、发起导入' },
-  { key: 'AUDITOR',     name: '审计读取者', role: '审计', initials: 'T', color: '#0BA5EC', desc: '在授权范围内只读查看资产、版本、投稿及导入记录' }
-];
-
-/* 权限矩阵：role -> { page: boolean } */
-const PERMISSIONS = {
-  CONTRIBUTOR: { dashboard: true, assetList: true, assetDetail: true, assetRegister: true, versionManage: true, submissionList: true, submissionDetail: true, review: false, publish: false, catalog: true, import: true, history: true },
-  REVIEWER:    { dashboard: true, assetList: true, assetDetail: true, assetRegister: false, versionManage: true, submissionList: true, submissionDetail: true, review: true, publish: false, catalog: true, import: false, history: true },
-  ADMIN:       { dashboard: true, assetList: true, assetDetail: true, assetRegister: true, versionManage: true, submissionList: true, submissionDetail: true, review: false, publish: true, catalog: true, import: true, history: true },
-  CONSUMER:    { dashboard: true, assetList: false, assetDetail: true, assetRegister: false, versionManage: false, submissionList: false, submissionDetail: false, review: false, publish: false, catalog: true, import: true, history: false },
-  AUDITOR:     { dashboard: true, assetList: true, assetDetail: true, assetRegister: false, versionManage: true, submissionList: true, submissionDetail: true, review: false, publish: false, catalog: true, import: true, history: true }
+const DEMO_USER = {
+  key: 'DEMO',
+  name: '演示用户',
+  role: '全功能演示模式',
+  initials: 'D',
+  color: '#3B6CFF',
+  desc: '可查看并操作原型中的全部页面与功能'
 };
 
 /* ============================
@@ -588,7 +580,7 @@ const assetTypes = [
 
 /* DigitalAsset（聚合根） */
 const state = {
-  currentRole: 'CONTRIBUTOR',
+  currentRole: 'DEMO',
   navPage: 'dashboard',
   breadcrumb: ['工作台'],
   filter: { assetList: { keyword: '', type: '', status: '' } },
@@ -875,12 +867,9 @@ function tag(code, dict, labelOverride) {
   return `<span class="tag ${s.cls}">${htmlEscape(labelOverride || s.label)}</span>`;
 }
 
-function getRole() { return ROLES.find(r => r.key === state.currentRole); }
-function hasPerm(pageKey) {
-  const p = PERMISSIONS[state.currentRole];
-  if (!p) return false;
-  return !!p[pageKey];
-}
+function getRole() { return DEMO_USER; }
+// 原型演示模式：不按角色限制页面与操作，全部可访问
+function hasPerm(pageKey) { return true; }
 
 /* ============================
    6. Toast / Modal / Drawer
@@ -939,7 +928,7 @@ const Modal = {
     return { close, bodyEl };
   },
   confirm({ title, message, onConfirm, danger=false, confirmText='确认', cancelText='取消' }) {
-    return Modal.show({ title, body: `<div style="font-size:14px;color:var(--ink-2);line-height:1.65">${htmlEscape(message)}</div>`, onConfirm, confirmText, cancelText, danger });
+    return Modal.show({ title, body: `<div style="font-size:14px;color:var(--ink-2);line-height:1.65">${message}</div>`, onConfirm, confirmText, cancelText, danger });
   }
 };
 
@@ -983,20 +972,18 @@ function renderNav() {
         <div class="nav-user-name">${htmlEscape(role.name)}</div>
         <div class="nav-user-role">${htmlEscape(role.role)}</div>
       </div>
-      <button class="nav-switch" onclick="openRoleSwitch()">切换</button>
     </div>
     <div class="nav-menu">`;
   NAV_GROUPS.forEach(g => {
     html += `<div class="nav-menu-group-label">${g.label}</div>`;
     g.items.forEach(item => {
-      const allowed = !item.roles || item.roles.includes(state.currentRole);
       let badge = '';
       if (item.badge) {
         const n = item.badge();
         if (n > 0) badge = `<span class="badge">${n}</span>`;
       }
-      const cls = `nav-menu-item ${state.navPage === item.key ? 'active' : ''} ${allowed ? '' : 'disabled'}`;
-      html += `<div class="${cls}" data-page="${item.key}" onclick="${allowed ? "navigate('${item.key}')" : "Toast.show('无权限','${role.name} 无权访问此页面','warning')"}">
+      const cls = `nav-menu-item ${state.navPage === item.key ? 'active' : ''}`;
+      html += `<div class="${cls}" data-page="${item.key}" onclick="navigate('${item.key}')">
         <span style="width:16px;text-align:center">${item.icon}</span>
         <span>${htmlEscape(item.name)}</span>${badge}
       </div>`;
@@ -1024,10 +1011,6 @@ function renderTopbar() {
 }
 
 function navigate(page) {
-  if (!hasPerm(page)) {
-    Toast.show('无权限访问', `当前角色 ${getRole().name} 无权访问该页面`, 'warning');
-    return;
-  }
   state.navPage = page;
   renderNav();
   const titles = {
@@ -1067,44 +1050,6 @@ function navigate(page) {
 }
 
 /* ============================
-   8. 角色切换
-   ============================ */
-function openRoleSwitch() {
-  Modal.show({
-    title: '切换角色 / 身份',
-    body: `<div id="roleOptions"></div>
-      <div class="info-banner warning" style="margin-top:16px">
-        <svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
-        <div><strong>提示：</strong>权限控制在页面和操作两层同时生效。切换后将按该角色的能力范围重新渲染导航、列表、按钮和详情。</div>
-      </div>`,
-    confirmText: '使用此角色',
-    onConfirm: async ({ close }) => {
-      const chosen = $$('.role-option.active', $('#roleOptions'))[0];
-      if (!chosen) { Toast.show('请先选择角色', '', 'warning', 1500); throw new Error(); }
-      state.currentRole = chosen.dataset.role;
-      close();
-      Toast.show('角色已切换', `当前身份：${getRole().name}`, 'success');
-      // 回到有权限的页面
-      if (!hasPerm(state.navPage)) state.navPage = 'dashboard';
-      navigate(state.navPage);
-    }
-  });
-  const list = $('#roleOptions');
-  list.innerHTML = ROLES.map(r => `
-    <div class="role-option ${r.key===state.currentRole?'active':''}" data-role="${r.key}" onclick="selectRoleOption('${r.key}')">
-      <div class="role-avatar" style="background:linear-gradient(135deg,${r.color},#7A3AF0)">${r.initials}</div>
-      <div style="flex:1">
-        <div class="role-name">${htmlEscape(r.name)} <span style="color:var(--muted);font-weight:400;font-size:12px;margin-left:8px">· ${htmlEscape(r.role)}</span></div>
-        <div class="role-desc">${htmlEscape(r.desc)}</div>
-      </div>
-    </div>
-  `).join('');
-}
-function selectRoleOption(k) {
-  $$('.role-option', $('#roleOptions')).forEach(el => el.classList.toggle('active', el.dataset.role === k));
-}
-
-/* ============================
    9. 工作台
    ============================ */
 function renderDashboard(root) {
@@ -1117,17 +1062,10 @@ function renderDashboard(root) {
     disabled: state.assets.filter(a => a.assetStatus === 'DISABLED').length,
     archived: state.assets.filter(a => a.assetStatus === 'ARCHIVED').length,
     pendingReview: state.submissions.filter(s => s.submissionStatus === 'PENDING_APPROVAL').length,
-    mySubmissions: state.submissions.filter(s => s.submittedBy === 'u-' + role.key.toLowerCase()).length,
+    allSubmissions: state.submissions.length,
     returning: state.submissions.filter(s => s.submissionStatus === 'RETURNED').length,
     failedPub: state.submissions.filter(s => s.publicationStatus === 'FAILED').length
   };
-
-  let rolePrompt = '';
-  if (role.key === 'REVIEWER') rolePrompt = `您当前有 <strong style="color:var(--accent)">${stats.pendingReview}</strong> 条投稿等待审批，请尽快处理。`;
-  if (role.key === 'CONTRIBUTOR') rolePrompt = `您是资产贡献者，可选择平台原生资源、生成版本、执行校验并发起投稿。`;
-  if (role.key === 'ADMIN') rolePrompt = `您是资产管理员，可执行发布、禁用、归档等生命周期操作。`;
-  if (role.key === 'CONSUMER') rolePrompt = `您是平台资产使用者，可在目录中检索资产、申请授权并导入到目标应用。`;
-  if (role.key === 'AUDITOR') rolePrompt = `您是审计读取者，当前仅有只读查看权限。`;
 
   let html = `
     <div class="role-banner">
@@ -1136,7 +1074,7 @@ function renderDashboard(root) {
       </div>
       <div>
         <div class="rb-title">${htmlEscape(role.name)} · ${htmlEscape(role.role)}</div>
-        <div class="rb-desc">${rolePrompt}</div>
+        <div class="rb-desc">原型演示模式：全部页面、菜单、表单与操作均可访问，便于完整走查业务流程。</div>
       </div>
     </div>
 
@@ -1171,9 +1109,9 @@ function renderDashboard(root) {
         <div class="metric-sub">需管理员介入重试</div>
       </div>
       <div class="metric-card">
-        <div class="metric-label">我的投稿数</div>
-        <div class="metric-value" style="color:var(--accent)">${stats.mySubmissions}</div>
-        <div class="metric-sub">资产贡献者视角</div>
+        <div class="metric-label">投稿总数</div>
+        <div class="metric-value" style="color:var(--accent)">${stats.allSubmissions}</div>
+        <div class="metric-sub">含全部状态的投稿</div>
       </div>
     </div>
 
@@ -1328,13 +1266,12 @@ function renderAssetList(root) {
 }
 
 function renderAssetRowActions(a) {
-  const role = state.currentRole;
   let actions = '';
   const hasPendingSubmission = submissionsOf(a.assetId).some(s => ['PENDING_APPROVAL','VALIDATING'].includes(s.submissionStatus));
   const latestFrozen = versionsOf(a.assetId).find(v => v.versionStatus === 'FROZEN');
 
-  // 贡献者/管理员：发起投稿
-  if ((role === 'CONTRIBUTOR' || role === 'ADMIN') && a.assetStatus !== 'ARCHIVED' && !hasPendingSubmission) {
+  // 发起投稿
+  if (a.assetStatus !== 'ARCHIVED' && !hasPendingSubmission) {
     // 要有冻结版本才能投稿
     const canSubmit = !!latestFrozen && latestFrozen.assetId === a.assetId; // 确保属于当前资产
     if (canSubmit) {
@@ -1346,12 +1283,10 @@ function renderAssetRowActions(a) {
       }
     }
   }
-  // 管理员：禁用/启用/归档
-  if (role === 'ADMIN') {
-    if (a.assetStatus === 'PUBLISHED') actions += `<button class="btn-link danger-link" onclick="disableAsset('${a.assetId}')">禁用</button>`;
-    if (a.assetStatus === 'DISABLED') actions += `<button class="btn-link success-link" onclick="enableAsset('${a.assetId}')">启用</button>`;
-    if (a.assetStatus === 'DRAFT' || a.assetStatus === 'DISABLED') actions += `<button class="btn-link danger-link" onclick="archiveAsset('${a.assetId}')">归档</button>`;
-  }
+  // 禁用/启用/归档
+  if (a.assetStatus === 'PUBLISHED') actions += `<button class="btn-link danger-link" onclick="disableAsset('${a.assetId}')">禁用</button>`;
+  if (a.assetStatus === 'DISABLED') actions += `<button class="btn-link success-link" onclick="enableAsset('${a.assetId}')">启用</button>`;
+  if (a.assetStatus === 'DRAFT' || a.assetStatus === 'DISABLED') actions += `<button class="btn-link danger-link" onclick="archiveAsset('${a.assetId}')">归档</button>`;
   return actions;
 }
 
@@ -1528,11 +1463,10 @@ function renderDetailPublish(a) {
       <div class="detail-section-title">🔄 可执行生命周期操作</div>
       <div style="display:flex;gap:12px;flex-wrap:wrap">
         ${a.assetStatus === 'DRAFT' && latestSub && latestSub.submissionStatus === 'APPROVED' && latestSub.publicationStatus !== 'SUCCESS' ? `<button class="btn btn-primary" onclick="publishAsset('${latestSub.submissionId}')">执行发布</button>` : ''}
-        ${a.assetStatus === 'PUBLISHED' && state.currentRole === 'ADMIN' ? `<button class="btn btn-danger" onclick="disableAsset('${a.assetId}')">禁用资产</button>` : ''}
-        ${a.assetStatus === 'DISABLED' && state.currentRole === 'ADMIN' ? `<button class="btn btn-success" onclick="enableAsset('${a.assetId}')">重新启用</button>` : ''}
-        ${(a.assetStatus === 'DRAFT' || a.assetStatus === 'DISABLED') && state.currentRole === 'ADMIN' ? `<button class="btn btn-danger" onclick="archiveAsset('${a.assetId}')">归档资产</button>` : ''}
+        ${a.assetStatus === 'PUBLISHED' ? `<button class="btn btn-danger" onclick="disableAsset('${a.assetId}')">禁用资产</button>` : ''}
+        ${a.assetStatus === 'DISABLED' ? `<button class="btn btn-success" onclick="enableAsset('${a.assetId}')">重新启用</button>` : ''}
+        ${(a.assetStatus === 'DRAFT' || a.assetStatus === 'DISABLED') ? `<button class="btn btn-danger" onclick="archiveAsset('${a.assetId}')">归档资产</button>` : ''}
         ${a.assetStatus === 'ARCHIVED' ? '<span class="muted-text">已归档资产不可执行进一步操作</span>' : ''}
-        ${(a.assetStatus === 'DRAFT' || a.assetStatus === 'DISABLED') && state.currentRole !== 'ADMIN' ? '<span class="muted-text">仅资产管理员可执行生命周期操作</span>' : ''}
       </div>
     </div>
   `;
@@ -2058,9 +1992,7 @@ function completeWizard() {
    14. 版本管理页面
    ============================ */
 function renderVersionManage(root) {
-  const role = state.currentRole;
   let items = state.versions.slice();
-  // 审计者/非贡献者只看不写
   items.sort((a,b) => b.createdAt.localeCompare(a.createdAt));
   root.innerHTML = `
     <div class="page-header"><div>
@@ -2084,7 +2016,7 @@ function renderVersionManage(root) {
             <td style="white-space:nowrap">${htmlEscape(v.frozenAt || '—')}</td>
             <td class="actions">
               <button class="btn-link" onclick="openVersionDetail('${v.versionId}')">详情</button>
-              ${v.versionStatus === 'DRAFT' && (role === 'CONTRIBUTOR' || role === 'ADMIN') ? `<button class="btn-link success-link" onclick="freezeVersion('${v.versionId}')">冻结</button>` : ''}
+              ${v.versionStatus === 'DRAFT' ? `<button class="btn-link success-link" onclick="freezeVersion('${v.versionId}')">冻结</button>` : ''}
               ${v.versionStatus === 'FROZEN' ? `<button class="btn-link" style="color:var(--muted)">只读</button>` : ''}
             </td>
           </tr>`;
@@ -2152,7 +2084,7 @@ function renderSubmissionDetail(root) {
   const validations = v ? validationsOf(v.versionId) : [];
 
   let actions = '';
-  if (s.submissionStatus === 'PENDING_APPROVAL' && (state.currentRole === 'REVIEWER' || state.currentRole === 'ADMIN')) {
+  if (s.submissionStatus === 'PENDING_APPROVAL') {
     actions += `<button class="btn btn-success" onclick="doApproval('${s.submissionId}', 'APPROVED')">审批通过</button>
                 <button class="btn btn-secondary" onclick="doApproval('${s.submissionId}', 'RETURNED')">退回修改</button>
                 <button class="btn btn-danger" onclick="doApproval('${s.submissionId}', 'REJECTED')">不通过</button>`;
@@ -2160,7 +2092,7 @@ function renderSubmissionDetail(root) {
   if (s.submissionStatus === 'RETURNED' || s.submissionStatus === 'REJECTED') {
     actions += `<button class="btn btn-primary" onclick="resubmitSubmission('${s.submissionId}')">重新提交</button>`;
   }
-  if (s.submissionStatus === 'APPROVED' && s.publicationStatus !== 'SUCCESS' && (state.currentRole === 'ADMIN')) {
+  if (s.submissionStatus === 'APPROVED' && s.publicationStatus !== 'SUCCESS') {
     actions += `<button class="btn btn-primary" onclick="publishAsset('${s.submissionId}')">立即发布</button>`;
   }
 
@@ -2278,7 +2210,7 @@ function renderReviewWorkspace(root) {
   root.innerHTML = `
     <div class="page-header"><div>
       <div class="page-title">投稿审核工作区</div>
-      <div class="page-subtitle">从审核人员视角查看待审批投稿、详情快照、校验结论，通过现有工作流完成审批。<strong>本原型只展示与工作流的衔接，不重建工作流引擎。</strong></div>
+      <div class="page-subtitle">从审核视角查看待审批投稿、详情快照、校验结论，通过现有工作流完成审批。<strong>本原型只展示与工作流的衔接，不重建工作流引擎。</strong></div>
     </div></div>
 
     <div class="panel-stack">
@@ -2664,7 +2596,7 @@ function renderPublish(root) {
   root.innerHTML = `
     <div class="page-header"><div>
       <div class="page-title">发布与生命周期</div>
-      <div class="page-subtitle">管理员专属页面。执行发布、禁用、启用、归档等生命周期操作。</div>
+      <div class="page-subtitle">执行发布、禁用、启用、归档等生命周期操作。</div>
     </div></div>
 
     <div class="panel-stack-3" style="margin-bottom:16px">
