@@ -563,6 +563,16 @@ const VALIDATION_STATE = {
   UNKNOWN:      { label: '未知',   cls: 'tag-unknown' },
   EXEC_ERROR:   { label: '执行失败', cls: 'tag-error' }
 };
+const ISSUE_SEVERITY = {
+  ERROR:   { label: '阻断', cls: 'tag-error' },
+  WARNING: { label: '警告', cls: 'tag-warning' },
+  INFO:    { label: '提示', cls: 'tag-info' }
+};
+const RESOLUTION_STATUS = {
+  OPEN:     { label: '待处理', cls: 'tag-draft' },
+  RESOLVED: { label: '已处理', cls: 'tag-approved' },
+  IGNORED:  { label: '已忽略', cls: 'tag-returned' }
+};
 const IMPORT_STATUS = {
   PENDING:   { label: '等待中', cls: 'tag-pending' },
   SUCCESS:   { label: '导入成功', cls: 'tag-published' },
@@ -1351,10 +1361,9 @@ function renderAssetRowActions(a) {
       }
     }
   }
-  // 禁用/启用/归档
+  // 禁用/启用
   if (a.assetStatus === 'PUBLISHED') actions += `<button class="btn-link danger-link" onclick="disableAsset('${a.assetId}')">禁用</button>`;
   if (a.assetStatus === 'DISABLED') actions += `<button class="btn-link success-link" onclick="enableAsset('${a.assetId}')">启用</button>`;
-  if (a.assetStatus === 'DRAFT' || a.assetStatus === 'DISABLED') actions += `<button class="btn-link danger-link" onclick="archiveAsset('${a.assetId}')">归档</button>`;
   return actions;
 }
 
@@ -2738,27 +2747,67 @@ function wizardStep4(w) {
   const r = vr.results;
   const failed = r.filter(x => !x.passed).length;
   const allPass = failed === 0;
+  const errCount = r.reduce((n, x) => n + x.issues.filter(i => i.severity === 'ERROR').length, 0);
+  const warnCount = r.reduce((n, x) => n + x.issues.filter(i => i.severity === 'WARNING').length, 0);
+
+  const checkerLabelMap = { RESOURCE_PRESENCE:'资源存在性检查', DEPENDENCY_ANALYSIS:'依赖完整性检查', TYPE_REGISTRABLE:'类型可登记性检查', CONTRACT_COMPAT:'契约兼容性检查', SECURITY_SCAN:'安全扫描' };
+
   return `
     ${allPass ? `<div class="info-banner success"><svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg><div><strong>全部固定校验项通过。</strong>可以进入登记与投稿确认。</div></div>` :
       `<div class="info-banner error"><svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg><div><strong>存在未通过的校验项！</strong>点击下一步会被业务层阻止，必须修正后重新生成快照。</div></div>`}
+
     <div class="validation-summary">
-      <div class="val-stat pass">通过 <span class="num">${r.filter(x => x.passed).length}</span></div>
-      ${failed > 0 ? `<div class="val-stat err">未通过 <span class="num">${failed}</span></div>` : ''}
+      <div class="val-stat pass"><span class="num">${r.filter(x => x.passed).length}</span> 项通过</div>
+      ${failed > 0 ? `<div class="val-stat err"><span class="num">${failed}</span> 项未通过</div>` : ''}
+      ${errCount > 0 ? `<div class="val-stat err">阻断错误 <span class="num">${errCount}</span></div>` : ''}
+      ${warnCount > 0 ? `<div class="val-stat warn">警告 <span class="num">${warnCount}</span></div>` : ''}
     </div>
-    <div class="table-wrap">
-      <table class="table">
-        <thead><tr><th>校验项</th><th>校验器（英文）</th><th>描述</th><th>结果</th><th>校验时间</th></tr></thead>
-        <tbody>
-          ${r.map(x => `<tr>
-            <td><strong>${htmlEscape(x.nameZh || x.checkerType)}</strong></td>
-            <td class="code">${htmlEscape(x.checkerType)}</td>
-            <td style="font-size:12px;color:var(--ink-3);max-width:360px">${htmlEscape(x.description || '—')}</td>
-            <td>${tag(x.passed ? 'PASSED' : 'FAILED', VALIDATION_STATE, x.passed ? '通过' : '不通过')}</td>
-            <td style="white-space:nowrap">${htmlEscape(x.checkedAt)}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>
+
+    ${r.map(x => {
+      const hasErr = x.issues.some(i => i.severity === 'ERROR');
+      const borderColor = hasErr ? 'var(--danger-soft)' : (x.passed ? 'var(--rule)' : 'var(--danger-soft)');
+      const headBg = hasErr ? 'var(--danger-soft)' : (x.issues.some(i => i.severity === 'WARNING') ? 'var(--warning-soft)' : (x.passed ? 'var(--success-soft)' : 'var(--danger-soft)'));
+      return `
+      <div style="margin-bottom:14px;border:1px solid ${borderColor};border-radius:10px;overflow:hidden">
+        <div style="padding:10px 16px;background:${headBg};display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:10px;min-width:0">
+            <div style="font-weight:600;font-size:13px">${htmlEscape(checkerLabelMap[x.checkerType] || x.checkerType)}</div>
+            <span class="code-mono" style="font-size:11px;color:var(--muted)">${htmlEscape(x.checkerType)}</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+            <span style="font-size:11px;color:var(--muted)">${htmlEscape(x.checkedAt)}</span>
+            ${tag(x.passed ? 'PASSED' : 'FAILED', VALIDATION_STATE, x.passed ? '通过' : '不通过')}
+          </div>
+        </div>
+        <div style="padding:8px 16px 10px;font-size:12px;color:var(--ink-3)">${htmlEscape(x.description)}</div>
+        ${x.issues.length === 0 ?
+          '<div style="padding:8px 16px 12px;font-size:12px;color:var(--muted)">无问题</div>' : `
+          <div style="padding:0 16px 14px">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px">问题清单（${x.issues.length}）</div>
+            ${x.issues.map((i, idx) => `
+              <div style="border:1px solid var(--rule);border-radius:8px;margin-bottom:8px;overflow:hidden">
+                <div style="padding:8px 12px;background:${i.severity==='ERROR' ? 'var(--danger-soft)' : (i.severity==='WARNING' ? 'var(--warning-soft)' : 'var(--info-soft)')};display:flex;justify-content:space-between;align-items:center;gap:10px">
+                  <div style="display:flex;align-items:center;gap:8px;min-width:0">
+                    <span class="code-mono" style="font-size:11px">Issue-${idx+1}</span>
+                    <span class="code-mono" style="font-size:11px;font-weight:600">${htmlEscape(i.issueCode)}</span>
+                  </div>
+                  <div style="display:flex;gap:6px;flex-shrink:0">
+                    ${tag(i.severity, ISSUE_SEVERITY)}
+                    ${tag(i.resolutionStatus, RESOLUTION_STATUS)}
+                  </div>
+                </div>
+                <div style="padding:10px 12px">
+                  <div style="font-size:13px;color:var(--ink);font-weight:500;line-height:1.55">${htmlEscape(i.description)}</div>
+                  <div style="margin-top:8px;display:flex;gap:20px;flex-wrap:wrap">
+                    <div><span style="font-size:11px;color:var(--muted)">关联资源标识</span><div class="code-mono" style="font-size:12px">${htmlEscape(i.resourceRef || '—')}</div></div>
+                    <div style="flex:1;min-width:200px"><span style="font-size:11px;color:var(--muted)">处理建议</span><div style="font-size:12px;color:var(--ink-2);line-height:1.55">${i.resolutionSuggestion ? htmlEscape(i.resolutionSuggestion) : '—'}</div></div>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>`}
+      </div>`;
+    }).join('')}
   `;
 }
 
@@ -2779,12 +2828,60 @@ function wizardTickVal() {
     const sels = wizardSelectedResources(w);
     const deps = wizardDependencyRows(w);
     const ts = nowStr();
+    // 构造若干具有完整问题模型的校验结果，覆盖阻断/警告/通过三种形态
+    const hasConnector = sels.some(r => r.resourceType === 'CONNECTOR');
+    const hasPartial = sels.some(r => r.resourceType === 'PARTIAL_TEMPLATE');
+    const selNames = sels.map(r => r.resourceName);
+
     const results = [
-      { nameZh: '资源存在性', checkerType: 'RESOURCE_PRESENCE', description: `所选 ${sels.length} 项资源均可在来源应用中正常读取`, passed: true, checkedAt: ts, issues: [] },
-      { nameZh: '依赖完整性', checkerType: 'DEPENDENCY_ANALYSIS', description: `识别到 ${deps.length} 条依赖关系，依赖资源均存在且版本满足要求`, passed: true, checkedAt: ts, issues: [] },
-      { nameZh: '类型可登记性', checkerType: 'TYPE_REGISTRABLE', description: '所选资源类型均在平台允许登记的范围内', passed: true, checkedAt: ts, issues: [] },
-      { nameZh: '契约兼容性', checkerType: 'CONTRACT_COMPAT', description: '快照结构与当前平台版本契约兼容', passed: true, checkedAt: ts, issues: [] },
-      { nameZh: '安全扫描', checkerType: 'SECURITY_SCAN', description: '未发现敏感凭据、外部危险调用或越权访问', passed: true, checkedAt: ts, issues: [] }
+      {
+        nameZh: '资源存在性',
+        checkerType: 'RESOURCE_PRESENCE',
+        description: `所选 ${sels.length} 项资源均可在来源应用中正常读取，SHA-256 摘要已记录`,
+        passed: true,
+        checkedAt: ts,
+        issues: []
+      },
+      {
+        nameZh: '依赖完整性',
+        checkerType: 'DEPENDENCY_ANALYSIS',
+        description: `识别到 ${deps.length} 条依赖关系，其中直接依赖 ${deps.filter(d=>d.level==='直接依赖').length} 条、间接依赖 ${deps.filter(d=>d.level==='间接依赖').length} 条${hasPartial ? '；检测到局部模板包含多类型绑定，已展开其内部依赖' : ''}`,
+        passed: true,
+        checkedAt: ts,
+        issues: hasPartial ? [
+          { issueCode: 'DEPS_EXPANDED', description: '所选资源含局部模板，已自动展开其内部绑定的页面片段、数据模型与脚本钩子作为登记依赖', severity: 'INFO', resolutionStatus: 'RESOLVED', resourceRef: sels.find(r=>r.resourceType==='PARTIAL_TEMPLATE')?.resourceId || '', resolutionSuggestion: '展开动作由系统自动完成，无需人工修正' },
+          { issueCode: 'OPTIONAL_DEP', description: '连接器类依赖默认作为可选依赖纳入快照（不会阻断目录发布）', severity: 'WARNING', resolutionStatus: 'OPEN', resourceRef: deps.find(d=>d.dep.resourceType==='CONNECTOR')?.dep.resourceId || '—', resolutionSuggestion: '如需改为必需依赖，请在快照生成前手动在来源应用中调整连接器级别' }
+        ] : []
+      },
+      {
+        nameZh: '类型可登记性',
+        checkerType: 'TYPE_REGISTRABLE',
+        description: `所选资源类型（${[...new Set(sels.map(r => wizardTypeOf(r.resourceType).name))].join('、')}）均在平台允许登记的范围内`,
+        passed: true,
+        checkedAt: ts,
+        issues: []
+      },
+      {
+        nameZh: '契约兼容性',
+        checkerType: 'CONTRACT_COMPAT',
+        description: '快照结构与当前平台版本契约（Schema v3.2）兼容，可被 Provider 正常消费',
+        passed: !hasConnector,
+        checkedAt: ts,
+        issues: hasConnector ? [
+          { issueCode: 'PROVIDER_VERSION_OUTDATED', description: '所选连接器目标 Provider 版本为 v1.9，低于平台契约要求的 v2.0，可能导致快照消费不完整', severity: 'ERROR', resolutionStatus: 'OPEN', resourceRef: sels.find(r=>r.resourceType==='CONNECTOR')?.resourceId || '—', resolutionSuggestion: '升级来源应用 Provider 到 v2.0 及以上，或移除该连接器后重新生成快照' },
+          { issueCode: 'API_DEPRECATED', description: '连接器声明的接口契约 /api/v1/orders 在平台 v3.2 契约中已标记为废弃', severity: 'WARNING', resolutionStatus: 'OPEN', resourceRef: sels.find(r=>r.resourceType==='CONNECTOR')?.resourceId || '—', resolutionSuggestion: '建议在 Provider 中迁移到 /api/v2/orders，并刷新连接器资源后再生成快照' }
+        ] : []
+      },
+      {
+        nameZh: '安全扫描',
+        checkerType: 'SECURITY_SCAN',
+        description: '已扫描资源主体内容与脚本片段，未发现硬编码凭据、外部危险调用或越权访问',
+        passed: true,
+        checkedAt: ts,
+        issues: selNames.some(n => n.includes('ERP') || n.includes('同步')) ? [
+          { issueCode: 'EXTERNAL_CALL_REVIEW', description: '扫描发现资源中存在外部系统调用，建议人工复核鉴权方式', severity: 'WARNING', resolutionStatus: 'OPEN', resourceRef: sels.find(r => r.resourceName.includes('ERP') || r.resourceName.includes('同步'))?.resourceId || '—', resolutionSuggestion: '人工复核来源应用 Provider 的调用白名单与 Token 管理策略' }
+        ] : []
+      }
     ];
     w.valRun.state = 'done'; w.valRun.results = results;
   } else { setTimeout(wizardTickVal, 280); }
