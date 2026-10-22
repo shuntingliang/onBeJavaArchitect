@@ -373,6 +373,24 @@ a:hover { text-decoration: underline; }
 .step-select-card .ssc-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
 .step-select-card .ssc-desc { font-size: 12px; color: var(--ink-3); margin-top: 6px; }
 
+/* 资源登记：应用与资源选择 */
+.app-pick-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+.app-pick-card { border: 1px solid var(--rule-2); border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.15s; background: var(--bg2); }
+.app-pick-card:hover { border-color: var(--accent); }
+.app-pick-card.selected { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent) inset; }
+.app-pick-name { font-size: 14px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 8px; }
+.app-pick-meta { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.6; }
+.res-group { margin-top: 18px; }
+.res-group-head { display: flex; align-items: center; gap: 8px; padding: 6px 0 8px; border-bottom: 1px solid var(--rule); font-size: 13px; font-weight: 700; color: var(--ink); }
+.res-group-count { font-size: 12px; font-weight: 400; color: var(--muted); }
+.res-pick-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--rule); border-radius: 8px; margin-top: 8px; cursor: pointer; transition: all 0.15s; }
+.res-pick-item:hover { border-color: var(--accent); }
+.res-pick-item.selected { border-color: var(--accent); background: var(--accent-soft); }
+.res-check { width: 18px; height: 18px; border-radius: 4px; border: 1.5px solid var(--rule-2); background: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; color: transparent; flex-shrink: 0; margin-top: 2px; }
+.res-pick-item.selected .res-check { background: var(--accent); border-color: var(--accent); color: #fff; }
+.res-contents { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.res-contents span { font-size: 11px; color: var(--purple); background: var(--purple-soft); border-radius: 4px; padding: 2px 7px; }
+
 /* ============================
    VALIDATION PANEL
    ============================ */
@@ -534,10 +552,8 @@ const SUBMISSION_STATUS = {
   CANCELLED:        { label: '已取消',   cls: 'tag-cancelled' }
 };
 const PUBLICATION_STATUS = {
-  NOT_STARTED: { label: '未开始', cls: 'tag-draft' },
-  PROCESSING:  { label: '发布中', cls: 'tag-processing' },
-  SUCCESS:     { label: '发布成功', cls: 'tag-published' },
-  FAILED:      { label: '发布失败', cls: 'tag-error' }
+  NOT_STARTED: { label: '未固化', cls: 'tag-draft' },
+  SUCCESS:     { label: '已固化', cls: 'tag-published' }
 };
 const VALIDATION_STATE = {
   NOT_EXECUTED: { label: '未执行', cls: 'tag-draft' },
@@ -570,12 +586,21 @@ const DEMO_USER = {
    3. 模拟数据
    ============================ */
 const assetTypes = [
-  { code: 'APPLICATION',  name: '应用模块', icon: '🧩' },
-  { code: 'DATASET',      name: '数据集',   icon: '📊' },
-  { code: 'WORKFLOW',     name: '工作流',   icon: '🔄' },
-  { code: 'FORM_TEMPLATE',name: '表单模板', icon: '📋' },
-  { code: 'REPORT',       name: '报表',     icon: '📈' },
-  { code: 'CONNECTOR',    name: '连接器',   icon: '🔌' }
+  { code: 'PAGE',             name: '页面',     icon: '🖥' },
+  { code: 'DATA_MODEL',       name: '数据模型', icon: '🗄' },
+  { code: 'SCRIPT',           name: '脚本',     icon: '📜' },
+  { code: 'CONNECTOR',        name: '连接器',   icon: '🔌' },
+  { code: 'PARTIAL_TEMPLATE', name: '局部模板', icon: '🧩' },
+  { code: 'MIXED',            name: '混合资产', icon: '🗂' }
+];
+
+/* 可登记的资源类型（应用内资源清单分类） */
+const RESOURCE_TYPES = [
+  { code: 'PAGE',             name: '页面',     icon: '🖥' },
+  { code: 'DATA_MODEL',       name: '数据模型', icon: '🗄' },
+  { code: 'SCRIPT',           name: '脚本',     icon: '📜' },
+  { code: 'CONNECTOR',        name: '连接器',   icon: '🔌' },
+  { code: 'PARTIAL_TEMPLATE', name: '局部模板', icon: '🧩' }
 ];
 
 /* DigitalAsset（聚合根） */
@@ -591,8 +616,8 @@ const state = {
   assets: [
     {
       assetId: 'AST-2026-0001', assetCode: 'CRM-CUSTOMER-360',
-      assetName: 'CRM 客户 360 视图应用', assetType: 'APPLICATION',
-      description: '基于客户主数据构建的 360° 客户视图应用，集成客户基本信息、交易历史、服务记录等多维度数据，为销售和客服提供统一视图。',
+      assetName: 'CRM 客户 360 详情页', assetType: 'PAGE',
+      description: '基于客户主数据构建的 360° 客户视图页面，集成客户基本信息、交易历史、服务记录等多维度数据，为销售和客服提供统一视图。',
       assetStatus: 'PUBLISHED', publishedVersionId: 'VER-0001-002',
       sourceApp: 'CRM Platform', sourceAppCode: 'CRM-SAAS',
       tenantId: 'T-ACME', tenantName: 'Acme 科技',
@@ -602,8 +627,8 @@ const state = {
     },
     {
       assetId: 'AST-2026-0002', assetCode: 'SALES-ORDER-WF',
-      assetName: '销售订单审批工作流', assetType: 'WORKFLOW',
-      description: '标准销售订单审批流程，支持多级审批、金额阈值分流、退回修改、加签等场景。',
+      assetName: '销售订单审批局部模板', assetType: 'PARTIAL_TEMPLATE',
+      description: '销售订单审批场景的局部模板，内含审批页面片段、流程编排脚本与订单数据模型绑定。',
       assetStatus: 'PUBLISHED', publishedVersionId: 'VER-0002-001',
       sourceApp: 'BPM Engine', sourceAppCode: 'BPM-CORE',
       tenantId: 'T-ACME', tenantName: 'Acme 科技',
@@ -613,8 +638,8 @@ const state = {
     },
     {
       assetId: 'AST-2026-0003', assetCode: 'FIN-REPORT-Q3',
-      assetName: 'Q3 财务经营分析报表', assetType: 'REPORT',
-      description: '三季度财务经营分析报表，包含收入、成本、利润、现金流、应收账款周转等核心指标。',
+      assetName: 'Q3 财务经营分析页', assetType: 'PAGE',
+      description: '三季度财务经营分析页面，包含收入、成本、利润、现金流、应收账款周转等核心指标。',
       assetStatus: 'DRAFT', publishedVersionId: null,
       sourceApp: 'BI Center', sourceAppCode: 'BI-MAIN',
       tenantId: 'T-ACME', tenantName: 'Acme 科技',
@@ -624,8 +649,8 @@ const state = {
     },
     {
       assetId: 'AST-2026-0004', assetCode: 'EMP-MASTER-DS',
-      assetName: '员工主数据（脱敏）', assetType: 'DATASET',
-      description: '脱敏后的员工主数据集，包含工号、部门、职级、入职时间等非敏感字段，供人力分析和绩效评估使用。',
+      assetName: '员工主数据（脱敏）', assetType: 'DATA_MODEL',
+      description: '脱敏后的员工主数据模型，包含工号、部门、职级、入职时间等非敏感字段，供人力分析和绩效评估使用。',
       assetStatus: 'PUBLISHED', publishedVersionId: 'VER-0004-001',
       sourceApp: 'HR Core', sourceAppCode: 'HR-MASTER',
       tenantId: 'T-ACME', tenantName: 'Acme 科技',
@@ -646,8 +671,8 @@ const state = {
     },
     {
       assetId: 'AST-2026-0006', assetCode: 'SURVEY-FORM-TPL',
-      assetName: '客户满意度调研表单模板', assetType: 'FORM_TEMPLATE',
-      description: 'NPS 客户满意度调研表单模板，含打分题、开放题和满意度分析所需的结构。',
+      assetName: '客户满意度调研局部模板', assetType: 'PARTIAL_TEMPLATE',
+      description: 'NPS 客户满意度调研局部模板，含调研页面片段、评分数据模型绑定与统计脚本。',
       assetStatus: 'DRAFT', publishedVersionId: null,
       sourceApp: 'Form Studio', sourceAppCode: 'FM-STUDIO',
       tenantId: 'T-ACME', tenantName: 'Acme 科技',
@@ -657,8 +682,8 @@ const state = {
     },
     {
       assetId: 'AST-2026-0007', assetCode: 'PROD-CATALOG-DS',
-      assetName: '产品目录与 SKU 映射', assetType: 'DATASET',
-      description: '产品目录主数据与 SKU 多维映射关系数据集，供销售订单、库存管理、电商前台使用。',
+      assetName: '产品目录与 SKU 数据模型', assetType: 'DATA_MODEL',
+      description: '产品目录主数据与 SKU 多维映射关系模型，供销售订单、库存管理、电商前台使用。',
       assetStatus: 'PUBLISHED', publishedVersionId: 'VER-0007-001',
       sourceApp: 'Product CMS', sourceAppCode: 'PRD-CMS',
       tenantId: 'T-ACME', tenantName: 'Acme 科技',
@@ -668,8 +693,8 @@ const state = {
     },
     {
       assetId: 'AST-2026-0008', assetCode: 'LEGACY-RPT-OLD',
-      assetName: '旧版财务报表模板（已归档）', assetType: 'REPORT',
-      description: '历史版本财务报表模板，保留用于审计追溯，不再对外提供。',
+      assetName: '旧版财务报表页（已归档）', assetType: 'PAGE',
+      description: '历史版本财务报表页面，保留用于审计追溯，不再对外提供。',
       assetStatus: 'ARCHIVED', publishedVersionId: 'VER-0008-003',
       sourceApp: 'Legacy BI', sourceAppCode: 'LEGACY-BI',
       tenantId: 'T-ACME', tenantName: 'Acme 科技',
@@ -681,14 +706,14 @@ const state = {
 
   /* AssetVersion（子实体） */
   versions: [
-    { versionId: 'VER-0001-001', assetId: 'AST-2026-0001', versionNumber: 'V1.0', versionStatus: 'FROZEN', snapshotId: 'SNAP-SHA256-0001A', snapshotDigest: '8F3A2C9D7B1E4F5A6C3D8B2E1F4A5C7D9B6E0F3A8C2D5B7E1F4A6C3D8B2E1F0A', snapshotSize: 2485376, snapshotCreatedAt: '2026-09-12 10:24:03', frozenAt: '2026-09-12 10:24:03', createdBy: 'u-wangli', createdAt: '2026-09-12 10:22:15', dependencies: [{ resourceId: 'RES-PROD-001', resourceType: 'DATASET', name: '产品主数据', depType: 'REQUIRED' }] },
-    { versionId: 'VER-0001-002', assetId: 'AST-2026-0001', versionNumber: 'V1.1', versionStatus: 'FROZEN', snapshotId: 'SNAP-SHA256-0001B', snapshotDigest: '2A7D4B9E1C3F6D8A2B4E6F8C0D2B4A6E8F1C3D5B7E9A2F4C6D8B0A2E4F6C8D0A', snapshotSize: 2631168, snapshotCreatedAt: '2026-10-14 11:08:22', frozenAt: '2026-10-14 11:08:22', createdBy: 'u-wangli', createdAt: '2026-10-14 10:00:00', dependencies: [{ resourceId: 'RES-PROD-001', resourceType: 'DATASET', name: '产品主数据', depType: 'REQUIRED' }, { resourceId: 'RES-USER-042', resourceType: 'APPLICATION', name: '客户标签服务', depType: 'OPTIONAL' }] },
+    { versionId: 'VER-0001-001', assetId: 'AST-2026-0001', versionNumber: 'V1.0', versionStatus: 'FROZEN', snapshotId: 'SNAP-SHA256-0001A', snapshotDigest: '8F3A2C9D7B1E4F5A6C3D8B2E1F4A5C7D9B6E0F3A8C2D5B7E1F4A6C3D8B2E1F0A', snapshotSize: 2485376, snapshotCreatedAt: '2026-09-12 10:24:03', frozenAt: '2026-09-12 10:24:03', createdBy: 'u-wangli', createdAt: '2026-09-12 10:22:15', dependencies: [{ resourceId: 'RES-PROD-001', resourceType: 'DATA_MODEL', name: '产品主数据', depType: 'REQUIRED' }] },
+    { versionId: 'VER-0001-002', assetId: 'AST-2026-0001', versionNumber: 'V1.1', versionStatus: 'FROZEN', snapshotId: 'SNAP-SHA256-0001B', snapshotDigest: '2A7D4B9E1C3F6D8A2B4E6F8C0D2B4A6E8F1C3D5B7E9A2F4C6D8B0A2E4F6C8D0A', snapshotSize: 2631168, snapshotCreatedAt: '2026-10-14 11:08:22', frozenAt: '2026-10-14 11:08:22', createdBy: 'u-wangli', createdAt: '2026-10-14 10:00:00', dependencies: [{ resourceId: 'RES-PROD-001', resourceType: 'DATA_MODEL', name: '产品主数据', depType: 'REQUIRED' }, { resourceId: 'RES-USER-042', resourceType: 'SCRIPT', name: '客户标签计算脚本', depType: 'OPTIONAL' }] },
     { versionId: 'VER-0002-001', assetId: 'AST-2026-0002', versionNumber: 'V1.0', versionStatus: 'FROZEN', snapshotId: 'SNAP-SHA256-0002A', snapshotDigest: '7B4E1D9C6F2A8E3B5D7F9A1C3E5B7D9F1A3C5E7B9D1F3A5C7E9B1D3F5A7C9E1B', snapshotSize: 524288, snapshotCreatedAt: '2026-08-25 09:12:40', frozenAt: '2026-08-25 09:12:40', createdBy: 'u-wangli', createdAt: '2026-08-25 09:10:00', dependencies: [] },
     { versionId: 'VER-0003-001', assetId: 'AST-2026-0003', versionNumber: 'V0.1', versionStatus: 'DRAFT', snapshotId: null, snapshotDigest: null, snapshotSize: null, snapshotCreatedAt: null, frozenAt: null, createdBy: 'u-chenhao', createdAt: '2026-10-08 11:33:42', dependencies: [] },
     { versionId: 'VER-0003-002', assetId: 'AST-2026-0003', versionNumber: 'V0.2', versionStatus: 'DRAFT', snapshotId: null, snapshotDigest: null, snapshotSize: null, snapshotCreatedAt: null, frozenAt: null, createdBy: 'u-chenhao', createdAt: '2026-10-15 16:10:00', dependencies: [] },
     { versionId: 'VER-0004-001', assetId: 'AST-2026-0004', versionNumber: 'V1.0', versionStatus: 'FROZEN', snapshotId: 'SNAP-SHA256-0004A', snapshotDigest: '9F2E7D4B1C6A3D8E5F2B7C9A1D4E6F8B3C5D7E9F1A2C4E6B8D0F3A5C7E9B1D2F', snapshotSize: 1324576, snapshotCreatedAt: '2026-07-01 08:01:12', frozenAt: '2026-07-01 08:01:12', createdBy: 'u-limin', createdAt: '2026-07-01 08:00:00', dependencies: [] },
-    { versionId: 'VER-0005-001', assetId: 'AST-2026-0005', versionNumber: 'V1.0', versionStatus: 'FROZEN', snapshotId: 'SNAP-SHA256-0005A', snapshotDigest: '1C3E5B7D9F1A3C5E7B9D1F3A5C7E9B1D3F5A7C9E1B3D5F7A9C1E3B5D7F9A1C3E', snapshotSize: 327680, snapshotCreatedAt: '2026-05-14 15:24:00', frozenAt: '2026-05-14 15:24:00', createdBy: 'u-chenhao', createdAt: '2026-05-14 15:22:10', dependencies: [{ resourceId: 'RES-ERP-011', resourceType: 'APPLICATION', name: 'ERP 业务接口', depType: 'REQUIRED' }] },
-    { versionId: 'VER-0005-002', assetId: 'AST-2026-0005', versionNumber: 'V1.1', versionStatus: 'FROZEN', snapshotId: 'SNAP-SHA256-0005B', snapshotDigest: '4A6C8E0B2D4F6A8C0E2B4D6F8A0C2E4B6D8F0A2C4E6B8D0F2A4C6E8B0D2F4A6C', snapshotSize: 345678, snapshotCreatedAt: '2026-09-18 10:02:50', frozenAt: '2026-09-18 10:02:50', createdBy: 'u-chenhao', createdAt: '2026-09-18 10:00:00', dependencies: [{ resourceId: 'RES-ERP-011', resourceType: 'APPLICATION', name: 'ERP 业务接口', depType: 'REQUIRED' }] },
+    { versionId: 'VER-0005-001', assetId: 'AST-2026-0005', versionNumber: 'V1.0', versionStatus: 'FROZEN', snapshotId: 'SNAP-SHA256-0005A', snapshotDigest: '1C3E5B7D9F1A3C5E7B9D1F3A5C7E9B1D3F5A7C9E1B3D5F7A9C1E3B5D7F9A1C3E', snapshotSize: 327680, snapshotCreatedAt: '2026-05-14 15:24:00', frozenAt: '2026-05-14 15:24:00', createdBy: 'u-chenhao', createdAt: '2026-05-14 15:22:10', dependencies: [{ resourceId: 'RES-ERP-011', resourceType: 'CONNECTOR', name: 'ERP 业务接口', depType: 'REQUIRED' }] },
+    { versionId: 'VER-0005-002', assetId: 'AST-2026-0005', versionNumber: 'V1.1', versionStatus: 'FROZEN', snapshotId: 'SNAP-SHA256-0005B', snapshotDigest: '4A6C8E0B2D4F6A8C0E2B4D6F8A0C2E4B6D8F0A2C4E6B8D0F2A4C6E8B0D2F4A6C', snapshotSize: 345678, snapshotCreatedAt: '2026-09-18 10:02:50', frozenAt: '2026-09-18 10:02:50', createdBy: 'u-chenhao', createdAt: '2026-09-18 10:00:00', dependencies: [{ resourceId: 'RES-ERP-011', resourceType: 'CONNECTOR', name: 'ERP 业务接口', depType: 'REQUIRED' }] },
     { versionId: 'VER-0006-001', assetId: 'AST-2026-0006', versionNumber: 'V0.1', versionStatus: 'DRAFT', snapshotId: null, snapshotDigest: null, snapshotSize: null, snapshotCreatedAt: null, frozenAt: null, createdBy: 'u-wangli', createdAt: '2026-10-20 14:05:00', dependencies: [] },
     { versionId: 'VER-0007-001', assetId: 'AST-2026-0007', versionNumber: 'V1.0', versionStatus: 'FROZEN', snapshotId: 'SNAP-SHA256-0007A', snapshotDigest: '3D5E7F9A1C3E5B7D9F1A3C5E7B9D1F3A5C7E9B1D3F5A7C9E1B3D5F7A9C1E3B5D', snapshotSize: 8543232, snapshotCreatedAt: '2026-04-10 10:01:05', frozenAt: '2026-04-10 10:01:05', createdBy: 'u-limin', createdAt: '2026-04-10 10:00:00', dependencies: [] },
     { versionId: 'VER-0008-001', assetId: 'AST-2026-0008', versionNumber: 'V1.0', versionStatus: 'FROZEN', snapshotId: 'SNAP-SHA256-0008A', snapshotDigest: '5B7D9F1A3C5E7B9D1F3A5C7E9B1D3F5A7C9E1B3D5F7A9C1E3B5D7F9A1C3E5B7D', snapshotSize: 1048576, snapshotCreatedAt: '2025-11-20 09:01:10', frozenAt: '2025-11-20 09:01:10', createdBy: 'u-zhangwei', createdAt: '2025-11-20 09:00:00', dependencies: [] },
@@ -698,14 +723,14 @@ const state = {
 
   /* AssetSubmission（子实体） */
   submissions: [
-    { submissionId: 'SUB-2026-0128', assetId: 'AST-2026-0001', versionId: 'VER-0001-002', submissionStatus: 'APPROVED', submittedBy: 'u-wangli', submittedByName: '王丽', submittedAt: '2026-10-14 11:10:55', workflowInstanceId: 'WF-APPROVAL-98231', approvalResult: 'APPROVED', approvalComment: '内容完整，依赖关系清晰，同意发布。', approvalCompletedAt: '2026-10-14 15:33:00', approvalBy: 'u-liuying', approvalByName: '刘颖', publicationStatus: 'SUCCESS', publicationMessage: '资产发布成功，目录已更新。' },
-    { submissionId: 'SUB-2026-0129', assetId: 'AST-2026-0002', versionId: 'VER-0002-001', submissionStatus: 'APPROVED', submittedBy: 'u-wangli', submittedByName: '王丽', submittedAt: '2026-08-25 09:13:00', workflowInstanceId: 'WF-APPROVAL-87654', approvalResult: 'APPROVED', approvalComment: '流程设计规范，无阻断问题。', approvalCompletedAt: '2026-08-26 10:20:00', approvalBy: 'u-liuying', approvalByName: '刘颖', publicationStatus: 'SUCCESS', publicationMessage: '发布成功' },
-    { submissionId: 'SUB-2026-0130', assetId: 'AST-2026-0003', versionId: 'VER-0003-001', submissionStatus: 'RETURNED', submittedBy: 'u-chenhao', submittedByName: '陈浩', submittedAt: '2026-10-09 10:15:33', workflowInstanceId: 'WF-APPROVAL-10111', approvalResult: 'RETURNED', approvalComment: '报表依赖的数据模型字段缺失，请补充后重新校验并提交。', approvalCompletedAt: '2026-10-10 16:42:00', approvalBy: 'u-liuying', approvalByName: '刘颖', publicationStatus: 'NOT_STARTED', publicationMessage: null },
-    { submissionId: 'SUB-2026-0131', assetId: 'AST-2026-0004', versionId: 'VER-0004-001', submissionStatus: 'APPROVED', submittedBy: 'u-limin', submittedByName: '李敏', submittedAt: '2026-07-01 08:01:20', workflowInstanceId: 'WF-APPROVAL-65432', approvalResult: 'APPROVED', approvalComment: '校验全部通过。', approvalCompletedAt: '2026-07-01 10:11:00', approvalBy: 'u-liuying', approvalByName: '刘颖', publicationStatus: 'SUCCESS', publicationMessage: '发布成功' },
+    { submissionId: 'SUB-2026-0128', assetId: 'AST-2026-0001', versionId: 'VER-0001-002', submissionStatus: 'APPROVED', submittedBy: 'u-wangli', submittedByName: '王丽', submittedAt: '2026-10-14 11:10:55', workflowInstanceId: 'WF-APPROVAL-98231', approvalResult: 'APPROVED', approvalComment: '内容完整，依赖关系清晰，同意固化。', approvalCompletedAt: '2026-10-14 15:33:00', approvalBy: 'u-liuying', approvalByName: '刘颖', publicationStatus: 'SUCCESS', publicationMessage: '审批通过，版本已固化并进入平台目录。' },
+    { submissionId: 'SUB-2026-0129', assetId: 'AST-2026-0002', versionId: 'VER-0002-001', submissionStatus: 'APPROVED', submittedBy: 'u-wangli', submittedByName: '王丽', submittedAt: '2026-08-25 09:13:00', workflowInstanceId: 'WF-APPROVAL-87654', approvalResult: 'APPROVED', approvalComment: '流程设计规范，无阻断问题。', approvalCompletedAt: '2026-08-26 10:20:00', approvalBy: 'u-liuying', approvalByName: '刘颖', publicationStatus: 'SUCCESS', publicationMessage: '审批通过，版本已固化并进入平台目录。' },
+    { submissionId: 'SUB-2026-0130', assetId: 'AST-2026-0003', versionId: 'VER-0003-001', submissionStatus: 'RETURNED', submittedBy: 'u-chenhao', submittedByName: '陈浩', submittedAt: '2026-10-09 10:15:33', workflowInstanceId: 'WF-APPROVAL-10111', approvalResult: 'RETURNED', approvalComment: '页面依赖的数据模型字段缺失，请补充后重新校验并提交。', approvalCompletedAt: '2026-10-10 16:42:00', approvalBy: 'u-liuying', approvalByName: '刘颖', publicationStatus: 'NOT_STARTED', publicationMessage: null },
+    { submissionId: 'SUB-2026-0131', assetId: 'AST-2026-0004', versionId: 'VER-0004-001', submissionStatus: 'APPROVED', submittedBy: 'u-limin', submittedByName: '李敏', submittedAt: '2026-07-01 08:01:20', workflowInstanceId: 'WF-APPROVAL-65432', approvalResult: 'APPROVED', approvalComment: '校验全部通过。', approvalCompletedAt: '2026-07-01 10:11:00', approvalBy: 'u-liuying', approvalByName: '刘颖', publicationStatus: 'SUCCESS', publicationMessage: '审批通过，版本已固化并进入平台目录。' },
     { submissionId: 'SUB-2026-0132', assetId: 'AST-2026-0005', versionId: 'VER-0005-002', submissionStatus: 'REJECTED', submittedBy: 'u-chenhao', submittedByName: '陈浩', submittedAt: '2026-09-18 10:05:00', workflowInstanceId: 'WF-APPROVAL-33333', approvalResult: 'REJECTED', approvalComment: '目标 ERP 接口已废弃，请先升级 Provider 版本或更换依赖资源。', approvalCompletedAt: '2026-09-20 09:18:00', approvalBy: 'u-liuying', approvalByName: '刘颖', publicationStatus: 'NOT_STARTED', publicationMessage: null },
-    { submissionId: 'SUB-2026-0133', assetId: 'AST-2026-0005', versionId: 'VER-0005-002', submissionStatus: 'APPROVED', submittedBy: 'u-chenhao', submittedByName: '陈浩', submittedAt: '2026-10-12 14:00:00', workflowInstanceId: 'WF-APPROVAL-55555', approvalResult: 'APPROVED', approvalComment: null, approvalCompletedAt: '2026-10-12 15:22:00', approvalBy: 'u-liuying', approvalByName: '刘颖', publicationStatus: 'FAILED', publicationMessage: '发布时目标 ERP 连接器服务超时，请检查 Provider 可用性。' },
+    { submissionId: 'SUB-2026-0133', assetId: 'AST-2026-0005', versionId: 'VER-0005-002', submissionStatus: 'APPROVED', submittedBy: 'u-chenhao', submittedByName: '陈浩', submittedAt: '2026-10-12 14:00:00', workflowInstanceId: 'WF-APPROVAL-55555', approvalResult: 'APPROVED', approvalComment: null, approvalCompletedAt: '2026-10-12 15:22:00', approvalBy: 'u-liuying', approvalByName: '刘颖', publicationStatus: 'SUCCESS', publicationMessage: '审批通过，版本已固化并进入平台目录。' },
     { submissionId: 'SUB-2026-0134', assetId: 'AST-2026-0006', versionId: 'VER-0006-001', submissionStatus: 'PENDING_APPROVAL', submittedBy: 'u-wangli', submittedByName: '王丽', submittedAt: '2026-10-20 16:22:40', workflowInstanceId: 'WF-APPROVAL-99887', approvalResult: null, approvalComment: null, approvalCompletedAt: null, approvalBy: null, approvalByName: null, publicationStatus: 'NOT_STARTED', publicationMessage: null },
-    { submissionId: 'SUB-2026-0135', assetId: 'AST-2026-0007', versionId: 'VER-0007-001', submissionStatus: 'APPROVED', submittedBy: 'u-limin', submittedByName: '李敏', submittedAt: '2026-04-10 10:02:00', workflowInstanceId: 'WF-APPROVAL-24680', approvalResult: 'APPROVED', approvalComment: null, approvalCompletedAt: '2026-04-10 14:00:00', approvalBy: 'u-liuying', approvalByName: '刘颖', publicationStatus: 'SUCCESS', publicationMessage: '发布成功' }
+    { submissionId: 'SUB-2026-0135', assetId: 'AST-2026-0007', versionId: 'VER-0007-001', submissionStatus: 'APPROVED', submittedBy: 'u-limin', submittedByName: '李敏', submittedAt: '2026-04-10 10:02:00', workflowInstanceId: 'WF-APPROVAL-24680', approvalResult: 'APPROVED', approvalComment: null, approvalCompletedAt: '2026-04-10 14:00:00', approvalBy: 'u-liuying', approvalByName: '刘颖', publicationStatus: 'SUCCESS', publicationMessage: '审批通过，版本已固化并进入平台目录。' }
   ],
 
   /* ValidationResult：checkerType -> ValidationResult */
@@ -713,33 +738,38 @@ const state = {
     'VER-0001-002': [
       { checkerType: 'RESOURCE_PRESENCE',  passed: true,  checkedAt: '2026-10-14 11:08:25', issues: [] },
       { checkerType: 'DEPENDENCY_ANALYSIS',passed: true,  checkedAt: '2026-10-14 11:08:30', issues: [] },
+      { checkerType: 'TYPE_REGISTRABLE',   passed: true,  checkedAt: '2026-10-14 11:08:37', issues: [] },
       { checkerType: 'CONTRACT_COMPAT',    passed: true,  checkedAt: '2026-10-14 11:08:38', issues: [] },
       { checkerType: 'SECURITY_SCAN',      passed: true,  checkedAt: '2026-10-14 11:08:45', issues: [] }
     ],
     'VER-0002-001': [
       { checkerType: 'RESOURCE_PRESENCE',  passed: true,  checkedAt: '2026-08-25 09:12:42', issues: [] },
       { checkerType: 'DEPENDENCY_ANALYSIS',passed: true,  checkedAt: '2026-08-25 09:12:45', issues: [] },
+      { checkerType: 'TYPE_REGISTRABLE',   passed: true,  checkedAt: '2026-08-25 09:12:49', issues: [] },
       { checkerType: 'CONTRACT_COMPAT',    passed: true,  checkedAt: '2026-08-25 09:12:50', issues: [] },
       { checkerType: 'SECURITY_SCAN',      passed: true,  checkedAt: '2026-08-25 09:12:55', issues: [] }
     ],
     'VER-0003-001': [
       { checkerType: 'RESOURCE_PRESENCE',  passed: true,  checkedAt: '2026-10-09 09:58:00', issues: [] },
       { checkerType: 'DEPENDENCY_ANALYSIS',passed: false, checkedAt: '2026-10-09 09:58:15', issues: [
-        { issueCode: 'DEPENDENCY_NOT_FOUND', description: '依赖的数据集 RES-DATA-082 在系统中不存在', severity: 'ERROR', resolutionStatus: 'OPEN', resourceRef: 'RES-DATA-082', resolutionSuggestion: '检查资源标识是否正确，或联系资源创建人确认' },
-        { issueCode: 'DEPENDENCY_NOT_FOUND', description: '依赖的报表模板 RES-TPL-119 已过期归档', severity: 'ERROR', resolutionStatus: 'OPEN', resourceRef: 'RES-TPL-119', resolutionSuggestion: '寻找替代模板或联系资产管理员重新激活' }
+        { issueCode: 'DEPENDENCY_NOT_FOUND', description: '依赖的数据模型 RES-DATA-082 在系统中不存在', severity: 'ERROR', resolutionStatus: 'OPEN', resourceRef: 'RES-DATA-082', resolutionSuggestion: '检查资源标识是否正确，或联系资源创建人确认' },
+        { issueCode: 'DEPENDENCY_NOT_FOUND', description: '依赖的页面 RES-TPL-119 已过期归档', severity: 'ERROR', resolutionStatus: 'OPEN', resourceRef: 'RES-TPL-119', resolutionSuggestion: '寻找替代模板或联系资产管理员重新激活' }
       ]},
+      { checkerType: 'TYPE_REGISTRABLE',   passed: true,  checkedAt: '2026-10-09 09:58:19', issues: [] },
       { checkerType: 'CONTRACT_COMPAT',    passed: true,  checkedAt: '2026-10-09 09:58:20', issues: [] },
       { checkerType: 'SECURITY_SCAN',      passed: true,  checkedAt: '2026-10-09 09:58:25', issues: [] }
     ],
     'VER-0004-001': [
       { checkerType: 'RESOURCE_PRESENCE',  passed: true,  checkedAt: '2026-07-01 08:01:14', issues: [] },
       { checkerType: 'DEPENDENCY_ANALYSIS',passed: true,  checkedAt: '2026-07-01 08:01:16', issues: [] },
+      { checkerType: 'TYPE_REGISTRABLE',   passed: true,  checkedAt: '2026-07-01 08:01:17', issues: [] },
       { checkerType: 'CONTRACT_COMPAT',    passed: true,  checkedAt: '2026-07-01 08:01:18', issues: [] },
       { checkerType: 'SECURITY_SCAN',      passed: true,  checkedAt: '2026-07-01 08:01:20', issues: [] }
     ],
     'VER-0005-002': [
       { checkerType: 'RESOURCE_PRESENCE',  passed: true,  checkedAt: '2026-09-18 10:03:00', issues: [] },
       { checkerType: 'DEPENDENCY_ANALYSIS',passed: true,  checkedAt: '2026-09-18 10:03:05', issues: [] },
+      { checkerType: 'TYPE_REGISTRABLE',   passed: true,  checkedAt: '2026-09-18 10:03:09', issues: [] },
       { checkerType: 'CONTRACT_COMPAT',    passed: false, checkedAt: '2026-09-18 10:03:10', issues: [
         { issueCode: 'PROVIDER_VERSION_OUTDATED', description: '依赖的 ERP Provider 版本过低，当前契约不兼容', severity: 'WARNING', resolutionStatus: 'OPEN', resourceRef: 'RES-ERP-011', resolutionSuggestion: '升级 Provider 到 3.2.0 或以上版本' },
         { issueCode: 'API_DEPRECATED', description: 'RES-ERP-011 使用的 API /api/v1/orders 已被标记为废弃', severity: 'WARNING', resolutionStatus: 'OPEN', resourceRef: 'RES-ERP-011', resolutionSuggestion: '切换到 /api/v2/orders' }
@@ -749,12 +779,14 @@ const state = {
     'VER-0006-001': [
       { checkerType: 'RESOURCE_PRESENCE',  passed: true,  checkedAt: '2026-10-20 16:10:00', issues: [] },
       { checkerType: 'DEPENDENCY_ANALYSIS',passed: true,  checkedAt: '2026-10-20 16:10:05', issues: [] },
+      { checkerType: 'TYPE_REGISTRABLE',   passed: true,  checkedAt: '2026-10-20 16:10:09', issues: [] },
       { checkerType: 'CONTRACT_COMPAT',    passed: true,  checkedAt: '2026-10-20 16:10:10', issues: [] },
       { checkerType: 'SECURITY_SCAN',      passed: true,  checkedAt: '2026-10-20 16:10:15', issues: [] }
     ],
     'VER-0007-001': [
       { checkerType: 'RESOURCE_PRESENCE',  passed: true,  checkedAt: '2026-04-10 10:01:06', issues: [] },
       { checkerType: 'DEPENDENCY_ANALYSIS',passed: true,  checkedAt: '2026-04-10 10:01:08', issues: [] },
+      { checkerType: 'TYPE_REGISTRABLE',   passed: true,  checkedAt: '2026-04-10 10:01:09', issues: [] },
       { checkerType: 'CONTRACT_COMPAT',    passed: true,  checkedAt: '2026-04-10 10:01:10', issues: [] },
       { checkerType: 'SECURITY_SCAN',      passed: true,  checkedAt: '2026-04-10 10:01:12', issues: [] }
     ]
@@ -765,32 +797,82 @@ const state = {
     { importId: 'IMP-2026-0044', assetId: 'AST-2026-0001', versionId: 'VER-0001-001', targetApp: 'Sales Console', targetAppCode: 'SALES-CON', packageId: 'PKG-0001-002-20261014', importStatus: 'SUCCESS', importMessage: '应用模块导入成功，已部署至生产环境。', startedAt: '2026-10-15 09:10:00', completedAt: '2026-10-15 09:12:33', operator: 'u-zhaoyang', operatorName: '赵阳' },
     { importId: 'IMP-2026-0045', assetId: 'AST-2026-0002', versionId: 'VER-0002-001', targetApp: 'Procurement Portal', targetAppCode: 'PROC-PTL', packageId: 'PKG-0002-001-20260826', importStatus: 'SUCCESS', importMessage: '工作流定义已注册并启用。', startedAt: '2026-09-02 16:30:00', completedAt: '2026-09-02 16:31:10', operator: 'u-zhaoyang', operatorName: '赵阳' },
     { importId: 'IMP-2026-0046', assetId: 'AST-2026-0001', versionId: 'VER-0001-002', targetApp: 'CRM Lite (Test)', targetAppCode: 'CRM-LITE-T', packageId: 'PKG-0001-002-20261014', importStatus: 'FAILED', importMessage: '目标环境版本过低，不支持客户标签依赖（需要 v3.0+）。', startedAt: '2026-10-16 10:02:00', completedAt: '2026-10-16 10:02:45', operator: 'u-zhaoyang', operatorName: '赵阳' },
-    { importId: 'IMP-2026-0047', assetId: 'AST-2026-0007', versionId: 'VER-0007-001', targetApp: 'E-commerce Frontend', targetAppCode: 'EC-FE', packageId: 'PKG-0007-001-20260410', importStatus: 'SUCCESS', importMessage: '数据集同步任务已创建并完成首次全量同步。', startedAt: '2026-04-12 08:00:00', completedAt: '2026-04-12 08:03:20', operator: 'u-zhaoyang', operatorName: '赵阳' },
+    { importId: 'IMP-2026-0047', assetId: 'AST-2026-0007', versionId: 'VER-0007-001', targetApp: 'E-commerce Frontend', targetAppCode: 'EC-FE', packageId: 'PKG-0007-001-20260410', importStatus: 'SUCCESS', importMessage: '数据模型同步任务已创建并完成首次全量同步。', startedAt: '2026-04-12 08:00:00', completedAt: '2026-04-12 08:03:20', operator: 'u-zhaoyang', operatorName: '赵阳' },
     { importId: 'IMP-2026-0048', assetId: 'AST-2026-0004', versionId: 'VER-0004-001', targetApp: 'Analytics Platform', targetAppCode: 'ANA-PLT', packageId: 'PKG-0004-001-20260701', importStatus: 'SUCCESS', importMessage: null, startedAt: '2026-07-02 14:10:00', completedAt: '2026-07-02 14:10:55', operator: 'u-zhaoyang', operatorName: '赵阳' }
   ],
 
   /* 操作历史 */
   activities: [
-    { id: 'ACT-0001', time: '2026-10-20 16:22:40', actor: '王丽', actorId: 'u-wangli', type: 'SUBMIT', target: 'AST-2026-0006', targetName: '客户满意度调研表单模板', targetType: 'ASSET', status: 'PENDING', message: '提交 V0.1 版本，等待审批' },
-    { id: 'ACT-0002', time: '2026-10-20 14:05:00', actor: '王丽', actorId: 'u-wangli', type: 'CREATE_VERSION', target: 'AST-2026-0006', targetName: '客户满意度调研表单模板', targetType: 'ASSET', status: 'DONE', message: '创建资产及初始版本 V0.1' },
-    { id: 'ACT-0003', time: '2026-10-18 09:14:50', actor: '陈浩', actorId: 'u-chenhao', type: 'UPDATE_ASSET', target: 'AST-2026-0003', targetName: 'Q3 财务经营分析报表', targetType: 'ASSET', status: 'DONE', message: '更新资产描述' },
-    { id: 'ACT-0004', time: '2026-10-16 10:02:45', actor: '赵阳', actorId: 'u-zhaoyang', type: 'IMPORT', target: 'AST-2026-0001 / CRM Lite (Test)', targetName: 'CRM 客户 360 视图应用 → CRM Lite (Test)', targetType: 'IMPORT', status: 'FAIL', message: '导入失败：目标环境版本过低' },
-    { id: 'ACT-0005', time: '2026-10-15 14:08:33', actor: '王丽', actorId: 'u-wangli', type: 'PUBLISH', target: 'AST-2026-0001', targetName: 'CRM 客户 360 视图应用 V1.1', targetType: 'ASSET', status: 'DONE', message: '资产发布成功' },
-    { id: 'ACT-0006', time: '2026-10-14 15:33:00', actor: '刘颖', actorId: 'u-liuying', type: 'APPROVE', target: 'SUB-2026-0128', targetName: 'CRM 客户 360 视图应用 V1.1 投稿', targetType: 'SUBMISSION', status: 'DONE', message: '审批通过' },
+    { id: 'ACT-0001', time: '2026-10-20 16:22:40', actor: '王丽', actorId: 'u-wangli', type: 'SUBMIT', target: 'AST-2026-0006', targetName: '客户满意度调研局部模板', targetType: 'ASSET', status: 'PENDING', message: '提交 V0.1 版本，等待审批' },
+    { id: 'ACT-0002', time: '2026-10-20 14:05:00', actor: '王丽', actorId: 'u-wangli', type: 'CREATE_VERSION', target: 'AST-2026-0006', targetName: '客户满意度调研局部模板', targetType: 'ASSET', status: 'DONE', message: '创建资产及初始版本 V0.1' },
+    { id: 'ACT-0003', time: '2026-10-18 09:14:50', actor: '陈浩', actorId: 'u-chenhao', type: 'UPDATE_ASSET', target: 'AST-2026-0003', targetName: 'Q3 财务经营分析页', targetType: 'ASSET', status: 'DONE', message: '更新资产描述' },
+    { id: 'ACT-0004', time: '2026-10-16 10:02:45', actor: '赵阳', actorId: 'u-zhaoyang', type: 'IMPORT', target: 'AST-2026-0001 / CRM Lite (Test)', targetName: 'CRM 客户 360 详情页 → CRM Lite (Test)', targetType: 'IMPORT', status: 'FAIL', message: '导入失败：目标环境版本过低' },
+    { id: 'ACT-0005', time: '2026-10-15 14:08:33', actor: '王丽', actorId: 'u-wangli', type: 'PUBLISH', target: 'AST-2026-0001', targetName: 'CRM 客户 360 详情页 V1.1', targetType: 'ASSET', status: 'DONE', message: '审批通过，版本已固化' },
+    { id: 'ACT-0006', time: '2026-10-14 15:33:00', actor: '刘颖', actorId: 'u-liuying', type: 'APPROVE', target: 'SUB-2026-0128', targetName: 'CRM 客户 360 详情页 V1.1 投稿', targetType: 'SUBMISSION', status: 'DONE', message: '审批通过' },
     { id: 'ACT-0007', time: '2026-10-12 14:00:00', actor: '陈浩', actorId: 'u-chenhao', type: 'SUBMIT', target: 'AST-2026-0005', targetName: 'ERP 业务数据同步连接器 V1.1', targetType: 'ASSET', status: 'DONE', message: '重新发起投稿' },
     { id: 'ACT-0008', time: '2026-10-12 10:30:00', actor: '资产管理员', actorId: 'u-admin', type: 'DISABLE', target: 'AST-2026-0005', targetName: 'ERP 业务数据同步连接器', targetType: 'ASSET', status: 'DONE', message: '因 Provider 异常暂时禁用' },
-    { id: 'ACT-0009', time: '2026-10-10 16:42:00', actor: '刘颖', actorId: 'u-liuying', type: 'RETURN', target: 'SUB-2026-0130', targetName: 'Q3 财务经营分析报表 V0.1', targetType: 'SUBMISSION', status: 'DONE', message: '退回：报表依赖的数据模型字段缺失' },
-    { id: 'ACT-0010', time: '2026-09-01 17:00:00', actor: '资产管理员', actorId: 'u-admin', type: 'ARCHIVE', target: 'AST-2026-0008', targetName: '旧版财务报表模板', targetType: 'ASSET', status: 'DONE', message: '归档' }
+    { id: 'ACT-0009', time: '2026-10-10 16:42:00', actor: '刘颖', actorId: 'u-liuying', type: 'RETURN', target: 'SUB-2026-0130', targetName: 'Q3 财务经营分析页 V0.1', targetType: 'SUBMISSION', status: 'DONE', message: '退回：页面依赖的数据模型字段缺失' },
+    { id: 'ACT-0010', time: '2026-09-01 17:00:00', actor: '资产管理员', actorId: 'u-admin', type: 'ARCHIVE', target: 'AST-2026-0008', targetName: '旧版财务报表页', targetType: 'ASSET', status: 'DONE', message: '归档' }
   ],
 
-  /* 模拟可登记的平台原生资源 */
-  platformResources: [
-    { resourceId: 'RES-PROD-001', resourceName: '产品主数据', resourceType: 'DATASET', sourceApp: 'Product CMS', sourceAppCode: 'PRD-CMS', owner: 'u-limin', ownerName: '李敏', updatedAt: '2026-10-10 09:00:00', size: 54321984 },
-    { resourceId: 'RES-CUST-042', resourceName: '客户标签服务', resourceType: 'APPLICATION', sourceApp: 'CRM Platform', sourceAppCode: 'CRM-SAAS', owner: 'u-wangli', ownerName: '王丽', updatedAt: '2026-10-12 11:30:00', size: 18432000 },
-    { resourceId: 'RES-WF-023', resourceName: '请假审批流程 v3', resourceType: 'WORKFLOW', sourceApp: 'BPM Engine', sourceAppCode: 'BPM-CORE', owner: 'u-liuying', ownerName: '刘颖', updatedAt: '2026-10-18 14:20:00', size: 245760 },
-    { resourceId: 'RES-RPT-087', resourceName: '销售漏斗分析看板', resourceType: 'REPORT', sourceApp: 'BI Center', sourceAppCode: 'BI-MAIN', owner: 'u-chenhao', ownerName: '陈浩', updatedAt: '2026-10-19 16:00:00', size: 4096000 },
-    { resourceId: 'RES-FM-055', resourceName: '离职交接表单', resourceType: 'FORM_TEMPLATE', sourceApp: 'Form Studio', sourceAppCode: 'FM-STUDIO', owner: 'u-zhangwei', ownerName: '张伟', updatedAt: '2026-10-11 10:00:00', size: 122880 },
-    { resourceId: 'RES-ERP-011', resourceName: 'ERP 业务接口 v2', resourceType: 'CONNECTOR', sourceApp: 'Integration Hub', sourceAppCode: 'INT-HUB', owner: 'u-chenhao', ownerName: '陈浩', updatedAt: '2026-10-05 08:00:00', size: 1048576 }
+  /* 模拟：当前租户（Acme 科技）下的应用及其可登记资源 */
+  tenantApps: [
+    {
+      appId: 'APP-CRM', appName: 'CRM Platform', appCode: 'CRM-SAAS',
+      provider: 'CRM Provider v2.4', ownerName: '王丽', updatedAt: '2026-10-20 09:30:00',
+      resources: [
+        { resourceId: 'RES-CRM-P01', resourceName: '客户 360 详情页', resourceType: 'PAGE', size: 823000, ownerName: '王丽', updatedAt: '2026-10-20 09:30:00',
+          dependsOn: ['RES-CRM-M01', 'RES-CRM-S01'] },
+        { resourceId: 'RES-CRM-P02', resourceName: '客户列表页', resourceType: 'PAGE', size: 412000, ownerName: '王丽', updatedAt: '2026-10-18 15:20:00',
+          dependsOn: ['RES-CRM-M01'] },
+        { resourceId: 'RES-CRM-M01', resourceName: '客户主数据模型', resourceType: 'DATA_MODEL', size: 156000, ownerName: '李敏', updatedAt: '2026-10-19 11:00:00',
+          dependsOn: ['RES-CRM-C01'] },
+        { resourceId: 'RES-CRM-M02', resourceName: '客户交互记录模型', resourceType: 'DATA_MODEL', size: 98700, ownerName: '李敏', updatedAt: '2026-10-17 09:40:00',
+          dependsOn: ['RES-CRM-C01'] },
+        { resourceId: 'RES-CRM-S01', resourceName: '客户去重校验脚本', resourceType: 'SCRIPT', size: 24500, ownerName: '陈浩', updatedAt: '2026-10-16 16:10:00',
+          dependsOn: ['RES-CRM-M01'] },
+        { resourceId: 'RES-CRM-C01', resourceName: '客户数据同步连接器', resourceType: 'CONNECTOR', size: 1048576, ownerName: '陈浩', updatedAt: '2026-10-12 10:00:00', dependsOn: [] },
+        { resourceId: 'RES-CRM-T01', resourceName: '客户卡片组件模板', resourceType: 'PARTIAL_TEMPLATE', size: 268000, ownerName: '王丽', updatedAt: '2026-10-20 08:50:00',
+          dependsOn: ['RES-CRM-M01', 'RES-CRM-S01'],
+          contents: ['页面片段：客户卡片布局', '数据模型绑定：客户主数据模型（只读字段映射）', '脚本钩子：客户去重校验脚本（提交前触发）'] }
+      ]
+    },
+    {
+      appId: 'APP-SAL', appName: '销售管理 Sales Cloud', appCode: 'SALES-CLD',
+      provider: 'Sales Provider v1.9', ownerName: '刘颖', updatedAt: '2026-10-19 14:00:00',
+      resources: [
+        { resourceId: 'RES-SAL-P01', resourceName: '订单列表页', resourceType: 'PAGE', size: 507000, ownerName: '刘颖', updatedAt: '2026-10-19 14:00:00',
+          dependsOn: ['RES-SAL-M01', 'RES-SAL-S01'] },
+        { resourceId: 'RES-SAL-P02', resourceName: '订单审批详情页', resourceType: 'PAGE', size: 634000, ownerName: '刘颖', updatedAt: '2026-10-19 13:30:00',
+          dependsOn: ['RES-SAL-M01', 'RES-SAL-S01'] },
+        { resourceId: 'RES-SAL-M01', resourceName: '订单主数据模型', resourceType: 'DATA_MODEL', size: 187000, ownerName: '张伟', updatedAt: '2026-10-15 10:20:00',
+          dependsOn: ['RES-SAL-C01'] },
+        { resourceId: 'RES-SAL-S01', resourceName: '订单金额校验脚本', resourceType: 'SCRIPT', size: 31200, ownerName: '张伟', updatedAt: '2026-10-14 17:00:00',
+          dependsOn: ['RES-SAL-M01'] },
+        { resourceId: 'RES-SAL-C01', resourceName: '支付网关连接器', resourceType: 'CONNECTOR', size: 2097152, ownerName: '赵阳', updatedAt: '2026-10-08 09:00:00', dependsOn: [] },
+        { resourceId: 'RES-SAL-T01', resourceName: '订单明细组件模板', resourceType: 'PARTIAL_TEMPLATE', size: 318000, ownerName: '刘颖', updatedAt: '2026-10-18 16:40:00',
+          dependsOn: ['RES-SAL-M01', 'RES-SAL-S01', 'RES-SAL-P01'],
+          contents: ['页面片段：订单明细表格', '数据模型绑定：订单主数据模型（含金额只读约束）', '脚本钩子：订单金额校验脚本（保存前触发）'] }
+      ]
+    },
+    {
+      appId: 'APP-ERP', appName: 'ERP Core', appCode: 'ERP-CORE',
+      provider: 'ERP Provider v3.1', ownerName: '陈浩', updatedAt: '2026-10-11 09:00:00',
+      resources: [
+        { resourceId: 'RES-ERP-P01', resourceName: '库存查询页', resourceType: 'PAGE', size: 386000, ownerName: '陈浩', updatedAt: '2026-10-11 09:00:00',
+          dependsOn: ['RES-ERP-M01', 'RES-ERP-M02', 'RES-ERP-S01'] },
+        { resourceId: 'RES-ERP-M01', resourceName: '物料主数据模型', resourceType: 'DATA_MODEL', size: 214000, ownerName: '李敏', updatedAt: '2026-10-10 15:00:00',
+          dependsOn: ['RES-ERP-C01'] },
+        { resourceId: 'RES-ERP-M02', resourceName: '供应商主数据模型', resourceType: 'DATA_MODEL', size: 176000, ownerName: '李敏', updatedAt: '2026-10-10 14:30:00',
+          dependsOn: ['RES-ERP-C01'] },
+        { resourceId: 'RES-ERP-S01', resourceName: '库存同步脚本', resourceType: 'SCRIPT', size: 28900, ownerName: '陈浩', updatedAt: '2026-10-09 11:10:00',
+          dependsOn: ['RES-ERP-M01', 'RES-ERP-M02'] },
+        { resourceId: 'RES-ERP-C01', resourceName: 'ERP 数据同步连接器', resourceType: 'CONNECTOR', size: 1048576, ownerName: '赵阳', updatedAt: '2026-10-05 08:00:00', dependsOn: [] },
+        { resourceId: 'RES-ERP-T01', resourceName: '库存概览组件模板', resourceType: 'PARTIAL_TEMPLATE', size: 245000, ownerName: '陈浩', updatedAt: '2026-10-11 08:30:00',
+          dependsOn: ['RES-ERP-M01', 'RES-ERP-M02', 'RES-ERP-S01', 'RES-ERP-P01'],
+          contents: ['页面片段：库存概览卡片', '数据模型绑定：物料主数据模型 + 供应商主数据模型', '脚本钩子：库存同步脚本（定时触发）'] }
+      ]
+    }
   ]
 };
 
@@ -800,21 +882,16 @@ const state = {
 const NAV_GROUPS = [
   { label: '核心操作', items: [
     { key: 'dashboard', name: '工作台', icon: '🏠' },
-    { key: 'assetRegister', name: '资源登记向导', icon: '➕', roles: ['CONTRIBUTOR','ADMIN'] }
+    { key: 'assetRegister', name: '资源登记向导', icon: '➕' }
   ]},
   { label: '资产管理', items: [
-    { key: 'assetList', name: '数字资产列表', icon: '📦', roles: ['CONTRIBUTOR','ADMIN','REVIEWER','AUDITOR'] },
-    { key: 'versionManage', name: '版本管理', icon: '📚', roles: ['CONTRIBUTOR','ADMIN','REVIEWER','AUDITOR'] },
-    { key: 'submissionList', name: '我的投稿', icon: '📝', roles: ['CONTRIBUTOR','ADMIN','REVIEWER','AUDITOR'] },
-    { key: 'review', name: '投稿审核工作区', icon: '✅', roles: ['REVIEWER'], badge: () => { return state.submissions.filter(s => s.submissionStatus === 'PENDING_APPROVAL').length; } },
-    { key: 'publish', name: '发布与生命周期', icon: '🚀', roles: ['ADMIN'] }
+    { key: 'assetList', name: '数字资产列表', icon: '📦' },
+    { key: 'versionManage', name: '版本管理', icon: '📚' },
+    { key: 'submissionList', name: '投稿列表', icon: '📝' },
+    { key: 'review', name: '投稿审核工作区', icon: '✅', badge: () => { return state.submissions.filter(s => s.submissionStatus === 'PENDING_APPROVAL').length; } }
   ]},
   { label: '资产复用', items: [
-    { key: 'catalog', name: '平台资产目录', icon: '🔍' },
-    { key: 'import', name: '资产导入记录', icon: '📥', roles: ['CONTRIBUTOR','ADMIN','CONSUMER','AUDITOR'] }
-  ]},
-  { label: '追溯', items: [
-    { key: 'history', name: '操作历史', icon: '📜', roles: ['CONTRIBUTOR','ADMIN','REVIEWER','AUDITOR'] }
+    { key: 'catalog', name: '平台资产目录', icon: '🔍' }
   ]}
 ];
 
@@ -1022,10 +1099,7 @@ function navigate(page) {
     submissionList: ['资产管理', '投稿列表'],
     submissionDetail: ['投稿', '投稿详情'],
     review: ['审核', '投稿审核工作区'],
-    publish: ['发布与生命周期'],
-    catalog: ['资产复用', '平台资产目录'],
-    import: ['资产复用', '资产导入记录'],
-    history: ['追溯', '操作历史']
+    catalog: ['资产复用', '平台资产目录']
   };
   state.breadcrumb = titles[page] || ['工作台'];
   renderTopbar();
@@ -1040,10 +1114,7 @@ function navigate(page) {
     submissionList: renderSubmissionList,
     submissionDetail: renderSubmissionDetail,
     review: renderReviewWorkspace,
-    publish: renderPublish,
-    catalog: renderCatalog,
-    import: renderImportList,
-    history: renderHistory
+    catalog: renderCatalog
   };
   (map[page] || renderDashboard)(c);
   window.scrollTo(0, 0);
@@ -1064,7 +1135,6 @@ function renderDashboard(root) {
     pendingReview: state.submissions.filter(s => s.submissionStatus === 'PENDING_APPROVAL').length,
     allSubmissions: state.submissions.length,
     returning: state.submissions.filter(s => s.submissionStatus === 'RETURNED').length,
-    failedPub: state.submissions.filter(s => s.publicationStatus === 'FAILED').length
   };
 
   let html = `
@@ -1104,9 +1174,9 @@ function renderDashboard(root) {
         <div class="metric-sub">退回中 ${stats.returning}</div>
       </div>
       <div class="metric-card">
-        <div class="metric-label">发布失败</div>
-        <div class="metric-value" style="color:var(--danger)">${stats.failedPub}</div>
-        <div class="metric-sub">需管理员介入重试</div>
+        <div class="metric-label">已禁用资产</div>
+        <div class="metric-value" style="color:var(--danger)">${stats.disabled}</div>
+        <div class="metric-sub">已从目录移除，可重新启用</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">投稿总数</div>
@@ -1119,7 +1189,6 @@ function renderDashboard(root) {
       <div class="card">
         <div class="card-header">
           <div class="card-title">最近动态</div>
-          <button class="btn-link" onclick="navigate('history')">查看全部 →</button>
         </div>
         <div class="card-body" style="padding:8px 22px">
           ${state.activities.slice(0, 8).map(a => `
@@ -1140,10 +1209,9 @@ function renderDashboard(root) {
         <div class="card-body">
           ${hasPerm('assetList') ? `<div class="step-select-card" onclick="navigate('assetList')"><div class="ssc-icon">📦</div><div><div class="ssc-name">数字资产列表</div><div class="ssc-meta">查询、筛选、管理全部资产</div></div></div>` : ''}
           ${hasPerm('assetRegister') ? `<div class="step-select-card" onclick="navigate('assetRegister')"><div class="ssc-icon">➕</div><div><div class="ssc-name">登记新资源</div><div class="ssc-meta">选择资源 → 生成快照 → 校验 → 投稿</div></div></div>` : ''}
-          ${hasPerm('submissionList') ? `<div class="step-select-card" onclick="navigate('submissionList')"><div class="ssc-icon">📝</div><div><div class="ssc-name">我的投稿</div><div class="ssc-meta">跟踪投稿状态、处理退回</div></div></div>` : ''}
+          ${hasPerm('submissionList') ? `<div class="step-select-card" onclick="navigate('submissionList')"><div class="ssc-icon">📝</div><div><div class="ssc-name">投稿列表</div><div class="ssc-meta">跟踪投稿状态、处理退回</div></div></div>` : ''}
           ${hasPerm('review') ? `<div class="step-select-card" onclick="navigate('review')"><div class="ssc-icon">✅</div><div><div class="ssc-name">审核工作区</div><div class="ssc-meta">处理待审批投稿 ${stats.pendingReview} 条</div></div></div>` : ''}
           ${hasPerm('catalog') ? `<div class="step-select-card" onclick="navigate('catalog')"><div class="ssc-icon">🔍</div><div><div class="ssc-name">资产目录</div><div class="ssc-meta">发现已发布资产、申请授权</div></div></div>` : ''}
-          ${hasPerm('publish') ? `<div class="step-select-card" onclick="navigate('publish')"><div class="ssc-icon">🚀</div><div><div class="ssc-name">发布与生命周期</div><div class="ssc-meta">执行发布、禁用、归档</div></div></div>` : ''}
         </div>
       </div>
     </div>
@@ -1234,7 +1302,7 @@ function renderAssetList(root) {
         <table class="table">
           <thead>
             <tr>
-              <th>资产名称</th><th>资产标识</th><th>类型</th><th>来源应用</th><th>状态</th><th>当前发布版本</th><th>创建人</th><th>最近更新</th><th>操作</th>
+              <th>资产名称</th><th>资产标识</th><th>类型</th><th>来源应用</th><th>状态</th><th>当前固化版本</th><th>创建人</th><th>最近更新</th><th>操作</th>
             </tr>
           </thead>
           <tbody>
@@ -1303,15 +1371,12 @@ function renderAssetDetail(root) {
   const type = assetTypes.find(t => t.code === a.assetType);
   const verList = versionsOf(a.assetId);
   const subList = submissionsOf(a.assetId);
-  const impList = importsOf(a.assetId);
   const firstTab = state.selectedTab[a.assetId] || 'basic';
   const tabs = [
     { key: 'basic', name: '基本信息' },
     { key: 'versions', name: '版本信息', count: verList.length },
     { key: 'submissions', name: '投稿记录', count: subList.length },
-    { key: 'publish', name: '发布 / 生命周期' },
-    { key: 'reuse', name: '复用与导入', count: impList.length },
-    { key: 'history', name: '操作历史' }
+    { key: 'publish', name: '固化与生命周期' }
   ];
 
   const header = `
@@ -1345,8 +1410,7 @@ function renderDetailTab(a, tab) {
   if (tab === 'versions') return renderDetailVersions(a);
   if (tab === 'submissions') return renderDetailSubmissions(a);
   if (tab === 'publish') return renderDetailPublish(a);
-  if (tab === 'reuse') return renderDetailReuse(a);
-  return renderDetailHistory(a);
+  return renderDetailBasic(a);
 }
 
 function renderDetailBasic(a) {
@@ -1360,7 +1424,7 @@ function renderDetailBasic(a) {
         <div class="detail-item"><div class="detail-label">资产 ID (assetId)</div><div class="detail-value mono">${htmlEscape(a.assetId)}</div></div>
         <div class="detail-item"><div class="detail-label">资产类型</div><div class="detail-value">${type ? `${type.icon} ${htmlEscape(type.name)}` : htmlEscape(a.assetType)}</div></div>
         <div class="detail-item"><div class="detail-label">资产状态</div><div class="detail-value">${tag(a.assetStatus, ASSET_STATUS)}</div></div>
-        <div class="detail-item"><div class="detail-label">当前发布版本</div><div class="detail-value mono">${a.publishedVersionId || '<span class="empty">尚未发布</span>'}</div></div>
+        <div class="detail-item"><div class="detail-label">当前固化版本</div><div class="detail-value mono">${a.publishedVersionId || '<span class="empty">尚未固化</span>'}</div></div>
         <div class="detail-item"><div class="detail-label">来源应用</div><div class="detail-value">${htmlEscape(a.sourceApp)} <span class="code-mono">${htmlEscape(a.sourceAppCode)}</span></div></div>
         <div class="detail-item"><div class="detail-label">所属租户</div><div class="detail-value">${htmlEscape(a.tenantName)} <span class="code-mono">${htmlEscape(a.tenantId)}</span></div></div>
         <div class="detail-item"><div class="detail-label">可见性</div><div class="detail-value">${htmlEscape(a.visibility)}</div></div>
@@ -1419,7 +1483,7 @@ function renderDetailSubmissions(a) {
       <div class="detail-section-title">📝 投稿记录（子实体 AssetSubmission）</div>
       <div class="table-wrap">
         <table class="table">
-          <thead><tr><th>投稿 ID</th><th>版本</th><th>投稿人</th><th>提交时间</th><th>投稿状态</th><th>审批结果</th><th>发布状态</th><th>操作</th></tr></thead>
+          <thead><tr><th>投稿 ID</th><th>版本</th><th>投稿人</th><th>提交时间</th><th>投稿状态</th><th>审批结果</th><th>固化状态</th><th>操作</th></tr></thead>
           <tbody>
             ${subs.map(s => {
               const v = versionOf(s.versionId);
@@ -1445,24 +1509,23 @@ function renderDetailPublish(a) {
   const latestSub = submissionsOf(a.assetId)[0];
   return `
     <div class="detail-section">
-      <div class="detail-section-title">🚀 发布与生命周期</div>
+      <div class="detail-section-title">🧊 固化结果与生命周期</div>
       <div class="detail-grid-3">
         <div class="detail-item"><div class="detail-label">资产状态</div><div class="detail-value">${tag(a.assetStatus, ASSET_STATUS)}</div></div>
-        <div class="detail-item"><div class="detail-label">当前发布版本</div><div class="detail-value mono">${a.publishedVersionId || '<span class="empty">—</span>'}</div></div>
+        <div class="detail-item"><div class="detail-label">当前固化版本</div><div class="detail-value mono">${a.publishedVersionId || '<span class="empty">—</span>'}</div></div>
         <div class="detail-item"><div class="detail-label">最近投稿</div><div class="detail-value mono">${latestSub ? latestSub.submissionId : '<span class="empty">—</span>'}</div></div>
         <div class="detail-item"><div class="detail-label">最近投稿状态</div><div class="detail-value">${latestSub ? tag(latestSub.submissionStatus, SUBMISSION_STATUS) : '<span class="empty">—</span>'}</div></div>
-        <div class="detail-item"><div class="detail-label">发布处理状态</div><div class="detail-value">${latestSub ? tag(latestSub.publicationStatus, PUBLICATION_STATUS) : '<span class="empty">—</span>'}</div></div>
-        <div class="detail-item"><div class="detail-label">发布结果说明</div><div class="detail-value">${latestSub?.publicationMessage || '<span class="empty">—</span>'}</div></div>
+        <div class="detail-item"><div class="detail-label">固化状态</div><div class="detail-value">${latestSub ? tag(latestSub.publicationStatus, PUBLICATION_STATUS) : '<span class="empty">—</span>'}</div></div>
+        <div class="detail-item"><div class="detail-label">固化说明</div><div class="detail-value">${latestSub?.publicationMessage || '<span class="empty">—</span>'}</div></div>
       </div>
-      ${latestSub?.publicationMessage ? `<div class="info-banner ${latestSub.publicationStatus==='FAILED'?'error':latestSub.publicationStatus==='SUCCESS'?'success':'info'}" style="margin-top:16px">
+      <div class="info-banner info" style="margin-top:16px">
         <svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-        <div><strong>发布说明：</strong>${htmlEscape(latestSub.publicationMessage)}</div>
-      </div>` : ''}
+        <div>审批通过即完成版本固化并进入平台目录，不存在单独的发布环节。</div>
+      </div>
     </div>
     <div class="detail-section">
       <div class="detail-section-title">🔄 可执行生命周期操作</div>
       <div style="display:flex;gap:12px;flex-wrap:wrap">
-        ${a.assetStatus === 'DRAFT' && latestSub && latestSub.submissionStatus === 'APPROVED' && latestSub.publicationStatus !== 'SUCCESS' ? `<button class="btn btn-primary" onclick="publishAsset('${latestSub.submissionId}')">执行发布</button>` : ''}
         ${a.assetStatus === 'PUBLISHED' ? `<button class="btn btn-danger" onclick="disableAsset('${a.assetId}')">禁用资产</button>` : ''}
         ${a.assetStatus === 'DISABLED' ? `<button class="btn btn-success" onclick="enableAsset('${a.assetId}')">重新启用</button>` : ''}
         ${(a.assetStatus === 'DRAFT' || a.assetStatus === 'DISABLED') ? `<button class="btn btn-danger" onclick="archiveAsset('${a.assetId}')">归档资产</button>` : ''}
@@ -1470,48 +1533,6 @@ function renderDetailPublish(a) {
       </div>
     </div>
   `;
-}
-
-function renderDetailReuse(a) {
-  const imports = importsOf(a.assetId);
-  if (imports.length === 0) return '<div class="empty-state"><div class="empty-state-title">暂无复用/导入记录</div><div class="empty-state-desc">资产被其他租户或目标应用使用后将在此展示</div></div>';
-  return `
-    <div class="detail-section">
-      <div class="detail-section-title">📥 复用与导入记录</div>
-      <div class="table-wrap">
-        <table class="table">
-          <thead><tr><th>导入 ID</th><th>目标应用</th><th>版本</th><th>资产包 ID</th><th>导入状态</th><th>开始时间</th><th>完成时间</th><th>结果说明</th></tr></thead>
-          <tbody>
-            ${imports.map(i => {
-              const v = versionOf(i.versionId);
-              return `<tr>
-                <td class="code">${htmlEscape(i.importId)}</td>
-                <td>${htmlEscape(i.targetApp)} <span class="code-mono">${htmlEscape(i.targetAppCode)}</span></td>
-                <td>${v ? htmlEscape(v.versionNumber) : '—'}</td>
-                <td class="code">${htmlEscape(i.packageId)}</td>
-                <td>${tag(i.importStatus, IMPORT_STATUS)}</td>
-                <td style="white-space:nowrap">${htmlEscape(i.startedAt)}</td>
-                <td style="white-space:nowrap">${htmlEscape(i.completedAt || '—')}</td>
-                <td>${htmlEscape(i.importMessage || '—')}</td>
-              </tr>`;
-            }).join('')}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
-}
-
-function renderDetailHistory(a) {
-  const items = state.activities.filter(ac => ac.target === a.assetId || ac.target.startsWith(a.assetId + '/')).slice(0, 20);
-  if (items.length === 0) return '<div class="empty-state"><div class="empty-state-title">暂无此资产的操作历史</div></div>';
-  return `<div class="detail-section"><div class="detail-section-title">📜 操作历史</div>${items.map(x => `
-    <div class="activity-item">
-      <div class="activity-dot ${x.status==='DONE'?'success':x.status==='FAIL'?'error':'warning'}"></div>
-      <div class="activity-content"><div class="activity-title">${htmlEscape(x.actor)} · ${htmlEscape(x.message)}</div></div>
-      <div class="activity-time">${htmlEscape(x.time)}</div>
-    </div>`).join('')}
-  </div>`;
 }
 
 /* ============================
@@ -1541,7 +1562,7 @@ function openVersionDetail(versionId) {
       <div style="margin-top:10px">
         ${validations.map(vr => {
           const severity = vr.issues.some(i => i.severity === 'ERROR') ? 'err' : (vr.issues.some(i => i.severity === 'WARNING') ? 'warn' : (vr.passed ? 'pass' : 'err'));
-          const checkerLabel = { RESOURCE_PRESENCE: '资源存在性检查', DEPENDENCY_ANALYSIS: '依赖分析', CONTRACT_COMPAT: '契约兼容性检查', SECURITY_SCAN: '安全扫描' }[vr.checkerType] || vr.checkerType;
+          const checkerLabel = { RESOURCE_PRESENCE: '资源存在性检查', DEPENDENCY_ANALYSIS: '依赖分析', TYPE_REGISTRABLE: '类型可登记性检查', CONTRACT_COMPAT: '契约兼容性检查', SECURITY_SCAN: '安全扫描' }[vr.checkerType] || vr.checkerType;
           return `<div style="margin-bottom:14px;border:1px solid var(--rule);border-radius:10px;padding:14px">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
               <strong>${htmlEscape(checkerLabel)}</strong>
@@ -1594,7 +1615,7 @@ function openVersionDetail(versionId) {
           <div style="padding:10px 0;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between">
             <div>
               <div style="font-weight:600;font-size:13px">${htmlEscape(d.name)} <span class="code-mono">${htmlEscape(d.resourceId)}</span></div>
-              <div style="font-size:12px;color:var(--muted)">${htmlEscape(d.resourceType)}</div>
+              <div style="font-size:12px;color:var(--muted)">${(assetTypes.find(t => t.code === d.resourceType) || {}).name || htmlEscape(d.resourceType)}</div>
             </div>
             <span class="tag ${d.depType === 'REQUIRED' ? 'tag-error' : 'tag-info'}">${d.depType === 'REQUIRED' ? '必需' : '可选'}</span>
           </div>
@@ -1620,373 +1641,6 @@ function openVersionDetail(versionId) {
   `);
 }
 
-/* ============================
-   13. 资源登记向导（6 步）
-   ============================ */
-function renderWizard(root) {
-  state.wizard = state.wizard || { step: 1, resourceId: null, assetName: '', assetCode: '', assetType: null, description: '', visibility: 'PRIVATE', type: '', dependenciesDetected: [], validation: null, snapshotId: null };
-  const steps = ['选择资源', '识别类型/依赖', '前置检查', '生成快照', '固定校验', '登记/投稿'];
-  const w = state.wizard;
-
-  let body = '';
-  if (w.step === 1) body = wizardStep1(w);
-  else if (w.step === 2) body = wizardStep2(w);
-  else if (w.step === 3) body = wizardStep3(w);
-  else if (w.step === 4) body = wizardStep4(w);
-  else if (w.step === 5) body = wizardStep5(w);
-  else body = wizardStep6(w);
-
-  root.innerHTML = `
-    <div class="page-header"><div>
-      <div class="page-title">资源登记向导</div>
-      <div class="page-subtitle">选择平台原生资源 → 识别依赖 → 校验 → 生成快照 → 登记资产 → 发起投稿（6 步）</div>
-    </div><div class="page-actions">
-      <button class="btn btn-ghost" onclick="state.wizard=null; navigate('assetList')">取消向导</button>
-    </div></div>
-
-    <div class="card"><div class="card-body">
-      <div class="wizard-steps">
-        ${steps.map((s,i) => {
-          const n = i+1;
-          let cls = '';
-          if (n < w.step) cls = 'done';
-          else if (n === w.step) cls = 'active';
-          return `<div class="wizard-step ${cls}">
-            <div class="wizard-step-num">${cls==='done'?'✓':n}</div>
-            <div class="wizard-step-label">${s}</div>
-          </div>${i < steps.length-1 ? `<div class="wizard-connector ${cls==='done'?'done':''}"></div>` : ''}`;
-        }).join('')}
-      </div>
-      <div id="wizardBody">${body}</div>
-    </div></div>
-  `;
-}
-
-function wizardStep1(w) {
-  return `
-    <div class="info-banner info">
-      <svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-      <div><strong>第一步 · 选择平台原生资源</strong>：从已注册的平台原生资源中选择一个作为资产源头。资产不是普通文件，而是平台可管理、可依赖、可交付的原生资源。</div>
-    </div>
-    ${state.platformResources.map(r => {
-      const type = assetTypes.find(t => t.code === r.resourceType);
-      return `<div class="step-select-card ${w.resourceId === r.resourceId ? 'selected':''}" onclick="selectWizardResource('${r.resourceId}')">
-        <div class="ssc-icon">${type ? type.icon : '📄'}</div>
-        <div style="flex:1">
-          <div class="ssc-name">${htmlEscape(r.resourceName)} <span class="code-mono" style="margin-left:6px">${htmlEscape(r.resourceId)}</span></div>
-          <div class="ssc-meta">来源：${htmlEscape(r.sourceApp)} · 创建人 ${htmlEscape(r.ownerName)} · 最近更新 ${htmlEscape(r.updatedAt)} · ${fmtSize(r.size)}</div>
-          <div class="ssc-desc">资源类型：${type ? htmlEscape(type.name) : htmlEscape(r.resourceType)}</div>
-        </div>
-      </div>`;
-    }).join('')}
-    <div style="margin-top:20px;display:flex;justify-content:flex-end">
-      <button class="btn btn-primary" ${!w.resourceId ? 'disabled' : ''} onclick="wizardNext()">下一步：识别类型和依赖 →</button>
-    </div>
-  `;
-}
-
-function wizardStep2(w) {
-  const r = state.platformResources.find(x => x.resourceId === w.resourceId);
-  const type = assetTypes.find(t => t.code === r.resourceType);
-  // 模拟依赖检测
-  const deps = w.resourceId === 'RES-PROD-001' ? [{ name: '客户主数据表', id: 'RES-CUST-MASTER', req: true }, { name: 'SKU 编码服务', id: 'RES-SKU-SVC', req: false }]
-             : w.resourceId === 'RES-WF-023'    ? [{ name: '人事主数据', id: 'RES-HR-MASTER', req: true }]
-             : [];
-  w.dependenciesDetected = deps;
-  return `
-    <div class="info-banner success">
-      <svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-      <div><strong>第二步 · 资源类型 & 依赖识别完成</strong>：资源类型由来源应用 Provider 自动识别，依赖关系通过扫描资源引用和契约声明生成。</div>
-    </div>
-    <div class="panel-stack-2-1">
-      <div>
-        <div class="detail-section-title">资源识别结果</div>
-        <div class="detail-grid">
-          <div class="detail-item"><div class="detail-label">资源名称</div><div class="detail-value">${htmlEscape(r.resourceName)}</div></div>
-          <div class="detail-item"><div class="detail-label">资源 ID</div><div class="detail-value mono">${htmlEscape(r.resourceId)}</div></div>
-          <div class="detail-item"><div class="detail-label">识别类型</div><div class="detail-value">${type ? type.icon + ' ' + htmlEscape(type.name) : htmlEscape(r.resourceType)}</div></div>
-          <div class="detail-item"><div class="detail-label">来源应用</div><div class="detail-value">${htmlEscape(r.sourceApp)}</div></div>
-        </div>
-      </div>
-      <div>
-        <div class="detail-section-title">检测到的依赖</div>
-        ${deps.length === 0 ? '<div class="muted-text" style="font-size:13px">无依赖资源</div>' :
-          deps.map(d => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border:1px solid var(--rule-2);border-radius:8px;margin-bottom:6px">
-            <div><div style="font-weight:600;font-size:13px">${htmlEscape(d.name)}</div><div class="code-mono">${htmlEscape(d.id)}</div></div>
-            <span class="tag ${d.req ? 'tag-error' : 'tag-info'}">${d.req ? '必需' : '可选'}</span>
-          </div>`).join('')}
-      </div>
-    </div>
-    <div style="margin-top:20px;display:flex;justify-content:space-between">
-      <button class="btn btn-secondary" onclick="wizardPrev()">← 上一步</button>
-      <button class="btn btn-primary" onclick="wizardNext()">下一步：前置检查 →</button>
-    </div>
-  `;
-}
-
-function wizardStep3(w) {
-  // 模拟前置检查
-  const r = state.platformResources.find(x => x.resourceId === w.resourceId);
-  const reqOK = true;
-  const ownOK = true;
-  const permOK = true;
-  const prevOK = true;
-  return `
-    <div class="info-banner info">
-      <svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
-      <div><strong>第三步 · 前置条件检查</strong>：在生成快照前，确认资源存在、权限、依赖资源状态以及是否已被登记过。</div>
-    </div>
-    <ul class="check-list">
-      <li class="${reqOK?'pass':'fail'}"><span class="chk-icon">${reqOK?'✓':'✗'}</span><span>资源 <code class="code-mono">${htmlEscape(r.resourceId)}</code> 在平台中存在且可读取 — <strong>${reqOK?'通过':'失败'}</strong></span></li>
-      <li class="${ownOK?'pass':'fail'}"><span class="chk-icon">${ownOK?'✓':'✗'}</span><span>来源应用 Provider 已注册且可用 — <strong>${ownOK?'通过':'失败'}</strong></span></li>
-      <li class="${permOK?'pass':'fail'}"><span class="chk-icon">${permOK?'✓':'✗'}</span><span>当前操作者对该资源有登记权限 — <strong>${permOK?'通过':'失败'}</strong></span></li>
-      <li class="${prevOK?'pass':'info'}"><span class="chk-icon">${prevOK?'✓':'i'}</span><span>是否已被登记过：该资源尚未登记为平台资产（若已登记将在下一步提示复用已有资产）</span></li>
-      ${w.dependenciesDetected.map(d => `<li class="pass"><span class="chk-icon">✓</span><span>依赖 <code class="code-mono">${htmlEscape(d.id)}</code> 存在且可访问</span></li>`).join('')}
-    </ul>
-    <div style="margin-top:20px;display:flex;justify-content:space-between">
-      <button class="btn btn-secondary" onclick="wizardPrev()">← 上一步</button>
-      <button class="btn btn-primary" onclick="wizardNext()">下一步：生成快照 →</button>
-    </div>
-  `;
-}
-
-function wizardStep4(w) {
-  const r = state.platformResources.find(x => x.resourceId === w.resourceId);
-  const size = r.size;
-  w.snapshotId = 'SNAP-SHA256-' + r.resourceId.substring(0,8) + '-A';
-  const steps = [
-    { label: '调用 Provider 拉取资源内容', duration: 600 },
-    { label: '扫描并固化依赖资源引用', duration: 400 },
-    { label: '计算 SHA-256 摘要', duration: 500 },
-    { label: '写入快照存储（只读）', duration: 400 },
-    { label: '返回 snapshotId 与 metadata', duration: 300 }
-  ];
-  return `
-    <div class="info-banner info">
-      <svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-      <div><strong>第四步 · 生成完整固定快照</strong>：快照一经生成即为只读，投稿、审核、发布和交付都使用同一份快照（"固定快照原则"）。</div>
-    </div>
-    <div id="snapshotProgress"></div>
-    <div id="snapshotResult" class="hidden">
-      <div class="info-banner success">
-        <svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-        <div><strong>快照生成成功</strong>。以下快照将用于后续的校验、审核、发布和资产包交付。</div>
-      </div>
-      <div class="detail-grid">
-        <div class="detail-item"><div class="detail-label">快照 ID</div><div class="detail-value mono">${w.snapshotId}</div></div>
-        <div class="detail-item"><div class="detail-label">快照大小</div><div class="detail-value">${fmtSize(size)}</div></div>
-        <div class="detail-item"><div class="detail-label">摘要算法</div><div class="detail-value mono">SHA-256</div></div>
-        <div class="detail-item"><div class="detail-label">状态</div><div class="detail-value">只读 / 已冻结</div></div>
-      </div>
-      <div style="margin-top:20px;display:flex;justify-content:space-between">
-        <button class="btn btn-secondary" onclick="wizardPrev()">← 上一步</button>
-        <button class="btn btn-primary" onclick="wizardNext()">下一步：执行固定校验 →</button>
-      </div>
-    </div>
-  `;
-}
-
-function wizardStep5(w) {
-  // 模拟校验
-  const checkerSteps = [
-    { key: 'RESOURCE_PRESENCE', label: '资源存在性检查', pass: true,  issues: [] },
-    { key: 'DEPENDENCY_ANALYSIS', label: '依赖分析', pass: w.resourceId !== 'RES-RPT-087', issues: w.resourceId === 'RES-RPT-087' ? [
-      { code: 'DEPENDENCY_NOT_FOUND', desc: '依赖的数据集 RES-DATA-082 不存在', severity: 'ERROR' },
-      { code: 'DEPENDENCY_EXPIRED', desc: '依赖的报表模板已归档', severity: 'ERROR' }
-    ] : [] },
-    { key: 'CONTRACT_COMPAT', label: '契约兼容性检查', pass: w.resourceId !== 'RES-ERP-011', issues: w.resourceId === 'RES-ERP-011' ? [
-      { code: 'API_DEPRECATED', desc: '依赖接口已标记废弃', severity: 'WARNING' }
-    ] : [] },
-    { key: 'SECURITY_SCAN', label: '安全扫描', pass: true, issues: [] }
-  ];
-  w.validation = checkerSteps;
-
-  const hasError = checkerSteps.some(c => c.issues.some(i => i.severity === 'ERROR'));
-  const hasWarning = checkerSteps.some(c => c.issues.some(i => i.severity === 'WARNING'));
-  const allPass = checkerSteps.every(c => c.pass);
-
-  let banner = '';
-  if (hasError) banner = `<div class="info-banner error"><svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg><div><strong>存在阻断性错误！</strong>根据业务规则，有 ERROR 时禁止投稿。请修正后重新生成快照。</div></div>`;
-  else if (hasWarning) banner = `<div class="info-banner warning"><svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg><div><strong>存在 ${checkerSteps.reduce((n,c) => n + c.issues.filter(i=>i.severity==='WARNING').length,0)} 条警告。</strong>警告不阻断投稿，但建议根据处理建议优化。</div></div>`;
-  else banner = `<div class="info-banner success"><svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><div><strong>校验全部通过 ✅</strong> 所有检查项均未发现问题，可以继续登记并发起投稿。</div></div>`;
-
-  const errCount = checkerSteps.reduce((n,c) => n + c.issues.filter(i=>i.severity==='ERROR').length, 0);
-  const warnCount = checkerSteps.reduce((n,c) => n + c.issues.filter(i=>i.severity==='WARNING').length, 0);
-
-  return `
-    <div class="info-banner info">
-      <svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
-      <div><strong>第五步 · 固定校验</strong>：对第 4 步生成的固定快照执行完整性、依赖、契约、安全等多维度校验。<strong style="color:var(--danger)">阻断性错误（ERROR）禁止投稿</strong>；警告（WARNING）按既定规则不阻断。</div>
-    </div>
-    ${banner}
-    <div class="validation-summary">
-      <div class="val-stat pass"><span class="num">${checkerSteps.filter(c=>c.pass && c.issues.length===0).length}</span> 通过</div>
-      <div class="val-stat err"><span class="num">${errCount}</span> 阻断错误</div>
-      <div class="val-stat warn"><span class="num">${warnCount}</span> 警告</div>
-    </div>
-    ${checkerSteps.map(c => `
-      <div style="margin-bottom:14px;border:1px solid var(--rule);border-radius:10px;overflow:hidden">
-        <div style="padding:12px 16px;background:${c.pass?'var(--success-soft)':(c.issues.some(i=>i.severity==='ERROR')?'var(--danger-soft)':'var(--warning-soft)')};display:flex;justify-content:space-between;align-items:center">
-          <div style="font-weight:600;font-size:13px">${htmlEscape(c.label)}</div>
-          <span class="tag ${c.pass?'tag-published':(c.issues.some(i=>i.severity==='ERROR')?'tag-error':'tag-warning')}">${c.pass?'通过':'发现问题'}</span>
-        </div>
-        ${c.issues.length > 0 ? `<div style="padding:10px 16px">
-          ${c.issues.map(i => `<div class="issue-row" style="margin-bottom:6px">
-            <div class="iss-code">${htmlEscape(i.code)}</div>
-            <div class="iss-desc">${htmlEscape(i.desc)}</div>
-            <span class="tag ${i.severity==='ERROR'?'tag-error':'tag-warning'}">${i.severity==='ERROR'?'ERROR':'WARNING'}</span>
-          </div>`).join('')}
-        </div>` : ''}
-      </div>`).join('')}
-    <div style="margin-top:20px;display:flex;justify-content:space-between">
-      <button class="btn btn-secondary" onclick="wizardPrev()">← 上一步</button>
-      <button class="btn btn-primary" ${hasError?'disabled':''} onclick="wizardNext()">${hasError?'有错误，禁止下一步':'下一步：登记并投稿 →'}</button>
-    </div>
-  `;
-}
-
-function wizardStep6(w) {
-  const r = state.platformResources.find(x => x.resourceId === w.resourceId);
-  const type = assetTypes.find(t => t.code === r.resourceType);
-  return `
-    <div class="info-banner info">
-      <svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-      <div><strong>第六步 · 登记资产 & 发起投稿</strong>：填写资产元信息后，系统将创建 <code class="code-mono">DigitalAsset</code> 聚合根、冻结 <code class="code-mono">AssetVersion</code> 子实体，并生成一条 <code class="code-mono">AssetSubmission</code> 进入工作流审批。</div>
-    </div>
-
-    <div class="form-grid">
-      <div class="form-field">
-        <div class="form-label"><span class="req">*</span> 资产名称</div>
-        <input class="form-input" id="w-asset-name" value="${htmlEscape(r.resourceName)}" placeholder="面向业务的可读名称">
-      </div>
-      <div class="form-field">
-        <div class="form-label"><span class="req">*</span> 资产标识 (assetCode)</div>
-        <input class="form-input" id="w-asset-code" value="${htmlEscape(r.resourceId.replace('RES-','').toUpperCase())}" placeholder="英文标识，建议与业务代码一致">
-      </div>
-      <div class="form-field">
-        <div class="form-label"><span class="req">*</span> 资产类型</div>
-        <input class="form-input" value="${type ? type.icon + ' ' + type.name : r.resourceType}" disabled>
-      </div>
-      <div class="form-field">
-        <div class="form-label">可见性</div>
-        <select class="form-select" id="w-visibility">
-          <option value="PRIVATE">私有（仅创建人可见）</option>
-          <option value="TENANT_PUBLIC" selected>租户内公开</option>
-          <option value="PLATFORM_PUBLIC">平台级公开</option>
-        </select>
-      </div>
-      <div class="form-field full">
-        <div class="form-label">资产描述 <span class="opt">（选填）</span></div>
-        <textarea class="form-textarea" id="w-asset-desc" placeholder="描述资产的业务用途、关键特性、使用场景等，帮助其他使用者理解">${htmlEscape(r.resourceName + ' 作为平台原生资源，提供稳定的契约和依赖声明。')}</textarea>
-      </div>
-    </div>
-
-    <div style="margin-top:20px;padding:16px;background:var(--bg3);border-radius:10px">
-      <div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:8px">将自动创建的对象（统一关联）</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px">
-        <span class="code-mono">DigitalAsset（新 assetId）</span>
-        <span class="code-mono">AssetVersion V1.0 · FROZEN · ${w.snapshotId}</span>
-        <span class="code-mono">AssetSubmission · PENDING_APPROVAL · WF-APPROVAL-xxx</span>
-      </div>
-    </div>
-
-    <div style="margin-top:20px;display:flex;justify-content:space-between">
-      <button class="btn btn-secondary" onclick="wizardPrev()">← 上一步</button>
-      <button class="btn btn-primary" onclick="completeWizard()">登记并发起投稿 🚀</button>
-    </div>
-  `;
-}
-
-function selectWizardResource(id) { state.wizard.resourceId = id; renderWizard($('#content')); }
-function wizardNext() { state.wizard.step++; renderWizard($('#content')); if (state.wizard.step === 4) runSnapshotProgress(); }
-function wizardPrev() { state.wizard.step--; renderWizard($('#content')); }
-
-function runSnapshotProgress() {
-  const w = state.wizard;
-  const steps = [
-    { label: '调用 Provider 拉取资源内容', done: false },
-    { label: '扫描并固化依赖资源引用', done: false },
-    { label: '计算 SHA-256 摘要', done: false },
-    { label: '写入快照存储（只读）', done: false },
-    { label: '返回 snapshotId 与 metadata', done: false }
-  ];
-  const prog = $('#snapshotProgress');
-  prog.innerHTML = `<div style="display:flex;flex-direction:column;gap:10px;padding:14px;background:var(--bg3);border-radius:10px">
-    ${steps.map((s,i) => `<div id="ss-${i}" style="display:flex;align-items:center;gap:10px"><div style="width:20px;height:20px;border-radius:50%;background:var(--rule-2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px">${i+1}</div><div style="font-size:13px;color:var(--ink-2)">${s.label}</div><div style="margin-left:auto"><span class="spinner dark"></span></div></div>`).join('')}
-    <div class="progress-bar" style="margin-top:6px"><span style="width:0%"></span></div>
-    <div style="font-size:11px;color:var(--muted);margin-top:2px">快照 ID 将在完成后生成</div>
-  </div>`;
-  let i = 0;
-  function next() {
-    if (i >= steps.length) {
-      prog.style.display = 'none';
-      $('#snapshotResult').classList.remove('hidden');
-      return;
-    }
-    const el = $(`#ss-${i}`);
-    el.querySelector('div:first-child').style.background = 'var(--accent)';
-    el.querySelector('div:last-child').innerHTML = '<span style="color:var(--accent);font-size:12px">执行中...</span>';
-    setTimeout(() => {
-      el.querySelector('div:first-child').style.background = 'var(--success)';
-      el.querySelector('div:first-child').textContent = '✓';
-      el.querySelector('div:last-child').innerHTML = '<span style="color:var(--success);font-size:12px">完成</span>';
-      const pct = ((i+1) / steps.length * 100).toFixed(0);
-      $('.progress-bar > span', prog).style.width = pct + '%';
-      i++; next();
-    }, 550);
-  }
-  next();
-}
-
-function completeWizard() {
-  const w = state.wizard;
-  const r = state.platformResources.find(x => x.resourceId === w.resourceId);
-  const type = assetTypes.find(t => t.code === r.resourceType);
-  const name = $('#w-asset-name').value.trim();
-  const code = $('#w-asset-code').value.trim();
-  const desc = $('#w-asset-desc').value.trim();
-  const vis = $('#w-visibility').value;
-  if (!name || !code) { Toast.show('请填写必填项','资产名称和资产标识不能为空','warning'); return; }
-
-  // 模拟创建
-  const ts = new Date().toISOString().replace('T',' ').slice(0,19);
-  const assetId = 'AST-2026-' + String(state.assets.length+1).padStart(4,'0');
-  const versionId = 'VER-' + assetId.split('-')[2] + '-001';
-  const subId = 'SUB-' + ts.slice(0,4) + '-' + String(state.submissions.length+1).padStart(4,'0');
-
-  state.assets.push({
-    assetId, assetCode: code, assetName: name, assetType: r.resourceType,
-    description: desc, assetStatus: 'DRAFT', publishedVersionId: null,
-    sourceApp: r.sourceApp, sourceAppCode: r.sourceAppCode,
-    tenantId: 'T-ACME', tenantName: 'Acme 科技', visibility: vis,
-    createdBy: 'u-wangli', createdByName: '王丽',
-    createdAt: ts, updatedAt: ts
-  });
-  state.versions.push({
-    versionId, assetId, versionNumber: 'V1.0', versionStatus: 'FROZEN',
-    snapshotId: w.snapshotId, snapshotDigest: '模拟-SHA256-' + Math.random().toString(36).slice(2,30).toUpperCase(),
-    snapshotSize: r.size, snapshotCreatedAt: ts, frozenAt: ts,
-    createdBy: 'u-wangli', createdAt: ts,
-    dependencies: w.dependenciesDetected.map(d => ({ resourceId: d.id, resourceType: r.resourceType, name: d.name, depType: d.req ? 'REQUIRED' : 'OPTIONAL' }))
-  });
-  state.submissions.push({
-    submissionId: subId, assetId, versionId, submissionStatus: 'PENDING_APPROVAL',
-    submittedBy: 'u-wangli', submittedByName: '王丽', submittedAt: ts,
-    workflowInstanceId: 'WF-APPROVAL-' + Math.floor(10000 + Math.random()*90000),
-    approvalResult: null, approvalComment: null, approvalCompletedAt: null, approvalBy: null, approvalByName: null,
-    publicationStatus: 'NOT_STARTED', publicationMessage: null
-  });
-
-  state.activities.unshift({ id: 'ACT-NEW-'+Date.now(), time: ts, actor: '王丽', actorId: 'u-wangli', type: 'CREATE_ASSET', target: assetId, targetName: name + ' V1.0', targetType: 'ASSET', status: 'DONE', message: '登记资产、生成快照并发起投稿' });
-
-  state.validations[versionId] = state.wizard.validation.map(vr => ({ checkerType: vr.key, passed: vr.pass, checkedAt: ts, issues: vr.issues }));
-
-  state.wizard = null;
-  Toast.show('登记成功！', `资产 ${name} 已创建并发起投稿，等待审批`, 'success', 4000);
-  // 跳转投稿详情
-  state.currentSubmissionId = subId;
-  navigate('submissionDetail');
-}
 
 /* ============================
    14. 版本管理页面
@@ -2034,10 +1688,10 @@ function renderSubmissionList(root) {
   root.innerHTML = `
     <div class="page-header"><div>
       <div class="page-title">我的投稿</div>
-      <div class="page-subtitle">AssetSubmission 子实体清单。投稿状态、审批结果、发布状态三套独立展示。</div>
+      <div class="page-subtitle">AssetSubmission 子实体清单。投稿状态、审批结果、固化状态三套独立展示。</div>
     </div></div>
     <div class="card"><div class="table-wrap"><table class="table">
-      <thead><tr><th>投稿 ID</th><th>资产</th><th>版本</th><th>投稿人</th><th>提交时间</th><th>投稿状态</th><th>审批结果</th><th>发布状态</th><th>操作</th></tr></thead>
+      <thead><tr><th>投稿 ID</th><th>资产</th><th>版本</th><th>投稿人</th><th>提交时间</th><th>投稿状态</th><th>审批结果</th><th>固化状态</th><th>操作</th></tr></thead>
       <tbody>
         ${items.map(s => {
           const a = roleOf(s.assetId); const v = versionOf(s.versionId);
@@ -2092,9 +1746,6 @@ function renderSubmissionDetail(root) {
   if (s.submissionStatus === 'RETURNED' || s.submissionStatus === 'REJECTED') {
     actions += `<button class="btn btn-primary" onclick="resubmitSubmission('${s.submissionId}')">重新提交</button>`;
   }
-  if (s.submissionStatus === 'APPROVED' && s.publicationStatus !== 'SUCCESS') {
-    actions += `<button class="btn btn-primary" onclick="publishAsset('${s.submissionId}')">立即发布</button>`;
-  }
 
   let html = `
     <div class="page-header"><div>
@@ -2122,15 +1773,15 @@ function renderSubmissionDetail(root) {
         </div>
       </div>
       <div class="card">
-        <div class="card-header"><div class="card-title">投稿与发布状态</div></div>
+        <div class="card-header"><div class="card-title">投稿与固化状态</div></div>
         <div class="card-body">
           <div style="display:flex;flex-direction:column;gap:14px">
             <div><div class="detail-label" style="margin-bottom:4px">投稿状态（独立）</div>${tag(s.submissionStatus, SUBMISSION_STATUS)}</div>
             <div><div class="detail-label" style="margin-bottom:4px">审批结果（独立）</div>${approvalTag(s.approvalResult)}</div>
-            <div><div class="detail-label" style="margin-bottom:4px">发布处理状态（独立）</div>${tag(s.publicationStatus, PUBLICATION_STATUS)}</div>
+            <div><div class="detail-label" style="margin-bottom:4px">固化状态（独立）</div>${tag(s.publicationStatus, PUBLICATION_STATUS)}</div>
             <div class="info-banner info" style="margin-bottom:0">
               <svg class="ib-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-              <div style="font-size:12px"><strong>三套状态独立：</strong>APPROVED 只代表审批通过，不代表资产已发布成功。发布需由管理员执行。</div>
+              <div style="font-size:12px"><strong>投稿与固化同步完成：</strong>审批通过后系统自动固化该版本并进入平台目录，无需单独发布。</div>
             </div>
           </div>
         </div>
@@ -2162,7 +1813,7 @@ function renderSubmissionDetail(root) {
 
     ${s.publicationStatus !== 'NOT_STARTED' ? `
     <div class="card" style="margin-top:16px">
-      <div class="card-header"><div class="card-title">🚀 发布处理结果</div></div>
+      <div class="card-header"><div class="card-title">🧊 固化结果</div></div>
       <div class="card-body">
         ${tag(s.publicationStatus, PUBLICATION_STATUS)}
         ${s.publicationMessage ? `<div style="margin-top:12px;font-size:13px;color:var(--ink-2)">${htmlEscape(s.publicationMessage)}</div>` : ''}
@@ -2176,7 +1827,7 @@ function renderValidationPanel(validations) {
   const errCount = validations.reduce((n, vr) => n + vr.issues.filter(i => i.severity === 'ERROR').length, 0);
   const warnCount = validations.reduce((n, vr) => n + vr.issues.filter(i => i.severity === 'WARNING').length, 0);
   const passCount = validations.filter(vr => vr.passed && vr.issues.length === 0).length;
-  const checkerLabelMap = { RESOURCE_PRESENCE:'资源存在性检查', DEPENDENCY_ANALYSIS:'依赖分析', CONTRACT_COMPAT:'契约兼容性检查', SECURITY_SCAN:'安全扫描' };
+  const checkerLabelMap = { RESOURCE_PRESENCE:'资源存在性检查', DEPENDENCY_ANALYSIS:'依赖分析', TYPE_REGISTRABLE:'类型可登记性检查', CONTRACT_COMPAT:'契约兼容性检查', SECURITY_SCAN:'安全扫描' };
   let out = `
     <div class="validation-summary">
       <div class="val-stat pass"><span class="num">${passCount}</span> 通过</div>
@@ -2186,11 +1837,11 @@ function renderValidationPanel(validations) {
     </div>
     ${validations.map(vr => `
       <div style="margin-bottom:12px;border:1px solid var(--rule);border-radius:10px;overflow:hidden">
-        <div style="padding:10px 16px;background:${vr.pass?'var(--success-soft)':'var(--danger-soft)'};display:flex;justify-content:space-between;align-items:center">
+        <div style="padding:10px 16px;background:${vr.passed?'var(--success-soft)':'var(--danger-soft)'};display:flex;justify-content:space-between;align-items:center">
           <div style="font-weight:600;font-size:13px">${checkerLabelMap[vr.checkerType] || vr.checkerType}</div>
           <div style="display:flex;gap:8px;align-items:center">
             <span style="font-size:11px;color:var(--muted)">${htmlEscape(vr.checkedAt)}</span>
-            ${tag(vr.pass?'PASSED':'FAILED', VALIDATION_STATE)}
+            ${tag(vr.passed?'PASSED':'FAILED', VALIDATION_STATE)}
           </div>
         </div>
         ${vr.issues.length > 0 ? `<div style="padding:10px 16px">
@@ -2245,7 +1896,7 @@ function renderReviewWorkspace(root) {
       <div class="card-body" style="padding:0 0 8px">
         <div class="table-wrap">
           <table class="table">
-            <thead><tr><th>投稿</th><th>资产</th><th>提交人</th><th>审批结果</th><th>审批时间</th><th>发布</th></tr></thead>
+            <thead><tr><th>投稿</th><th>资产</th><th>提交人</th><th>审批结果</th><th>审批时间</th><th>固化</th></tr></thead>
             <tbody>
               ${subs.filter(s => s.submissionStatus !== 'PENDING_APPROVAL' && s.submissionStatus !== 'DRAFT').map(s => {
                 const a = roleOf(s.assetId);
@@ -2424,9 +2075,24 @@ function doApproval(submissionId, action) {
       s.approvalCompletedAt = ts;
       s.approvalBy = 'u-liuying';
       s.approvalByName = '刘颖';
+      const asset = roleOf(s.assetId);
+      const ver = versionOf(s.versionId);
+      if (action === 'APPROVED') {
+        // 审批通过即完成固化，不再单独设置发布环节
+        s.publicationStatus = 'SUCCESS';
+        s.publicationMessage = '审批通过，版本已固化并进入平台目录。';
+        if (asset) {
+          asset.assetStatus = 'PUBLISHED';
+          asset.publishedVersionId = s.versionId;
+          asset.updatedAt = ts;
+        }
+      }
       state.activities.unshift({ id:'ACT-'+Date.now(), time:ts, actor:'刘颖', actorId:'u-liuying', type:action, target:s.submissionId, targetName:roleOf(s.assetId)?.assetName, targetType:'SUBMISSION', status:'DONE', message:label + '：' + (comment?.slice(0,40) || '') });
+      if (action === 'APPROVED' && asset && ver) {
+        state.activities.unshift({ id:'ACT-'+Date.now()+'-SNAP', time:ts, actor:'系统', actorId:'sys', type:'FREEZE', target:asset.assetId, targetName:`${asset.assetName} ${ver.versionNumber}`, targetType:'ASSET', status:'DONE', message:'审批通过，版本已固化' });
+      }
       close();
-      Toast.show(label + ' 成功', '', action === 'APPROVED' ? 'success' : 'info');
+      Toast.show(action === 'APPROVED' ? '审批通过并已固化' : label + ' 成功', action === 'APPROVED' ? '资产已进入平台目录' : '', action === 'APPROVED' ? 'success' : 'info');
       state.currentReviewSubmission = null;
       const curPage = state.navPage;
       navigate(curPage);
@@ -2488,65 +2154,6 @@ function cancelSubmission(submissionId) {
   });
 }
 
-function publishAsset(submissionId) {
-  const s = state.submissions.find(x => x.submissionId === submissionId);
-  if (!s) return;
-  if (s.submissionStatus !== 'APPROVED') { Toast.show('发布前置条件不满足','投稿必须先审批通过','error',3500); return; }
-  const v = versionOf(s.versionId);
-  if (!v || v.versionStatus !== 'FROZEN') { Toast.show('版本未冻结','发布前版本必须 FROZEN','error',3500); return; }
-  const a = roleOf(s.assetId);
-
-  Modal.show({
-    title: '执行发布',
-    body: `<div class="info-banner info">
-      <svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
-      <div><strong>发布前校验已通过：</strong>投稿 APPROVED，版本 FROZEN，快照存在。发布成功后资产状态将变为 PUBLISHED，目录可见。</div>
-    </div>
-    <div class="detail-grid" style="margin-top:14px">
-      <div class="detail-item"><div class="detail-label">资产</div><div class="detail-value">${htmlEscape(a.assetName)}</div></div>
-      <div class="detail-item"><div class="detail-label">版本</div><div class="detail-value">${htmlEscape(v.versionNumber)}</div></div>
-      <div class="detail-item"><div class="detail-label">快照</div><div class="detail-value mono">${htmlEscape(v.snapshotId)}</div></div>
-      <div class="detail-item"><div class="detail-label">将变更为</div><div class="detail-value">资产状态 → ${tag('PUBLISHED', ASSET_STATUS)}</div></div>
-    </div>
-    <div style="margin-top:10px">
-      <label class="form-label">发布模拟结果</label>
-      <select class="form-select" id="pubResult">
-        <option value="success">✅ 发布成功（正常场景）</option>
-        <option value="fail-connector">❌ 失败：Provider 超时（依赖 ERP 连接器）</option>
-        <option value="fail-snapshot">❌ 失败：快照完整性校验失败（SHA 不匹配）</option>
-      </select>
-      <div class="form-hint">为演示异常分支，可模拟不同结果。发布失败时资产状态 <strong>不会</strong> 被改为 PUBLISHED。</div>
-    </div>`,
-    confirmText: '执行发布',
-    onConfirm: async ({ close }) => {
-      await new Promise(r => setTimeout(r, 1200));
-      const res = $('#pubResult').value;
-      const ts = new Date().toISOString().replace('T',' ').slice(0,19);
-      if (res === 'success') {
-        s.publicationStatus = 'SUCCESS';
-        s.publicationMessage = '资产发布成功，目录已更新。';
-        a.assetStatus = 'PUBLISHED';
-        a.publishedVersionId = v.versionId;
-        a.updatedAt = ts;
-        state.activities.unshift({ id:'ACT-'+Date.now(), time:ts, actor:'资产管理员', actorId:'u-admin', type:'PUBLISH', target:a.assetId, targetName:`${a.assetName} ${v.versionNumber}`, targetType:'ASSET', status:'DONE', message:'发布成功' });
-        Toast.show('发布成功', `${a.assetName} 已进入目录`, 'success');
-      } else if (res === 'fail-connector') {
-        s.publicationStatus = 'FAILED';
-        s.publicationMessage = '发布时依赖的 Provider 超时：Integration Hub 未在 30s 内响应。';
-        state.activities.unshift({ id:'ACT-'+Date.now(), time:ts, actor:'系统', actorId:'sys', type:'PUBLISH', target:s.submissionId, targetName:a.assetName, targetType:'SUBMISSION', status:'FAIL', message:'发布失败：Provider 超时' });
-        Toast.show('发布失败', 'Provider 超时，资产状态保持不变', 'error', 4000);
-      } else {
-        s.publicationStatus = 'FAILED';
-        s.publicationMessage = '发布失败：快照 SHA-256 摘要与提交时不一致，可能被篡改。';
-        state.activities.unshift({ id:'ACT-'+Date.now(), time:ts, actor:'系统', actorId:'sys', type:'PUBLISH', target:s.submissionId, targetName:a.assetName, targetType:'SUBMISSION', status:'FAIL', message:'发布失败：快照摘要校验不通过' });
-        Toast.show('发布失败', '快照校验失败，安全机制已阻止发布', 'error', 4000);
-      }
-      close();
-      navigate('submissionDetail');
-    }
-  });
-}
-
 function disableAsset(assetId) {
   const a = roleOf(assetId);
   if (a.assetStatus !== 'PUBLISHED') { Toast.show('状态不允许禁用','只有 PUBLISHED 资产可禁用','warning'); return; }
@@ -2575,7 +2182,7 @@ function archiveAsset(assetId) {
   const a = roleOf(assetId);
   if (a.assetStatus === 'PUBLISHED') { Toast.show('请先禁用资产','PUBLISHED 资产需要先禁用才能归档','warning',3500); return; }
   if (a.assetStatus === 'ARCHIVED') { Toast.show('已归档','','warning'); return; }
-  Modal.confirm({ title: '归档资产', message: `归档后资产仍保留用于审计追溯，但不再出现在正常目录中，且不可重新发布。<br><br><strong>目标状态：</strong>${tag('ARCHIVED', ASSET_STATUS)}<br><strong>资产：</strong>${htmlEscape(a.assetName)}`, danger: true,
+  Modal.confirm({ title: '归档资产', message: `归档后资产仍保留用于审计追溯，但不再出现在正常目录中，且不可重新启用。<br><br><strong>目标状态：</strong>${tag('ARCHIVED', ASSET_STATUS)}<br><strong>资产：</strong>${htmlEscape(a.assetName)}`, danger: true,
     onConfirm: async ({ close }) => {
       await new Promise(r => setTimeout(r, 500));
       a.assetStatus = 'ARCHIVED';
@@ -2586,56 +2193,7 @@ function archiveAsset(assetId) {
 }
 
 /* ============================
-   18. 发布管理（管理员视角）
-   ============================ */
-function renderPublish(root) {
-  const subs = state.submissions.filter(s => s.publicationStatus !== 'NOT_STARTED' || s.submissionStatus === 'APPROVED')
-    .sort((a,b) => (b.submittedAt||'').localeCompare(a.submittedAt||''));
-  const needsPublish = state.submissions.filter(s => s.submissionStatus === 'APPROVED' && s.publicationStatus !== 'SUCCESS');
-  const failed = state.submissions.filter(s => s.publicationStatus === 'FAILED');
-  root.innerHTML = `
-    <div class="page-header"><div>
-      <div class="page-title">发布与生命周期</div>
-      <div class="page-subtitle">执行发布、禁用、启用、归档等生命周期操作。</div>
-    </div></div>
-
-    <div class="panel-stack-3" style="margin-bottom:16px">
-      <div class="metric-card"><div class="metric-label">审批通过待发布</div><div class="metric-value" style="color:var(--warning)">${needsPublish.length}</div><div class="metric-sub">可立即执行发布</div></div>
-      <div class="metric-card"><div class="metric-label">发布失败待处理</div><div class="metric-value" style="color:var(--danger)">${failed.length}</div><div class="metric-sub">需介入排查</div></div>
-      <div class="metric-card"><div class="metric-label">已禁用 / 已归档</div><div class="metric-value">${state.assets.filter(a=>a.assetStatus==='DISABLED'||a.assetStatus==='ARCHIVED').length}</div><div class="metric-sub">正常 ${state.assets.filter(a=>a.assetStatus==='PUBLISHED'||a.assetStatus==='DRAFT').length}</div></div>
-    </div>
-
-    ${needsPublish.length > 0 ? `<div class="info-banner warning"><svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg><div>存在 <strong>${needsPublish.length}</strong> 条审批通过但尚未发布的投稿，请尽快执行发布操作。审批通过 ≠ 发布成功。</div></div>` : ''}
-
-    <div class="card">
-      <div class="card-header"><div class="card-title">发布处理记录（Submission × Publication）</div></div>
-      <div class="table-wrap"><table class="table">
-        <thead><tr><th>投稿</th><th>资产</th><th>版本</th><th>投稿状态</th><th>审批结果</th><th>发布状态</th><th>发布说明</th><th>操作</th></tr></thead>
-        <tbody>
-          ${subs.map(s => {
-            const a = roleOf(s.assetId); const v = versionOf(s.versionId);
-            return `<tr>
-              <td class="code">${htmlEscape(s.submissionId)}</td>
-              <td>${htmlEscape(a?.assetName || '—')}</td>
-              <td>${v ? htmlEscape(v.versionNumber) : '—'}</td>
-              <td>${tag(s.submissionStatus, SUBMISSION_STATUS)}</td>
-              <td>${approvalTag(s.approvalResult)}</td>
-              <td>${tag(s.publicationStatus, PUBLICATION_STATUS)}</td>
-              <td style="max-width:260px">${htmlEscape(s.publicationMessage || '—')}</td>
-              <td class="actions">
-                <button class="btn-link" onclick="openAssetDetail('${s.assetId}')">资产详情</button>
-                ${s.submissionStatus === 'APPROVED' && s.publicationStatus !== 'SUCCESS' ? `<button class="btn-link success-link" onclick="publishAsset('${s.submissionId}')">执行发布</button>` : ''}
-              </td>
-            </tr>`;
-          }).join('')}
-        </tbody>
-      </table></div>
-    </div>
-  `;
-}
-
-/* ============================
-   19. 资产目录 & 跨租户复用
+   18. 资产目录 & 跨租户复用
    ============================ */
 function renderCatalog(root) {
   const items = state.assets.filter(a => a.assetStatus === 'PUBLISHED');
@@ -2699,8 +2257,8 @@ function openCatalogAsset(assetId) {
           <div class="detail-item"><div class="detail-label">来源应用</div><div class="detail-value">${htmlEscape(a.sourceApp)}</div></div>
           <div class="detail-item"><div class="detail-label">租户</div><div class="detail-value">${htmlEscape(a.tenantName)}</div></div>
           <div class="detail-item"><div class="detail-label">可见性</div><div class="detail-value">${htmlEscape(a.visibility)}</div></div>
-          <div class="detail-item"><div class="detail-label">当前发布版本</div><div class="detail-value mono">${v?v.versionNumber:'—'}</div></div>
-          <div class="detail-item"><div class="detail-label">发布时间</div><div class="detail-value">${htmlEscape(a.updatedAt)}</div></div>
+          <div class="detail-item"><div class="detail-label">当前固化版本</div><div class="detail-value mono">${v?v.versionNumber:'—'}</div></div>
+          <div class="detail-item"><div class="detail-label">固化时间</div><div class="detail-value">${htmlEscape(a.updatedAt)}</div></div>
         </div>
       </div>
 
@@ -2790,66 +2348,9 @@ function requestImport(assetId) {
       close();
       Toast.show(res === 'success' ? '导入成功' : '导入失败', '', res === 'success' ? 'success' : 'error', 3500);
       state.currentImportId = importId;
-      navigate('import');
+      navigate('catalog');
     }
   });
-}
-
-/* ============================
-   20. 导入记录
-   ============================ */
-function renderImportList(root) {
-  const items = state.imports.slice().sort((a,b) => (b.startedAt||'').localeCompare(a.startedAt||''));
-  root.innerHTML = `
-    <div class="page-header"><div>
-      <div class="page-title">资产导入记录</div>
-      <div class="page-subtitle">Provider 导入结果追溯。导入成功/失败都形成记录；已发布资产的导入失败不会修改快照。</div>
-    </div></div>
-    <div class="card"><div class="table-wrap"><table class="table">
-      <thead><tr><th>导入 ID</th><th>资产</th><th>版本</th><th>目标应用</th><th>资产包</th><th>导入状态</th><th>开始时间</th><th>结果说明</th></tr></thead>
-      <tbody>
-        ${items.map(i => {
-          const a = roleOf(i.assetId); const v = versionOf(i.versionId);
-          return `<tr>
-            <td class="code">${htmlEscape(i.importId)}</td>
-            <td>${htmlEscape(a?.assetName || '—')}</td>
-            <td>${v ? htmlEscape(v.versionNumber) : '—'}</td>
-            <td>${htmlEscape(i.targetApp)}</td>
-            <td class="code">${htmlEscape(i.packageId)}</td>
-            <td>${tag(i.importStatus, IMPORT_STATUS)}</td>
-            <td style="white-space:nowrap">${htmlEscape(i.startedAt)}</td>
-            <td>${htmlEscape(i.importMessage || '—')}</td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table></div></div>
-  `;
-}
-
-function renderHistory(root) {
-  const acts = [...state.activities].sort((a,b) => b.time.localeCompare(a.time));
-  root.innerHTML = `
-    <div class="page-header">
-      <div>
-        <div class="page-title">操作历史</div>
-        <div class="page-subtitle">系统内已记录的关键操作 · 只读查询</div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-body" style="padding:8px 22px">
-        ${acts.map(a => `
-          <div class="activity-item">
-            <div class="activity-dot ${a.status==='DONE'?'success':a.status==='FAIL'?'error':a.status==='PENDING'?'warning':'info'}"></div>
-            <div class="activity-content">
-              <div class="activity-title">${htmlEscape(a.actor)} · ${htmlEscape(a.message)}</div>
-              <div class="activity-sub">${htmlEscape(a.targetName)} · 类型 ${a.targetType}</div>
-            </div>
-            <div class="activity-time">${htmlEscape(a.time)}</div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `;
 }
 
 
@@ -2857,12 +2358,12 @@ function renderHistory(root) {
    20. 资源登记多步骤向导
    ============================ */
 function renderWizard(root) {
-  if (!state.wizard || !state.wizard.selectedResource) {
+  if (!state.wizard) {
     // 初始化
-    state.wizard = { step: 1, selectedResource: null, assetName: '', assetCode: '', assetDesc: '', visibility: 'TENANT_PUBLIC', depCheck: [], snapStatus: null, valRun: null };
+    state.wizard = { step: 1, appId: null, selectedResources: [], assetName: '', assetCode: '', assetDesc: '', visibility: 'PLATFORM_PUBLIC', snapStatus: null, valRun: null };
   }
   const w = state.wizard;
-  const steps = ['选择资源', '类型与依赖识别', '权限与存在性检查', '生成固定快照', '固定校验', '登记与投稿'];
+  const steps = ['选择资源', '类型与依赖识别', '生成固定快照', '固定校验', '登记与投稿'];
 
   let stepContent = '';
   if (w.step === 1) stepContent = wizardStep1(w);
@@ -2870,13 +2371,12 @@ function renderWizard(root) {
   else if (w.step === 3) stepContent = wizardStep3(w);
   else if (w.step === 4) stepContent = wizardStep4(w);
   else if (w.step === 5) stepContent = wizardStep5(w);
-  else if (w.step === 6) stepContent = wizardStep6(w);
 
   root.innerHTML = `
     <div class="page-header">
       <div>
         <div class="page-title">资源登记向导</div>
-        <div class="page-subtitle">选择平台原生资源 → 识别依赖 → 校验 → 生成快照 → 登记 → 发起投稿</div>
+        <div class="page-subtitle">选择租户应用内的资源 → 识别类型与依赖 → 生成固定快照 → 固定校验 → 确认登记并投稿</div>
       </div>
       <div class="page-actions">
         <button class="btn btn-secondary" onclick="state.wizard=null;navigate('assetList')">放弃</button>
@@ -2901,8 +2401,8 @@ function renderWizard(root) {
             ${w.step > 1 ? `<button class="btn btn-secondary" onclick="wizardPrev()">← 上一步</button>` : ''}
           </div>
           <div>
-            ${w.step < 6 ? `<button class="btn btn-primary" onclick="wizardNext()">下一步 →</button>` : ''}
-            ${w.step === 6 ? `<button class="btn btn-success" onclick="wizardComplete()">完成登记并返回列表</button>` : ''}
+            ${w.step < 5 ? `<button class="btn btn-primary" ${(w.step === 3 && w.snapStatus?.state !== 'done') || (w.step === 4 && w.valRun?.state !== 'done') ? 'disabled style="opacity:.5;cursor:not-allowed"' : ''} onclick="wizardNext()">${(w.step === 3 && w.snapStatus?.state !== 'done') ? '快照生成中…' : (w.step === 4 && w.valRun?.state !== 'done') ? '校验执行中…' : '下一步 →'}</button>` : ''}
+            ${w.step === 5 ? `<button class="btn btn-success" onclick="wizardComplete()">确认登记并发起投稿</button>` : ''}
           </div>
         </div>
       </div>
@@ -2910,119 +2410,238 @@ function renderWizard(root) {
   `;
 }
 
-function wizardStep1(w) {
-  // 选择平台原生资源
-  return `
-    <div class="info-banner info">
-      <svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-      <div>平台原生资源由各来源应用提供。选择后系统将自动识别资源类型、依赖、执行固定快照和校验。</div>
-    </div>
-    <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px">选择要登记的资源</div>
-    ${state.platformResources.map(r => {
-      const t = assetTypes.find(x => x.code === r.resourceType);
-      const sel = w.selectedResource && w.selectedResource.resourceId === r.resourceId;
-      return `<div class="step-select-card ${sel ? 'selected' : ''}" onclick="wizardPickResource('${r.resourceId}')">
-        <div class="ssc-icon">${t?.icon || '📦'}</div>
-        <div style="flex:1">
-          <div class="ssc-name">${htmlEscape(r.resourceName)}</div>
-          <div class="ssc-meta">${htmlEscape(r.sourceApp)} · 创建人 ${htmlEscape(r.ownerName)} · 最近更新 ${htmlEscape(r.updatedAt)}</div>
-          <div class="ssc-desc"><span class="tag tag-info">${t?.name || r.resourceType}</span> · <span style="color:var(--muted)">资源 ID <span class="code-mono">${htmlEscape(r.resourceId)}</span> · 大小 ${fmtSize(r.size)}</span></div>
-        </div>
-      </div>`;
-    }).join('')}
-  `;
+function wizardApp(w) {
+  return state.tenantApps.find(a => a.appId === w.appId) || null;
 }
-
-function wizardPickResource(id) {
-  const r = state.platformResources.find(x => x.resourceId === id);
-  state.wizard.selectedResource = r;
-  // 自动填充
-  state.wizard.assetName = r.resourceName;
-  state.wizard.assetCode = r.resourceId.replace('RES-','').toUpperCase();
-  state.wizard.assetDesc = '';
+function wizardSelectedResources(w) {
+  const app = wizardApp(w);
+  if (!app) return [];
+  return w.selectedResources.map(id => app.resources.find(r => r.resourceId === id)).filter(Boolean);
+}
+function wizardTypeOf(code) {
+  return RESOURCE_TYPES.find(t => t.code === code) || { icon: '📦', name: code };
+}
+function wizardAssetType(w) {
+  const sels = wizardSelectedResources(w);
+  const types = [...new Set(sels.map(r => r.resourceType))];
+  if (types.length === 0) return '';
+  return types.length === 1 ? types[0] : 'MIXED';
+}
+function wizardTypeSummary(w) {
+  const sels = wizardSelectedResources(w);
+  const map = {};
+  sels.forEach(r => { map[r.resourceType] = (map[r.resourceType] || 0) + 1; });
+  return Object.keys(map).map(k => `${wizardTypeOf(k).name} ${map[k]}`).join(' · ');
+}
+function wizardRefreshIdentity(w) {
+  const sels = wizardSelectedResources(w);
+  const app = wizardApp(w);
+  if (!app || sels.length === 0) { w.assetName = ''; w.assetCode = ''; return; }
+  if (sels.length === 1) {
+    w.assetName = sels[0].resourceName;
+    w.assetCode = sels[0].resourceId.replace(/^RES-/, '').toUpperCase();
+  } else {
+    w.assetName = app.appName + ' 资源组合（' + sels.length + ' 项）';
+    w.assetCode = app.appCode + '-BUNDLE-' + String(sels.length).padStart(2, '0');
+  }
+}
+function wizardPickApp(appId) {
+  const w = state.wizard;
+  w.appId = appId;
+  w.selectedResources = [];
+  w.assetName = '';
+  w.assetCode = '';
+  w.assetDesc = '';
+  w.snapStatus = null;
+  w.valRun = null;
+  renderWizard(document.getElementById('content'));
+}
+function wizardToggleResource(resourceId) {
+  const w = state.wizard;
+  const i = w.selectedResources.indexOf(resourceId);
+  if (i >= 0) w.selectedResources.splice(i, 1);
+  else w.selectedResources.push(resourceId);
+  wizardRefreshIdentity(w);
+  w.snapStatus = null;
+  w.valRun = null;
   renderWizard(document.getElementById('content'));
 }
 
+function wizardStep1(w) {
+  const app = wizardApp(w);
+  const sels = wizardSelectedResources(w);
+  const resName = id => {
+    const a = wizardApp(w);
+    const r = a && a.resources.find(x => x.resourceId === id);
+    return r ? r.resourceName : id;
+  };
+  return `
+    <div class="info-banner info">
+      <svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      <div>资源登记以「应用」为单位：先选择当前租户下的应用，再从该应用中选择要登记的资源，支持跨类型多选。</div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">① 选择应用 <span style="font-weight:400;color:var(--muted);font-size:12px">当前租户：Acme 科技（T-ACME）</span></div>
+      <div class="app-pick-grid">
+        ${state.tenantApps.map(a => `
+          <div class="app-pick-card ${w.appId === a.appId ? 'selected' : ''}" onclick="wizardPickApp('${a.appId}')">
+            <div class="app-pick-name">🗂 ${htmlEscape(a.appName)}</div>
+            <div class="app-pick-meta">
+              应用标识 <span class="code-mono">${htmlEscape(a.appCode)}</span> · ${htmlEscape(a.provider)}<br>
+              可登记资源 ${a.resources.length} 项 · 负责人 ${htmlEscape(a.ownerName)}<br>
+              最近更新 ${htmlEscape(a.updatedAt)}
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    ${!app ? `
+      <div class="empty-state" style="padding:36px 20px">
+        <div class="empty-state-title">请先选择一个应用</div>
+        <div class="empty-state-desc">选择应用后，将展示该应用内可登记的资源清单</div>
+      </div>` : `
+      <div class="detail-section">
+        <div class="detail-section-title">② 选择资源 <span style="font-weight:400;color:var(--muted);font-size:12px">来自 ${htmlEscape(app.appName)}，可多选</span></div>
+        ${RESOURCE_TYPES.map(t => {
+          const list = app.resources.filter(r => r.resourceType === t.code);
+          if (list.length === 0) return '';
+          const chosen = list.filter(r => w.selectedResources.includes(r.resourceId)).length;
+          return `<div class="res-group">
+            <div class="res-group-head">${t.icon} ${t.name}
+              <span class="res-group-count">共 ${list.length} 项 · 已选 ${chosen}</span>
+            </div>
+            ${list.map(r => {
+              const sel = w.selectedResources.includes(r.resourceId);
+              const depNames = (r.dependsOn || []).map(resName);
+              return `<div class="res-pick-item ${sel ? 'selected' : ''}" onclick="wizardToggleResource('${r.resourceId}')">
+                <div class="res-check">✓</div>
+                <div style="flex:1;min-width:0">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                    <span style="font-size:13px;font-weight:600;color:var(--ink)">${htmlEscape(r.resourceName)}</span>
+                    ${r.resourceType === 'PARTIAL_TEMPLATE' ? '<span class="tag tag-info">混合内容</span>' : ''}
+                  </div>
+                  <div class="ssc-meta">资源 ID <span class="code-mono">${htmlEscape(r.resourceId)}</span> · 创建人 ${htmlEscape(r.ownerName)} · 最近更新 ${htmlEscape(r.updatedAt)} · ${fmtSize(r.size)}</div>
+                  ${r.contents ? `<div class="res-contents">${r.contents.map(c => `<span>${htmlEscape(c)}</span>`).join('')}</div>` : ''}
+                  ${depNames.length ? `<div style="font-size:11px;color:var(--muted);margin-top:6px">关联资源：${depNames.map(htmlEscape).join('、')}</div>` : ''}
+                </div>
+              </div>`;
+            }).join('')}
+          </div>`;
+        }).join('')}
+      </div>
+
+      <div class="info-banner ${sels.length ? 'success' : 'info'}" style="margin-bottom:0">
+        <svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg>
+        <div>${sels.length
+          ? `已选择 <strong>${sels.length}</strong> 项资源：${wizardTypeSummary(w)}。系统将按所选资源自动识别类型与依赖关系。`
+          : '尚未选择资源。请在上方按类型勾选，至少选择 1 项。'}</div>
+      </div>`}
+  `;
+}
+
+function wizardDependencyRows(w) {
+  const app = wizardApp(w);
+  const rows = [];
+  const seen = new Set();
+  const add = (owner, depId, level) => {
+    const dep = app.resources.find(x => x.resourceId === depId);
+    if (!dep) return;
+    const key = owner.resourceId + '>' + depId;
+    if (seen.has(key)) return;
+    seen.add(key);
+    rows.push({ owner, dep, level, type: dep.resourceType === 'CONNECTOR' ? 'OPTIONAL' : 'REQUIRED' });
+  };
+  w.selectedResources.forEach(id => {
+    const owner = app.resources.find(x => x.resourceId === id);
+    if (!owner) return;
+    (owner.dependsOn || []).forEach(depId => add(owner, depId, '直接依赖'));
+  });
+  w.selectedResources.forEach(id => {
+    const owner = app.resources.find(x => x.resourceId === id);
+    if (!owner) return;
+    (owner.dependsOn || []).forEach(depId => {
+      const mid = app.resources.find(x => x.resourceId === depId);
+      if (!mid) return;
+      (mid.dependsOn || []).forEach(d2 => add(owner, d2, '间接依赖'));
+    });
+  });
+  return rows;
+}
+
 function wizardStep2(w) {
-  const r = w.selectedResource;
-  const t = assetTypes.find(x => x.code === r.resourceType);
-  // 模拟：该资源可能有依赖
-  const deps = [
-    { resourceId: 'RES-DEP-A01', resourceName: 'A01 基础库', depType: 'REQUIRED', autoFound: true },
-    { resourceId: 'RES-DEP-B07', resourceName: 'B07 配置中心', depType: 'OPTIONAL', autoFound: true }
-  ];
+  const sels = wizardSelectedResources(w);
+  const deps = wizardDependencyRows(w);
+  const assetType = wizardAssetType(w);
+  const at = assetTypes.find(x => x.code === assetType) || { icon: '🗂', name: '混合资产' };
   return `
     <div class="info-banner success">
       <svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg>
-      <div><strong>资源类型识别完成。</strong>已识别为 <strong>${t?.icon} ${t?.name || r.resourceType}</strong>，来源应用 <strong>${htmlEscape(r.sourceApp)}</strong>。</div>
+      <div><strong>类型与依赖识别完成。</strong>共识别 <strong>${sels.length}</strong> 项资源（${wizardTypeSummary(w)}），登记资产类型为 <strong>${at.icon} ${at.name}</strong>，自动识别依赖 <strong>${deps.length}</strong> 条。</div>
     </div>
+
     <div class="detail-section">
-      <div class="detail-section-title">资源基本信息（系统自动识别）</div>
-      <div class="detail-grid">
-        <div class="detail-item"><div class="detail-label">资源 ID</div><div class="detail-value mono">${htmlEscape(r.resourceId)}</div></div>
-        <div class="detail-item"><div class="detail-label">资源名称</div><div class="detail-value">${htmlEscape(r.resourceName)}</div></div>
-        <div class="detail-item"><div class="detail-label">资源类型</div><div class="detail-value">${t?.icon || '📦'} ${htmlEscape(r.resourceType)}</div></div>
-        <div class="detail-item"><div class="detail-label">来源应用</div><div class="detail-value">${htmlEscape(r.sourceApp)} <span class="code-mono">${htmlEscape(r.sourceAppCode)}</span></div></div>
-        <div class="detail-item"><div class="detail-label">资源大小</div><div class="detail-value">${fmtSize(r.size)}</div></div>
-        <div class="detail-item"><div class="detail-label">创建人</div><div class="detail-value">${htmlEscape(r.ownerName)}</div></div>
+      <div class="detail-section-title">资源类型识别结果</div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>资源名称</th><th>资源 ID</th><th>识别类型</th><th>内容构成</th><th>大小</th><th>负责人</th></tr></thead>
+          <tbody>
+            ${sels.map(r => {
+              const t = wizardTypeOf(r.resourceType);
+              return `<tr>
+                <td><strong>${htmlEscape(r.resourceName)}</strong></td>
+                <td class="code">${htmlEscape(r.resourceId)}</td>
+                <td><span class="tag tag-info">${t.icon} ${htmlEscape(t.name)}</span></td>
+                <td style="font-size:12px;color:var(--ink-3)">${r.contents ? r.contents.map(htmlEscape).join('；') : '—'}</td>
+                <td>${fmtSize(r.size)}</td>
+                <td>${htmlEscape(r.ownerName)}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
       </div>
     </div>
+
     <div class="detail-section">
-      <div class="detail-section-title">自动识别的依赖清单</div>
-      <table class="table" style="min-width:0">
-        <thead><tr><th>依赖资源</th><th>依赖类型</th><th>识别方式</th></tr></thead>
-        <tbody>
-          ${deps.map(d => `<tr>
-            <td>${htmlEscape(d.resourceName)} <span class="code-mono">${htmlEscape(d.resourceId)}</span></td>
-            <td>${d.depType==='REQUIRED' ? '<span class="tag tag-error">必需</span>' : '<span class="tag tag-info">可选</span>'}</td>
-            <td><span class="tag tag-published">自动识别</span></td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
+      <div class="detail-section-title">依赖关系识别结果 <span style="font-weight:400;color:var(--muted);font-size:12px">按所选资源自动关联</span></div>
+      ${deps.length === 0 ? '<div class="empty-state" style="padding:24px"><div class="empty-state-title">未识别到依赖关系</div></div>' : `
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>被依赖资源</th><th>依赖方资源</th><th>依赖类型</th><th>依赖层级</th><th>识别方式</th></tr></thead>
+          <tbody>
+            ${deps.map(d => {
+              const dt = wizardTypeOf(d.dep.resourceType);
+              return `<tr>
+                <td><strong>${htmlEscape(d.dep.resourceName)}</strong> <span class="code-mono">${htmlEscape(d.dep.resourceId)}</span><div style="font-size:11px;color:var(--muted)">${dt.icon} ${htmlEscape(dt.name)}</div></td>
+                <td>${htmlEscape(d.owner.resourceName)} <span class="code-mono">${htmlEscape(d.owner.resourceId)}</span></td>
+                <td>${d.type === 'REQUIRED' ? '<span class="tag tag-error">必需</span>' : '<span class="tag tag-info">可选</span>'}</td>
+                <td>${d.level === '直接依赖' ? '<span class="tag tag-published">直接依赖</span>' : '<span class="tag tag-draft">间接依赖</span>'}</td>
+                <td><span class="tag tag-approved">自动识别</span></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`}
+      <div class="form-hint" style="margin-top:8px">依赖资源随所选资源一并生成快照；间接依赖表示所选资源所依赖的资源自身又依赖的其他资源。</div>
     </div>
+
     <div class="detail-section">
       <div class="detail-section-title">资产业务信息（人工确认）</div>
       <div class="form-grid">
         <div class="form-field"><div class="form-label"><span class="req">*</span>资产名称</div><input class="form-input" value="${htmlEscape(w.assetName)}" oninput="state.wizard.assetName=this.value"></div>
         <div class="form-field"><div class="form-label"><span class="req">*</span>资产标识</div><input class="form-input" value="${htmlEscape(w.assetCode)}" oninput="state.wizard.assetCode=this.value"></div>
-        <div class="form-field"><div class="form-label"><span class="req">*</span>可见性</div>
-          <select class="form-select" onchange="state.wizard.visibility=this.value">
-            <option value="TENANT_PUBLIC" ${w.visibility==='TENANT_PUBLIC'?'selected':''}>租户内可见</option>
-            <option value="PLATFORM_PUBLIC" ${w.visibility==='PLATFORM_PUBLIC'?'selected':''}>平台公开</option>
-            <option value="PRIVATE" ${w.visibility==='PRIVATE'?'selected':''}>私有（仅自己可见）</option>
-          </select>
+        <div class="form-field"><div class="form-label">资产类型</div><input class="form-input" value="${at.icon} ${at.name}" disabled></div>
+        <div class="form-field"><div class="form-label">可见性</div>
+          <input class="form-input" value="平台可见（PLATFORM_PUBLIC）" disabled>
+          <div class="form-hint">由平台统一策略决定，登记时不可修改。</div>
         </div>
-        <div class="form-field full"><div class="form-label">资产描述 <span class="opt">（选填）</span></div><textarea class="form-textarea" oninput="state.wizard.assetDesc=this.value">${htmlEscape(w.assetDesc)}</textarea></div>
+        <div class="form-field full"><div class="form-label">资产描述 <span class="opt">（选填）</span></div><textarea class="form-textarea" placeholder="简要说明该资产组合的业务用途" oninput="state.wizard.assetDesc=this.value">${htmlEscape(w.assetDesc)}</textarea></div>
       </div>
     </div>
   `;
 }
 
 function wizardStep3(w) {
-  // 模拟权限检查 + 依赖存在性检查
-  const checks = [
-    { label: '资源存在性', passed: true,  detail: '已在来源应用中确认该资源可正常读取' },
-    { label: '来源应用权限', passed: true,  detail: `有 ${w.selectedResource.sourceApp} 的只读访问权限（RBAC）` },
-    { label: '资源未被禁用', passed: true,  detail: '资源当前处于 ACTIVE 状态' },
-    { label: '必需依赖存在', passed: true,  detail: 'RES-DEP-A01 已在平台注册' },
-    { label: '可选依赖存在', passed: true,  detail: 'RES-DEP-B07 已在平台注册' },
-    { label: '来源应用 Provider 可用', passed: true,  detail: `${w.selectedResource.sourceAppCode} Provider 健康检查通过` }
-  ];
-  return `
-    <div class="detail-section">
-      <div class="detail-section-title">前置条件检查</div>
-      <ul class="check-list">
-        ${checks.map(c => `<li class="${c.passed?'pass':'fail'}"><span class="chk-icon">${c.passed?'✓':'✗'}</span><div><div>${c.label}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">${c.detail}</div></div></li>`).join('')}
-      </ul>
-    </div>
-    <div class="info-banner success">
-      <svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg>
-      <div>所有前置条件检查通过。下一步将生成固定快照并冻结版本。</div>
-    </div>
-  `;
-}
-
-function wizardStep4(w) {
   if (!w.snapStatus) { w.snapStatus = { state: 'running', progress: 0 }; setTimeout(() => wizardTickSnap(), 400); }
   const s = w.snapStatus;
   if (s.state === 'running') {
@@ -3032,7 +2651,7 @@ function wizardStep4(w) {
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21 12a9 9 0 11-6.22-8.56"/><path d="M21 3v6h-6"/></svg>
         </div>
         <div style="font-size:15px;font-weight:700">正在生成固定快照...</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:4px">从来源应用 ${w.selectedResource.sourceApp} 读取完整资源内容并计算 SHA-256</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">从来源应用 ${htmlEscape(wizardApp(w)?.appName || '')} 读取 ${w.selectedResources.length} 项资源内容并计算 SHA-256</div>
         <div style="max-width:400px;margin:20px auto 0">
           <div class="progress-bar"><span style="width:${s.progress}%"></span></div>
           <div style="font-size:12px;color:var(--muted);margin-top:8px">${s.progress}% - ${s.current}</div>
@@ -3043,15 +2662,16 @@ function wizardStep4(w) {
     return `
       <div class="info-banner success">
         <svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg>
-        <div><strong>快照已生成并冻结。</strong>版本内容将以此为准，审核、发布与资产包获取均使用该固定快照。</div>
+        <div><strong>快照已生成并冻结。</strong>版本内容将以此为准，审核、固化与资产包获取均使用该固定快照。</div>
       </div>
       <div class="detail-section">
         <div class="detail-section-title">快照信息</div>
         <div class="detail-grid">
           <div class="detail-item"><div class="detail-label">快照 ID</div><div class="detail-value mono">${htmlEscape(s.snapshotId)}</div></div>
+          <div class="detail-item"><div class="detail-label">包含资源</div><div class="detail-value">${w.selectedResources.length} 项（${wizardTypeSummary(w)}）</div></div>
           <div class="detail-item"><div class="detail-label">快照大小</div><div class="detail-value">${fmtSize(s.snapshotSize)}</div></div>
-          <div class="detail-item full"><div class="detail-label">SHA-256 摘要</div><div class="detail-value mono" style="word-break:break-all;font-size:11px">${htmlEscape(s.snapshotDigest)}</div></div>
           <div class="detail-item"><div class="detail-label">生成时间</div><div class="detail-value">${htmlEscape(s.generatedAt)}</div></div>
+          <div class="detail-item full"><div class="detail-label">SHA-256 摘要</div><div class="detail-value mono" style="word-break:break-all;font-size:11px">${htmlEscape(s.snapshotDigest)}</div></div>
         </div>
       </div>
       <ul class="check-list">
@@ -3068,9 +2688,9 @@ function wizardTickSnap() {
   if (!w || !w.snapStatus || w.snapStatus.state !== 'running') return;
   const steps = [
     [15, '连接来源应用 Provider'],
-    [35, '读取资源元数据'],
-    [55, '下载资源主体内容'],
-    [75, '解析依赖并固化依赖清单'],
+    [35, '汇总所选资源清单'],
+    [55, '读取资源主体内容'],
+    [75, '固化依赖清单'],
     [92, '计算 SHA-256 摘要'],
     [100, '冻结版本快照']
   ];
@@ -3084,7 +2704,7 @@ function wizardTickSnap() {
     w.snapStatus.state = 'done';
     const now = new Date();
     w.snapStatus.snapshotId = 'SNAP-SHA256-' + w.assetCode + '-' + now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '-' + Math.random().toString(16).slice(2,8).toUpperCase();
-    w.snapStatus.snapshotSize = w.selectedResource.size;
+    w.snapStatus.snapshotSize = wizardSelectedResources(w).reduce((sum, r) => sum + (r.size || 0), 0);
     w.snapStatus.snapshotDigest = Array.from({length: 64}, () => '0123456789ABCDEF'[Math.floor(Math.random()*16)]).join('');
     w.snapStatus.generatedAt = now.toISOString().replace('T',' ').slice(0,19);
   } else {
@@ -3094,7 +2714,7 @@ function wizardTickSnap() {
   if (c && state.navPage === 'assetRegister') renderWizard(c);
 }
 
-function wizardStep5(w) {
+function wizardStep4(w) {
   if (!w.valRun) {
     w.valRun = { state: 'running', progress: 0 };
     setTimeout(wizardTickVal, 280);
@@ -3107,7 +2727,7 @@ function wizardStep5(w) {
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--info)" stroke-width="2"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
         </div>
         <div style="font-size:15px;font-weight:700">正在执行固定校验...</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:4px">依次执行 资源存在性 / 依赖分析 / 契约兼容 / 安全扫描</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">依次执行 资源存在性 / 依赖完整性 / 类型可登记性 / 契约兼容性 / 安全扫描</div>
         <div style="max-width:400px;margin:20px auto 0">
           <div class="progress-bar"><span style="width:${vr.progress}%"></span></div>
           <div style="font-size:12px;color:var(--muted);margin-top:8px">${vr.progress}% - ${vr.current}</div>
@@ -3116,33 +2736,29 @@ function wizardStep5(w) {
   }
   // done
   const r = vr.results;
-  const errors = r.reduce((s,x) => s + x.issues.filter(i => i.severity === 'ERROR').length, 0);
-  const warnings = r.reduce((s,x) => s + x.issues.filter(i => i.severity === 'WARNING').length, 0);
-  const allPass = errors === 0;
+  const failed = r.filter(x => !x.passed).length;
+  const allPass = failed === 0;
   return `
-    ${allPass ? `<div class="info-banner success"><svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg><div><strong>全部校验通过。</strong>可以进入资产登记与投稿步骤。</div></div>` :
-      `<div class="info-banner error"><svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg><div><strong>存在阻断性错误！</strong>点击下一步会被业务层阻止，必须修正后重新快照。</div></div>`}
+    ${allPass ? `<div class="info-banner success"><svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg><div><strong>全部固定校验项通过。</strong>可以进入登记与投稿确认。</div></div>` :
+      `<div class="info-banner error"><svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg><div><strong>存在未通过的校验项！</strong>点击下一步会被业务层阻止，必须修正后重新生成快照。</div></div>`}
     <div class="validation-summary">
-      <div class="val-stat pass">通过 <span class="num">${r.filter(x=>x.passed).length}</span></div>
-      ${errors > 0 ? `<div class="val-stat err">阻断 <span class="num">${errors}</span></div>` : ''}
-      ${warnings > 0 ? `<div class="val-stat warn">警告 <span class="num">${warnings}</span></div>` : ''}
+      <div class="val-stat pass">通过 <span class="num">${r.filter(x => x.passed).length}</span></div>
+      ${failed > 0 ? `<div class="val-stat err">未通过 <span class="num">${failed}</span></div>` : ''}
     </div>
-    ${r.map(vr => `
-      <div style="padding:10px 0;border-bottom:1px solid var(--rule)">
-        <div style="display:flex;gap:14px;align-items:center;margin-bottom:6px">
-          <span class="code-mono">${htmlEscape(vr.checkerType)}</span>
-          ${tag(vr.passed?'PASSED':'FAILED', VALIDATION_STATE, vr.passed?'通过':'未通过')}
-          <span style="font-size:12px;color:var(--muted)">${htmlEscape(vr.checkedAt)}</span>
-        </div>
-        ${vr.issues.length > 0 ? vr.issues.map(i => `
-          <div class="issue-row" style="margin-bottom:4px">
-            <div class="iss-code">${htmlEscape(i.issueCode)}</div>
-            <div>
-              <div class="iss-desc">${htmlEscape(i.description)}</div>
-              ${i.resolutionSuggestion ? `<div class="iss-suggestion">建议：${htmlEscape(i.resolutionSuggestion)}</div>` : ''}
-            </div>
-          </div>`).join('') : ''}
-      </div>`).join('')}
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>校验项</th><th>校验器（英文）</th><th>描述</th><th>结果</th><th>校验时间</th></tr></thead>
+        <tbody>
+          ${r.map(x => `<tr>
+            <td><strong>${htmlEscape(x.nameZh || x.checkerType)}</strong></td>
+            <td class="code">${htmlEscape(x.checkerType)}</td>
+            <td style="font-size:12px;color:var(--ink-3);max-width:360px">${htmlEscape(x.description || '—')}</td>
+            <td>${tag(x.passed ? 'PASSED' : 'FAILED', VALIDATION_STATE, x.passed ? '通过' : '不通过')}</td>
+            <td style="white-space:nowrap">${htmlEscape(x.checkedAt)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
   `;
 }
 
@@ -3151,36 +2767,25 @@ function wizardTickVal() {
   if (!w || !w.valRun || w.valRun.state !== 'running') return;
   const steps = [
     [20, '资源存在性校验'],
-    [45, '依赖分析校验'],
-    [70, '契约兼容性校验'],
+    [45, '依赖完整性校验'],
+    [70, '类型可登记性校验'],
+    [88, '契约兼容性校验'],
     [95, '安全扫描'],
     [100, '校验完成']
   ];
   const cur = steps.find(s => s[0] > w.valRun.progress);
   if (cur) { w.valRun.current = cur[1]; w.valRun.progress = Math.min(100, cur[0]); }
   if (w.valRun.progress >= 100) {
-    // 模拟校验结果 — 取决于资源类型
-    const resType = w.selectedResource.resourceType;
-    let results;
-    if (resType === 'REPORT') {
-      // 报表：故意出一个 ERROR + 一个 WARNING（模拟 DEPENDENCY_NOT_FOUND）
-      results = [
-        { checkerType: 'RESOURCE_PRESENCE',  passed: true,  checkedAt: nowStr(), issues: [] },
-        { checkerType: 'DEPENDENCY_ANALYSIS', passed: false, checkedAt: nowStr(), issues: [
-          { issueCode: 'DEPENDENCY_NOT_FOUND', description: '依赖的数据集 RES-DATA-082 在系统中不存在', severity: 'ERROR', resolutionStatus: 'OPEN', resourceRef: 'RES-DATA-082', resolutionSuggestion: '检查资源标识或联系资源创建人' },
-          { issueCode: 'PROVIDER_VERSION_OUTDATED', description: 'Provider 版本较低，存在潜在兼容性风险', severity: 'WARNING', resolutionStatus: 'OPEN', resourceRef: 'RES-ERP-011', resolutionSuggestion: '升级 Provider 到最新版本' }
-        ]},
-        { checkerType: 'CONTRACT_COMPAT',    passed: true,  checkedAt: nowStr(), issues: [] },
-        { checkerType: 'SECURITY_SCAN',      passed: true,  checkedAt: nowStr(), issues: [] }
-      ];
-    } else {
-      results = [
-        { checkerType: 'RESOURCE_PRESENCE',  passed: true,  checkedAt: nowStr(), issues: [] },
-        { checkerType: 'DEPENDENCY_ANALYSIS', passed: true, checkedAt: nowStr(), issues: [] },
-        { checkerType: 'CONTRACT_COMPAT',    passed: true,  checkedAt: nowStr(), issues: [] },
-        { checkerType: 'SECURITY_SCAN',      passed: true,  checkedAt: nowStr(), issues: [] }
-      ];
-    }
+    const sels = wizardSelectedResources(w);
+    const deps = wizardDependencyRows(w);
+    const ts = nowStr();
+    const results = [
+      { nameZh: '资源存在性', checkerType: 'RESOURCE_PRESENCE', description: `所选 ${sels.length} 项资源均可在来源应用中正常读取`, passed: true, checkedAt: ts, issues: [] },
+      { nameZh: '依赖完整性', checkerType: 'DEPENDENCY_ANALYSIS', description: `识别到 ${deps.length} 条依赖关系，依赖资源均存在且版本满足要求`, passed: true, checkedAt: ts, issues: [] },
+      { nameZh: '类型可登记性', checkerType: 'TYPE_REGISTRABLE', description: '所选资源类型均在平台允许登记的范围内', passed: true, checkedAt: ts, issues: [] },
+      { nameZh: '契约兼容性', checkerType: 'CONTRACT_COMPAT', description: '快照结构与当前平台版本契约兼容', passed: true, checkedAt: ts, issues: [] },
+      { nameZh: '安全扫描', checkerType: 'SECURITY_SCAN', description: '未发现敏感凭据、外部危险调用或越权访问', passed: true, checkedAt: ts, issues: [] }
+    ];
     w.valRun.state = 'done'; w.valRun.results = results;
   } else { setTimeout(wizardTickVal, 280); }
   const c = $('#content');
@@ -3189,48 +2794,113 @@ function wizardTickVal() {
 
 function nowStr() { return new Date().toISOString().replace('T',' ').slice(0,19); }
 
-function wizardStep6(w) {
-  const allPass = w.valRun.results.every(x => x.issues.every(i => i.severity !== 'ERROR'));
-  const r = w.selectedResource;
+function wizardStep5(w) {
+  const app = wizardApp(w);
+  const sels = wizardSelectedResources(w);
+  const deps = wizardDependencyRows(w);
+  const at = assetTypes.find(x => x.code === wizardAssetType(w)) || { icon: '🗂', name: '混合资产' };
+  const allPass = w.valRun.results.every(x => x.passed);
+  const typeSummary = wizardTypeSummary(w);
   return `
-    ${!allPass ? `<div class="info-banner error"><svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg><div><strong>阻断性错误未清除。</strong>业务层将阻止登记 → 投稿 → 审批通过 → 发布 的后续流程。请返回第 5 步确认校验结果。</div></div>` :
-      `<div class="info-banner success"><svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg><div><strong>所有前置条件已满足。</strong>接下来将：(1) 创建数字资产记录；(2) 创建 FROZEN 版本；(3) 创建 PENDING_APPROVAL 投稿。</div></div>`}
-    <div class="card" style="padding:18px 22px;background:var(--bg3);border:1px dashed var(--rule-2);margin-top:10px">
-      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:12px">将要生成的数据</div>
-      <ul class="check-list" style="font-size:12px">
-        <li class="info"><span class="chk-icon">i</span>DigitalAsset：${htmlEscape(w.assetName)} <span class="code-mono">${htmlEscape(w.assetCode)}</span> · 状态 DRAFT</li>
-        <li class="info"><span class="chk-icon">i</span>AssetVersion：${htmlEscape(w.assetName)} V0.1 · 状态 FROZEN · 快照 <span class="code-mono">${htmlEscape(w.snapStatus.snapshotId)}</span></li>
-        <li class="info"><span class="chk-icon">i</span>AssetSubmission：状态 PENDING_APPROVAL · 工作流实例自动创建</li>
-      </ul>
+    ${!allPass ? `<div class="info-banner error"><svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg><div><strong>存在未通过的固定校验项。</strong>业务层将阻止登记与投稿，请返回上一步确认校验结果。</div></div>` :
+      `<div class="info-banner success"><svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg><div><strong>请进行最后一步信息确认。</strong>以下为本次登记将形成的完整业务对象，全部为只读；确认无误后即可提交投稿。</div></div>`}
+
+    <div class="detail-section">
+      <div class="detail-section-title">数字资产（DigitalAsset）</div>
+      <div class="detail-grid-3">
+        <div class="detail-item"><div class="detail-label">资产名称</div><div class="detail-value">${htmlEscape(w.assetName)}</div></div>
+        <div class="detail-item"><div class="detail-label">资产标识</div><div class="detail-value mono">${htmlEscape(w.assetCode)}</div></div>
+        <div class="detail-item"><div class="detail-label">资产类型</div><div class="detail-value">${at.icon} ${htmlEscape(at.name)}</div></div>
+        <div class="detail-item"><div class="detail-label">来源应用</div><div class="detail-value">${htmlEscape(app.appName)} <span class="code-mono">${htmlEscape(app.appCode)}</span></div></div>
+        <div class="detail-item"><div class="detail-label">所属租户</div><div class="detail-value">Acme 科技 <span class="code-mono">T-ACME</span></div></div>
+        <div class="detail-item"><div class="detail-label">可见性</div><div class="detail-value">平台可见 <span class="code-mono">PLATFORM_PUBLIC</span></div></div>
+        <div class="detail-item"><div class="detail-label">资产状态</div><div class="detail-value">${tag('DRAFT', ASSET_STATUS)}（审批通过后固化）</div></div>
+        <div class="detail-item"><div class="detail-label">登记人</div><div class="detail-value">当前用户</div></div>
+        <div class="detail-item"><div class="detail-label">登记时间</div><div class="detail-value">${nowStr()}</div></div>
+      </div>
+      <div style="margin-top:14px"><div class="detail-label" style="margin-bottom:4px">资产描述</div><div style="font-size:13px;color:var(--ink-2);line-height:1.7">${htmlEscape(w.assetDesc || `${app.appName} 下 ${sels.length} 项资源的组合资产`)}</div></div>
     </div>
-    <div style="font-size:13px;color:var(--muted);margin-top:12px">注意：登记完成后资产将处于 DRAFT 状态，需要审批通过并发布后才会进入平台目录。</div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">资产版本（AssetVersion）</div>
+      <div class="detail-grid-3">
+        <div class="detail-item"><div class="detail-label">版本号</div><div class="detail-value">V0.1</div></div>
+        <div class="detail-item"><div class="detail-label">版本状态</div><div class="detail-value">${tag('FROZEN', VERSION_STATUS)}</div></div>
+        <div class="detail-item"><div class="detail-label">包含资源</div><div class="detail-value">${sels.length} 项（${typeSummary}）</div></div>
+        <div class="detail-item"><div class="detail-label">依赖关系</div><div class="detail-value">${deps.length} 条</div></div>
+        <div class="detail-item"><div class="detail-label">快照大小</div><div class="detail-value">${fmtSize(w.snapStatus.snapshotSize)}</div></div>
+        <div class="detail-item"><div class="detail-label">快照生成时间</div><div class="detail-value">${htmlEscape(w.snapStatus.generatedAt)}</div></div>
+        <div class="detail-item full"><div class="detail-label">快照 ID</div><div class="detail-value mono">${htmlEscape(w.snapStatus.snapshotId)}</div></div>
+        <div class="detail-item full"><div class="detail-label">SHA-256 摘要</div><div class="detail-value mono" style="word-break:break-all;font-size:11px">${htmlEscape(w.snapStatus.snapshotDigest)}</div></div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">资源清单</div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>资源名称</th><th>类型</th><th>资源 ID</th><th>大小</th><th>负责人</th></tr></thead>
+          <tbody>
+            ${sels.map(r => {
+              const t = wizardTypeOf(r.resourceType);
+              return `<tr>
+                <td><strong>${htmlEscape(r.resourceName)}</strong></td>
+                <td><span class="tag tag-info">${t.icon} ${htmlEscape(t.name)}</span></td>
+                <td class="code">${htmlEscape(r.resourceId)}</td>
+                <td>${fmtSize(r.size)}</td>
+                <td>${htmlEscape(r.ownerName)}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">投稿记录（AssetSubmission）</div>
+      <div class="detail-grid-3">
+        <div class="detail-item"><div class="detail-label">投稿类型</div><div class="detail-value">首次登记</div></div>
+        <div class="detail-item"><div class="detail-label">投稿状态</div><div class="detail-value">${tag('PENDING_APPROVAL', SUBMISSION_STATUS)}</div></div>
+        <div class="detail-item"><div class="detail-label">审批流程</div><div class="detail-value">提交后自动创建审批工作流</div></div>
+        <div class="detail-item"><div class="detail-label">投稿人</div><div class="detail-value">当前用户</div></div>
+        <div class="detail-item"><div class="detail-label">提交时间</div><div class="detail-value">${nowStr()}</div></div>
+        <div class="detail-item"><div class="detail-label">后续处理</div><div class="detail-value">审批通过后自动固化，无需单独发布</div></div>
+      </div>
+    </div>
+
+    <div class="info-banner info" style="margin-bottom:0">
+      <svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      <div>本页内容仅供最终确认，不可编辑。提交后资产进入等待审批状态，审批通过即完成固化并在平台目录可见。</div>
+    </div>
   `;
 }
 
 function wizardPrev() {
   const w = state.wizard;
   if (w.step > 1) {
-    if (w.step === 5) { w.valRun = null; w.snapStatus = null; }
-    if (w.step === 4) { w.snapStatus = null; }
+    if (w.step === 4) w.valRun = null;
+    if (w.step === 3) w.snapStatus = null;
     w.step--;
     renderWizard(document.getElementById('content'));
   }
 }
 function wizardNext() {
   const w = state.wizard;
-  if (w.step === 1 && !w.selectedResource) { Toast.show('请先选择一个平台原生资源', '', 'warning'); return; }
+  if (w.step === 1 && (!w.appId || w.selectedResources.length === 0)) { Toast.show('请先选择应用并至少选择 1 项资源', '', 'warning'); return; }
   if (w.step === 2 && (!w.assetName || !w.assetCode)) { Toast.show('请填写资产名称和标识', '', 'warning'); return; }
-  if (w.step === 5) {
-    const hasErr = w.valRun.results.some(x => x.issues.some(i => i.severity === 'ERROR'));
+  if (w.step === 3 && (!w.snapStatus || w.snapStatus.state !== 'done')) { Toast.show('快照尚未生成完成', '请等待快照生成并冻结后再继续', 'warning', 2400); return; }
+  if (w.step === 4 && (!w.valRun || w.valRun.state !== 'done')) { Toast.show('固定校验尚未完成', '请等待校验执行完成后再继续', 'warning', 2400); return; }
+  if (w.step === 4) {
+    const hasErr = w.valRun.results.some(x => !x.passed);
     if (hasErr) {
       Modal.confirm({
-        title: '存在阻断性错误',
-        message: '业务规则：存在 ERROR 级阻断性校验问题时，禁止投稿。请返回第 5 步修正后重新快照，或放弃登记。',
+        title: '存在未通过的校验项',
+        message: '业务规则：存在固定校验未通过项时，禁止登记与投稿。请返回第 4 步确认并重新生成快照，或放弃登记。',
         confirmText: '我知道了，返回',
         danger: true,
         onConfirm: async ({ close }) => { close(); }
       });
-      Toast.show('阻断性错误不允许进入投稿步骤', '业务层已阻止', 'error', 2400);
+      Toast.show('校验未通过，不允许进入投稿流程', '业务层已阻止', 'error', 2400);
       return;
     }
   }
@@ -3240,18 +2910,21 @@ function wizardNext() {
 function wizardComplete() {
   const w = state.wizard;
   // 业务层二次校验（禁止绕行）
-  const hasErr = w.valRun.results.some(x => x.issues.some(i => i.severity === 'ERROR'));
-  if (hasErr) { Toast.show('阻断性错误仍存在，业务层拒绝登记', '', 'error', 2800); return; }
+  const hasErr = w.valRun.results.some(x => !x.passed);
+  if (hasErr) { Toast.show('校验未通过，业务层拒绝登记', '', 'error', 2800); return; }
 
-  const resType = w.selectedResource.resourceType;
+  const app = wizardApp(w);
+  const sels = wizardSelectedResources(w);
+  const deps = wizardDependencyRows(w);
+  const resType = wizardAssetType(w);
   const newAsset = {
     assetId: 'AST-2026-' + String(state.assets.length + 1).padStart(4, '0'),
     assetCode: w.assetCode, assetName: w.assetName, assetType: resType,
-    description: w.assetDesc || w.selectedResource.resourceName,
+    description: w.assetDesc || `${app.appName} 下 ${sels.length} 项资源的组合资产`,
     assetStatus: 'DRAFT', publishedVersionId: null,
-    sourceApp: w.selectedResource.sourceApp, sourceAppCode: w.selectedResource.sourceAppCode,
+    sourceApp: app.appName, sourceAppCode: app.appCode,
     tenantId: 'T-ACME', tenantName: 'Acme 科技',
-    visibility: w.visibility,
+    visibility: 'PLATFORM_PUBLIC',
     createdBy: 'u-' + state.currentRole.toLowerCase(), createdByName: '当前用户',
     createdAt: nowStr(), updatedAt: nowStr()
   };
@@ -3263,7 +2936,8 @@ function wizardComplete() {
     assetId: newAsset.assetId, versionNumber: verNum, versionStatus: 'FROZEN',
     snapshotId: w.snapStatus.snapshotId, snapshotDigest: w.snapStatus.snapshotDigest,
     snapshotSize: w.snapStatus.snapshotSize, snapshotCreatedAt: nowStr(), frozenAt: nowStr(),
-    createdBy: newAsset.createdBy, createdAt: nowStr(), dependencies: []
+    createdBy: newAsset.createdBy, createdAt: nowStr(),
+    dependencies: deps.map(d => ({ resourceId: d.dep.resourceId, resourceName: d.dep.resourceName, depType: d.type }))
   };
   state.versions.push(newVer);
   state.validations[newVer.versionId] = w.valRun.results;
@@ -3453,44 +3127,7 @@ function cancelSubmission(submissionId) {
   });
 }
 
-/* — 审核操作 — */
-function approveSubmission(submissionId) {
-  const s = state.submissions.find(x => x.submissionId === submissionId);
-  const v = versionOf(s.versionId);
-  // 业务层前置检查
-  if (!v || v.versionStatus !== 'FROZEN') { Toast.show('版本未冻结！', '审批通过将被业务层拒绝', 'error', 2800); return; }
-  runValidationOnVersion(s.versionId);
-  const hasErr = state.validations[s.versionId].some(x => x.issues.some(i => i.severity === 'ERROR'));
-  if (hasErr) { Toast.show('存在阻断性错误！', '业务层拒绝审批通过', 'error', 2800); return; }
-  Modal.show({
-    title: '审批通过',
-    body: `<div style="font-size:14px;line-height:1.65">
-      <p>即将通过投稿 <strong>${s.submissionId}</strong>。系统将自动调用现有工作流完成审批，然后进入发布处理。</p>
-      <div class="form-field" style="margin-top:14px"><div class="form-label">审批意见 <span class="opt">(选填)</span></div>
-        <textarea id="approveComment" class="form-textarea" placeholder="同意发布，校验通过..."></textarea>
-      </div>
-      <div class="info-banner info" style="margin-top:14px;margin-bottom:0">
-        <svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-        <div><strong>重要：</strong>审批通过 ≠ 发布成功。管理员仍需在「发布与生命周期」中触发实际发布。</div>
-      </div>
-    </div>`,
-    confirmText: '确认通过',
-    onConfirm: async ({ close }) => {
-      const comment = $('#approveComment').value.trim();
-      await new Promise(r => setTimeout(r, 800));
-      s.approvalResult = 'APPROVED';
-      s.approvalComment = comment || '审批通过';
-      s.approvalCompletedAt = nowStr();
-      s.approvalBy = 'u-liuying'; s.approvalByName = '刘颖';
-      s.submissionStatus = 'APPROVED';
-      close();
-      Toast.show('审批已通过', '请由管理员触发发布', 'success', 3500);
-      state.activities.unshift({ id:'ACT-AP'+Date.now(), time:nowStr(), actor:'刘颖', actorId:'u-liuying', type:'APPROVE', target:s.submissionId, targetName:`${roleOf(s.assetId).assetName} 投稿`, targetType:'SUBMISSION', status:'DONE', message:'审批通过' });
-      navigate('review');
-    }
-  });
-}
-
+/* — 退回操作 — */
 function returnSubmission(submissionId) {
   const s = state.submissions.find(x => x.submissionId === submissionId);
   Modal.show({
@@ -3517,60 +3154,6 @@ function returnSubmission(submissionId) {
       Toast.show('投稿已退回', '', 'success', 3000);
       state.activities.unshift({ id:'ACT-RT'+Date.now(), time:nowStr(), actor:'刘颖', actorId:'u-liuying', type:'RETURN', target:s.submissionId, targetName:`${roleOf(s.assetId).assetName} 投稿`, targetType:'SUBMISSION', status:'DONE', message:'退回：'+comment.slice(0,30) });
       navigate('review');
-    }
-  });
-}
-
-/* — 发布操作 — */
-function retryPublish(submissionId) {
-  const s = state.submissions.find(x => x.submissionId === submissionId);
-  const v = versionOf(s.versionId);
-  const a = roleOf(s.assetId);
-  // 业务层检查
-  if (s.approvalResult !== 'APPROVED') { Toast.show('审批未通过，无法发布', '', 'error', 2800); return; }
-  if (!v || v.versionStatus !== 'FROZEN') { Toast.show('版本未冻结', '禁止绕行：先冻结版本', 'error', 2800); return; }
-  if (!v.snapshotId) { Toast.show('固定快照不存在', '禁止发布', 'error', 2800); return; }
-
-  Modal.show({
-    title: `发布 ${a.assetName} ${v.versionNumber}`,
-    body: `<div style="font-size:14px;line-height:1.65">
-      <p>即将触发发布处理：</p>
-      <ul class="check-list" style="margin-top:10px">
-        <li class="info"><span class="chk-icon">i</span>调用来源应用 Provider 生成资产包</li>
-        <li class="info"><span class="chk-icon">i</span>更新目录索引</li>
-        <li class="info"><span class="chk-icon">i</span>资产状态从 DRAFT 变更为 PUBLISHED</li>
-      </ul>
-      ${s.publicationStatus === 'FAILED' ? `<div class="info-banner error" style="margin-top:12px;margin-bottom:0">
-        <svg class="ib-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
-        <div><strong>上次失败原因：</strong>${htmlEscape(s.publicationMessage || '—')}</div>
-      </div>` : ''}
-      <div class="form-field" style="margin-top:14px"><div class="form-label">模拟发布结果 <span class="opt">(演示用)</span></div>
-        <select id="pubMode" class="form-select"><option value="success">成功</option><option value="fail">失败（Provider 超时）</option></select>
-      </div>
-    </div>`,
-    confirmText: '立即发布',
-    onConfirm: async ({ close }) => {
-      const mode = $('#pubMode').value;
-      s.publicationStatus = 'PROCESSING';
-      await new Promise(r => setTimeout(r, 1100));
-      if (mode === 'fail' || Math.random() < 0.1) {
-        s.publicationStatus = 'FAILED';
-        s.publicationMessage = '目标 Provider 服务超时，资产包生成失败。请稍后重试或联系来源应用管理员。';
-        a.assetStatus = 'DRAFT'; // 失败时不能变已发布
-        close();
-        Toast.show('发布失败', s.publicationMessage, 'error', 5000);
-        state.activities.unshift({ id:'ACT-PF'+Date.now(), time:nowStr(), actor:'资产管理员', actorId:'u-admin', type:'PUBLISH', target:a.assetId, targetName:`${a.assetName} ${v.versionNumber}`, targetType:'ASSET', status:'FAIL', message:'发布失败：Provider 超时' });
-      } else {
-        s.publicationStatus = 'SUCCESS';
-        s.publicationMessage = '资产发布成功，目录已更新。';
-        a.assetStatus = 'PUBLISHED';
-        a.publishedVersionId = v.versionId;
-        a.updatedAt = nowStr();
-        close();
-        Toast.show('发布成功', `${a.assetName} ${v.versionNumber} 已进入平台目录`, 'success', 5000);
-        state.activities.unshift({ id:'ACT-PS'+Date.now(), time:nowStr(), actor:'资产管理员', actorId:'u-admin', type:'PUBLISH', target:a.assetId, targetName:`${a.assetName} ${v.versionNumber}`, targetType:'ASSET', status:'DONE', message:'发布成功' });
-      }
-      navigate('publish');
     }
   });
 }
@@ -3637,7 +3220,7 @@ function openImportWizard(assetId) {
       <div class="detail-section">
         <div class="detail-grid">
           <div class="detail-item"><div class="detail-label">资产</div><div class="detail-value">${htmlEscape(a.assetName)}</div></div>
-          <div class="detail-item"><div class="detail-label">发布版本</div><div class="detail-value">${pubVer?.versionNumber || '—'}</div></div>
+          <div class="detail-item"><div class="detail-label">固化版本</div><div class="detail-value">${pubVer?.versionNumber || '—'}</div></div>
           <div class="detail-item"><div class="detail-label">固定快照</div><div class="detail-value mono">${pubVer?.snapshotId || '—'}</div></div>
           <div class="detail-item"><div class="detail-label">可见性</div><div class="detail-value">${a.visibility}</div></div>
         </div>
@@ -3658,7 +3241,7 @@ function openImportWizard(assetId) {
     onConfirm: async ({ close }) => {
       const targetCode = $('#targetApp').value;
       const targetName = $('#targetApp option:checked').textContent;
-      if (!pubVer) { Toast.show('没有发布版本', '', 'error'); close(); return; }
+      if (!pubVer) { Toast.show('没有已固化版本', '', 'error'); close(); return; }
       // 业务层：禁用/归档资产不能导入
       if (a.assetStatus !== 'PUBLISHED') { Toast.show('资产当前不可导入', '状态：'+ASSET_STATUS[a.assetStatus].label, 'error', 2800); close(); return; }
 
