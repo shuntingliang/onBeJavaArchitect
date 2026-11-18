@@ -442,6 +442,17 @@
     line-height: 1.7;
   }
   .internal[hidden] { display: none; }
+  .internal-title { margin-bottom: 4px; color: var(--text); font-family: var(--font-sans); font-size: 11px; font-weight: 600; }
+  .internal-group {
+    margin: 6px 0 2px;
+    padding-top: 5px;
+    border-top: 1px dashed var(--border);
+    color: var(--faint);
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .04em;
+  }
   .internal-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
   .ik { flex: none; width: 86px; color: var(--faint); }
   .iv { color: var(--text); word-break: break-all; }
@@ -704,6 +715,7 @@
                 </div>
                 <div class="k-title">数据看板导出慢的排查与优化</div>
                 <div class="k-meta">来源：客户成功 / 客户拜访记录 / R-8821 · 内容已快照</div>
+                <div class="k-meta">标签建议：数据看板、导出 · 可见范围：继承「客户成功」应用</div>
                 <div class="k-note">分类由知识管理员在知识管理中确认，业务侧不维护分类树。</div>
               </div>
             </div>
@@ -714,7 +726,7 @@
       <div class="card-foot between">
         <span><span class="dot-mark"></span> 业务提交来源三元组 + 内容快照</span>
         <label class="switch-wrap">
-          沉淀规则
+          提交信息
           <span class="switch">
             <input type="checkbox" id="showRule">
             <span class="slider"></span>
@@ -722,15 +734,22 @@
         </label>
       </div>
       <div class="internal" id="rulePanel" hidden>
-        <div class="internal-row"><span class="ik">knowledge_id</span><span class="iv">K-1024 · 草稿</span></div>
+        <div class="internal-title">提交给知识管理的信息</div>
+        <div class="internal-group">来源定位</div>
+        <div class="internal-row"><span class="ik">租户 / 空间</span><span class="iv">t_1001 · 默认空间</span></div>
         <div class="internal-row"><span class="ik">应用</span><span class="iv">app_cs · 客户成功</span></div>
         <div class="internal-row"><span class="ik">业务表</span><span class="iv">visit_record · 客户拜访记录</span></div>
-        <div class="internal-row"><span class="ik">业务记录</span><span class="iv">R-8821 · 数据看板二期需求沟通</span></div>
+        <div class="internal-row"><span class="ik">业务记录</span><span class="iv">R-8821 · v3 · 数据看板二期需求沟通</span></div>
         <div class="internal-row"><span class="ik">来源链接</span><span class="iv">/app/app_cs/visit_record/R-8821</span></div>
+        <div class="internal-group">内容快照</div>
+        <div class="internal-row"><span class="ik">知识标题</span><span class="iv">数据看板导出慢的排查与优化</span></div>
         <div class="internal-row"><span class="ik">知识内容</span><span class="iv">问题与解决方案（快照）</span></div>
-        <div class="internal-row"><span class="ik">生成人</span><span class="iv">张伟 · 2026-11-13 18:20</span></div>
+        <div class="internal-row"><span class="ik">标签建议</span><span class="iv">数据看板、导出</span></div>
+        <div class="internal-group">生成上下文</div>
+        <div class="internal-row"><span class="ik">生成人</span><span class="iv">张伟 · 手动 · 2026-11-13 18:20</span></div>
         <div class="internal-row"><span class="ik">幂等键</span><span class="iv">app_cs:visit_record:R-8821</span></div>
-        <div class="internal-note">仅 record_id 无法定位来源；业务提交应用 / 业务表 / 业务记录三级路径与内容快照，分类仍由知识管理员在知识管理中调整。</div>
+        <div class="internal-row"><span class="ik">可见范围</span><span class="iv">继承「客户成功」应用</span></div>
+        <div class="internal-note">仅 record_id 无法定位来源；业务不选择分类，分类由知识管理员在知识管理中调整。</div>
       </div>
     </section>
   </main>
@@ -738,12 +757,12 @@
   <!-- 调用关系 -->
   <section class="flow-card">
     <h2>实际调用关系</h2>
-    <p>业务应用只调用生成能力；知识管理负责分类、审核与发布。知识的分类归属在知识管理中完成，业务侧不体现。</p>
+    <p>业务应用提交来源定位、内容快照和生成上下文；知识管理负责分类、审核与发布。分类归属在知识管理中完成，业务侧不体现。</p>
     <div class="flow-row">
       <div class="flow-box">
         <div class="flow-kicker">低代码应用</div>
         <div class="flow-title">客户拜访记录</div>
-        <div class="flow-desc">一条已完成的业务记录</div>
+        <div class="flow-desc">app_cs / visit_record / R-8821</div>
       </div>
       <div class="arrow"><b>→</b><span>生成</span></div>
       <div class="flow-box accent">
@@ -776,7 +795,7 @@
     </div>
   </section>
 
-  <p class="page-note">提示：点击左侧分类可筛选知识；右侧点击「生成为知识」，新知识会出现在左侧「业务沉淀 / 待整理」中。</p>
+  <p class="page-note">提示：点击左侧分类可筛选知识；右侧点击「生成为知识」并展开「提交信息」，可查看业务提交的完整字段。</p>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -829,7 +848,7 @@
     row.className = 'new-row';
     row.dataset.folders = 'all business pending';
     row.innerHTML =
-      '<td><div class="kn-title">数据看板导出慢的排查与优化 <span class="new-badge">新</span></div><div class="kn-cat">业务沉淀</div></td>' +
+      '<td><div class="kn-title">数据看板导出慢的排查与优化 <span class="new-badge">新</span></div><div class="kn-cat">业务沉淀 · 来自客户拜访</div></td>' +
       '<td><span class="status draft">草稿</span></td>' +
       '<td>今天</td>';
     knowledgeRows.insertBefore(row, knowledgeRows.firstChild);
