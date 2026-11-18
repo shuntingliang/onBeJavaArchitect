@@ -443,7 +443,7 @@
   }
   .internal[hidden] { display: none; }
   .internal-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
-  .ik { flex: none; width: 68px; color: var(--faint); }
+  .ik { flex: none; width: 86px; color: var(--faint); }
   .iv { color: var(--text); word-break: break-all; }
   .internal-note {
     margin-top: 4px;
@@ -548,7 +548,7 @@
   <header class="page-head">
     <span class="badge">交互原型</span>
     <h1>知识管理 vs 业务生成知识</h1>
-    <p>知识管理是低代码平台的一级菜单，有自己的分类和知识列表；应用里的业务只调用「生成知识」能力。知识最终归到哪个分类由知识管理统一整理，业务侧并不体现。</p>
+    <p>知识管理是低代码平台的一级菜单，有自己的分类和知识列表；应用里的业务只调用「生成知识」能力。业务提交应用、业务表、业务记录三级来源和内容快照，知识归到哪个分类由知识管理统一整理。</p>
   </header>
 
   <main class="compare">
@@ -692,7 +692,7 @@
                 <span class="gen-ico">K</span>
                 <div>
                   <div class="gen-title">把这条拜访记录沉淀为知识</div>
-                  <div class="gen-desc">自动带入问题与解决方案，不需要选择分类</div>
+                  <div class="gen-desc">提交来源三级路径和内容快照，不需要选择分类</div>
                 </div>
                 <button class="btn primary" type="button" id="genBtn">生成为知识</button>
               </div>
@@ -703,7 +703,7 @@
                   <span class="k-id">K-1024</span>
                 </div>
                 <div class="k-title">数据看板导出慢的排查与优化</div>
-                <div class="k-meta">来源：客户拜访记录 R-8821 · 默认归入「业务沉淀 / 待整理」</div>
+                <div class="k-meta">来源：客户成功 / 客户拜访记录 / R-8821 · 内容已快照</div>
                 <div class="k-note">分类由知识管理员在知识管理中确认，业务侧不维护分类树。</div>
               </div>
             </div>
@@ -712,7 +712,7 @@
       </div>
 
       <div class="card-foot between">
-        <span><span class="dot-mark"></span> 业务只拿到 knowledge_id，不维护分类</span>
+        <span><span class="dot-mark"></span> 业务提交来源三元组 + 内容快照</span>
         <label class="switch-wrap">
           沉淀规则
           <span class="switch">
@@ -722,10 +722,15 @@
         </label>
       </div>
       <div class="internal" id="rulePanel" hidden>
-        <div class="internal-row"><span class="ik">knowledge_id</span><span class="iv">K-1024</span></div>
-        <div class="internal-row"><span class="ik">source</span><span class="iv">sales_visit / R-8821</span></div>
-        <div class="internal-row"><span class="ik">默认分类</span><span class="iv">业务沉淀 / 待整理（系统预设）</span></div>
-        <div class="internal-note">业务侧不出现分类选择，分类由知识管理员在知识管理中调整。</div>
+        <div class="internal-row"><span class="ik">knowledge_id</span><span class="iv">K-1024 · 草稿</span></div>
+        <div class="internal-row"><span class="ik">应用</span><span class="iv">app_cs · 客户成功</span></div>
+        <div class="internal-row"><span class="ik">业务表</span><span class="iv">visit_record · 客户拜访记录</span></div>
+        <div class="internal-row"><span class="ik">业务记录</span><span class="iv">R-8821 · 数据看板二期需求沟通</span></div>
+        <div class="internal-row"><span class="ik">来源链接</span><span class="iv">/app/app_cs/visit_record/R-8821</span></div>
+        <div class="internal-row"><span class="ik">知识内容</span><span class="iv">问题与解决方案（快照）</span></div>
+        <div class="internal-row"><span class="ik">生成人</span><span class="iv">张伟 · 2026-11-13 18:20</span></div>
+        <div class="internal-row"><span class="ik">幂等键</span><span class="iv">app_cs:visit_record:R-8821</span></div>
+        <div class="internal-note">仅 record_id 无法定位来源；业务提交应用 / 业务表 / 业务记录三级路径与内容快照，分类仍由知识管理员在知识管理中调整。</div>
       </div>
     </section>
   </main>
@@ -744,13 +749,13 @@
       <div class="flow-box accent">
         <div class="flow-kicker">知识管理提供的能力</div>
         <div class="flow-title">创建知识</div>
-        <div class="flow-desc">带入业务内容，返回 knowledge_id</div>
+        <div class="flow-desc">接收三级来源 + 内容快照，返回 knowledge_id</div>
       </div>
       <div class="arrow"><b>→</b><span>写入草稿</span></div>
       <div class="flow-box dashed">
         <div class="flow-kicker">知识库</div>
         <div class="flow-title">业务沉淀 / 待整理</div>
-        <div class="flow-desc">生成知识草稿 <code>K-1024</code></div>
+        <div class="flow-desc">草稿 <code>K-1024</code>，含内容快照</div>
       </div>
       <div class="arrow"><b>→</b><span>整理归档</span></div>
       <div class="flow-box">
@@ -766,7 +771,7 @@
       </div>
       <div class="split-item highlight">
         <span class="s-label">业务生成的知识</span>
-        只携带来源引用，不决定归入哪个分类
+        携带应用 / 业务表 / 记录 + 内容快照，不决定分类
       </div>
     </div>
   </section>
