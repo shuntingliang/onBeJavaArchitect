@@ -832,6 +832,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
+(function () {
   const treeItems = document.querySelectorAll('.tree-item[data-filter]');
   const fileRows = Array.from(document.querySelectorAll('#fileRows tr'));
   const fmCrumb = document.getElementById('fmCrumb');
@@ -906,6 +907,7 @@
   showInternal.addEventListener('change', function () {
     internalPanel.hidden = !showInternal.checked;
   });
+})();
 </script>
 </body>
 </html>

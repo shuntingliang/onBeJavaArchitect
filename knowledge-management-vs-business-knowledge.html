@@ -777,6 +777,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
+(function () {
   const treeItems = Array.from(document.querySelectorAll('.tree-item[data-filter]'));
   const knowledgeRows = document.getElementById('knowledgeRows');
   const kmCrumb = document.getElementById('kmCrumb');
@@ -845,6 +846,7 @@
   showRule.addEventListener('change', function () {
     rulePanel.hidden = !showRule.checked;
   });
+})();
 </script>
 </body>
 </html>
