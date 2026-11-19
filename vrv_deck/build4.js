@@ -268,7 +268,7 @@ s.addText("先削得热，再削尖峰，最后守边界；单项有效，叠加
 const measures = [
   ["01", "高反射遮阳", "板底净高 ≥1.5 m、反射率 ≥0.80；只挡顶部，进排风保持敞开。"],
   ["02", "高反射冷屋面", "SRI ≥78；屋面表面降 15–25℃，机组近地气温降 2–3℃。"],
-  ["03", "微雾蒸发预冷", "仅高温低湿时段启用，进风降 4–6℃；RH >80% 立即停用。"],
+  ["03", "微雾蒸发预冷", "喷嘴沿棚底通道中线布置，喷向两侧进风翅片；RH >80% 停用。"],
   ["04", "智能控制联锁", "按进风温度分级投切，湿度 / 水质 / 风速三级联锁。"]
 ];
 measures.forEach((m, i) => {
@@ -293,15 +293,15 @@ measures.forEach((m, i) => {
 });
 
 // 效果图
-const IMG = { x: 5.22, y: 1.48, w: 7.41, h: 4.94 };
-s.addImage({ path: "assets/solution_2400x1600.jpg", x: IMG.x, y: IMG.y, w: IMG.w, h: IMG.h });
+const IMG = { x: 5.22, y: 1.48, w: 7.14, h: 4.94 };
+s.addImage({ path: "assets/hero_1903x1317.jpg", x: IMG.x, y: IMG.y, w: IMG.w, h: IMG.h });
 
 // 标注
 const pins = [
-  ["1", 0.46, 0.44],
-  ["2", 0.26, 0.84],
-  ["3", 0.665, 0.62],
-  ["4", 0.385, 0.59]
+  ["1", 0.155, 0.12],
+  ["2", 0.27, 0.85],
+  ["3", 0.70, 0.47],
+  ["4", 0.922, 0.31]
 ];
 pins.forEach((p) => {
   const px = IMG.x + p[1] * IMG.w - 0.2;
@@ -317,9 +317,21 @@ pins.forEach((p) => {
   });
 });
 
-s.addText("效果示意：实体遮阳板仅覆盖顶部，机组四侧进风与水平排风不设阻挡；微雾喷嘴沿进风侧布置，距翅片 ≥0.5 m。", {
-  x: IMG.x, y: 6.5, w: IMG.w, h: 0.28,
-  fontFace: BF, fontSize: 8, color: GRAY_L, margin: 0
+// ③ 位置说明
+const mistTag = { x: 9.0, y: 4.06, w: 2.22, h: 0.34 };
+s.addShape(pres.shapes.RECTANGLE, {
+  x: mistTag.x, y: mistTag.y, w: mistTag.w, h: mistTag.h,
+  fill: { color: INK }, line: { width: 0 }
+});
+s.addText("进风侧 · 距翅片 0.3–0.5 m", {
+  x: mistTag.x, y: mistTag.y, w: mistTag.w, h: mistTag.h,
+  fontFace: BF, fontSize: 7.4, color: WHITE,
+  align: "center", valign: "middle", margin: 0
+});
+
+s.addText("效果示意：实体遮阳板只挡顶部，四侧进风与水平排风不设阻挡；微雾喷管沿棚底通道中线布置，雾流喷向两侧机组进风翅片；屋面为高反射涂层。", {
+  x: IMG.x, y: 6.5, w: IMG.w, h: 0.3,
+  fontFace: BF, fontSize: 7.2, color: GRAY_L, lineSpacing: 10, margin: 0
 });
 s.render();
 
