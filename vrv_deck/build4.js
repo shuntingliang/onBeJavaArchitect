@@ -122,7 +122,7 @@ const arrow = (s, x1, y1, x2, y2, color, width = 1.25, dash = "solid") => {
 // ===================== 01 封面 =====================
 let s = pres.addSlide();
 s.background = { color: INK };
-s.addImage({ path: "assets/cover_2400x1350.jpg", x: 0, y: 0, w: SLIDE_W, h: SLIDE_H, sizing: { type: "cover", w: SLIDE_W, h: SLIDE_H } });
+s.addImage({ path: "assets/cover_2341x1317.jpg", x: 0, y: 0, w: SLIDE_W, h: SLIDE_H, sizing: { type: "cover", w: SLIDE_W, h: SLIDE_H } });
 
 s.addText("暖通空调 · 运行优化方案", {
   x: 0.95, y: 1.25, w: 5, h: 0.28,
@@ -139,13 +139,9 @@ s.addText("夏季高温换热优化", {
 s.addShape(pres.shapes.RECTANGLE, {
   x: 0.95, y: 3.78, w: 0.78, h: 0.05, fill: { color: AMBER }, line: { width: 0 }
 });
-s.addText("遮阳结构   ·   高反射冷屋面   ·   微雾预冷   ·   智能控制", {
+s.addText("遮阳结构   ·   冷屋面   ·   微雾预冷   ·   智能控制", {
   x: 0.95, y: 4.05, w: 6.2, h: 0.32,
   fontFace: BF, fontSize: 12.5, color: "DCE7E3", charSpacing: 0.5, margin: 0
-});
-s.addText("适用对象：屋面集中布置的多联机（VRV / VRF）系统", {
-  x: 0.95, y: 5.95, w: 5.6, h: 0.28,
-  fontFace: BF, fontSize: 9, color: "9FB8B2", margin: 0
 });
 s.addShape(pres.shapes.LINE, {
   x: 0.95, y: 6.38, w: 4.6, h: 0, line: { color: "46605C", width: 0.75 }
@@ -266,9 +262,9 @@ s.addText("先削得热，再削尖峰，最后守边界；单项有效，叠加
 });
 
 const measures = [
-  ["01", "高反射遮阳", "板底净高 ≥1.5 m、反射率 ≥0.80；只挡顶部，进排风保持敞开。"],
+  ["01", "高反射遮阳", "棚底距排风口 ≥1.5 m、反射率 ≥0.80；四周敞开，只挡顶部。"],
   ["02", "高反射冷屋面", "SRI ≥78；屋面表面降 15–25℃，机组近地气温降 2–3℃。"],
-  ["03", "微雾蒸发预冷", "喷嘴沿棚底通道中线布置，喷向两侧进风翅片；RH >80% 停用。"],
+  ["03", "微雾蒸发预冷", "喷嘴沿进风侧架设，距翅片 0.3–0.5 m；RH >80% 停用。"],
   ["04", "智能控制联锁", "按进风温度分级投切，湿度 / 水质 / 风速三级联锁。"]
 ];
 measures.forEach((m, i) => {
@@ -298,10 +294,10 @@ s.addImage({ path: "assets/hero_1903x1317.jpg", x: IMG.x, y: IMG.y, w: IMG.w, h:
 
 // 标注
 const pins = [
-  ["1", 0.155, 0.12],
-  ["2", 0.27, 0.85],
-  ["3", 0.70, 0.47],
-  ["4", 0.922, 0.31]
+  ["1", 0.22, 0.135],
+  ["2", 0.93, 0.845],
+  ["3", 0.565, 0.545],
+  ["4", 0.705, 0.30]
 ];
 pins.forEach((p) => {
   const px = IMG.x + p[1] * IMG.w - 0.2;
@@ -317,19 +313,7 @@ pins.forEach((p) => {
   });
 });
 
-// ③ 位置说明
-const mistTag = { x: 9.0, y: 4.06, w: 2.22, h: 0.34 };
-s.addShape(pres.shapes.RECTANGLE, {
-  x: mistTag.x, y: mistTag.y, w: mistTag.w, h: mistTag.h,
-  fill: { color: INK }, line: { width: 0 }
-});
-s.addText("进风侧 · 距翅片 0.3–0.5 m", {
-  x: mistTag.x, y: mistTag.y, w: mistTag.w, h: mistTag.h,
-  fontFace: BF, fontSize: 7.4, color: WHITE,
-  align: "center", valign: "middle", margin: 0
-});
-
-s.addText("效果示意：实体遮阳板只挡顶部，四侧进风与水平排风不设阻挡；微雾喷管沿棚底通道中线布置，雾流喷向两侧机组进风翅片；屋面为高反射涂层。", {
+s.addText("效果示意：顶出风机组棚底高出排风口 ≥1.5 m 且四周敞开；微雾喷管沿进风侧架设，雾流随进风进入翅片；屋面为高反射涂层。", {
   x: IMG.x, y: 6.5, w: IMG.w, h: 0.3,
   fontFace: BF, fontSize: 7.2, color: GRAY_L, lineSpacing: 10, margin: 0
 });
