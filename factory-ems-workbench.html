@@ -1677,83 +1677,188 @@ svg { display: block; }
   .chain-link { flex-basis: 54px; }
 }
 
-/* Integration rule engine */
-.rule-layout { height: 100%; display: flex; flex-direction: column; gap: 7px; min-height: 0; }
-.rule-top {
-  flex: 0 0 auto;
+/* Integration pipeline graph — inspired by 双生编排 */
+.pipe-layout { height: 100%; display: flex; min-height: 0; }
+.pipe-left {
+  flex: 0 0 210px; min-width: 0; display: flex; flex-direction: column; gap: 6px;
+  padding: 7px 7px 7px 0; border-right: 1px solid var(--line); overflow: auto;
+}
+.pipe-left-title { display: flex; align-items: center; gap: 6px; font-size: 8.6px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-2); }
+.pipe-left-title svg { width: 10px; height: 10px; color: var(--cyan); }
+.pipe-chip { height: 22px; padding: 0 7px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--line); border-radius: 6px; background: rgba(255, 255, 255, .66); color: var(--muted); font-size: 9.2px; white-space: nowrap; transition: .15s ease; }
+.pipe-chip:hover { border-color: var(--line-strong); }
+.pipe-chip.active { color: var(--text); border-color: rgba(13, 148, 136, .45); background: rgba(13, 148, 136, .1); }
+.pipe-chip-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent, var(--cyan)); }
+.pipe-side-note { margin-top: auto; padding: 7px 8px; border: 1px solid var(--line); border-radius: 8px; background: rgba(16, 50, 62, .02); font-size: 8.4px; color: var(--muted); line-height: 1.5; }
+.pipe-side-note b { display: block; font-size: 9.2px; color: var(--text); margin-bottom: 2px; }
+
+.pipe-canvas {
+  flex: 1; min-width: 0; padding: 10px 14px; overflow: auto;
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+  background:
+    radial-gradient(2px 2px at 14px 14px, rgba(20, 52, 64, .07) 50%, transparent 52%),
+    radial-gradient(2px 2px at 14px calc(14px + 12px), rgba(20, 52, 64, .05) 50%, transparent 52%),
+    linear-gradient(180deg, rgba(246, 250, 251, .5), rgba(240, 246, 248, .55));
+  background-size: 28px 28px, 28px 28px, 100% 100%;
+}
+
+/* Endpoint node */
+.pipe-node {
+  position: relative;
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 9px;
-  border: 1px solid rgba(13, 148, 136, .2);
-  border-radius: 8px;
-  background: linear-gradient(120deg, rgba(13, 148, 136, .07), rgba(59, 99, 216, .03));
+  gap: 12px;
+  padding: 6px 10px 6px 10px;
+  box-sizing: border-box;
 }
-.rule-brand { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
-.rule-signal { width: 7px; height: 7px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 0 4px rgba(13, 148, 136, .12); animation: pulse 1.8s infinite; }
-.rule-brand b { display: block; font-size: 11px; font-weight: 700; }
-.rule-brand em { display: block; font-style: normal; font: 8.4px var(--mono); color: var(--muted-2); }
-.rule-chips { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: 4px; }
-.contract-chip { height: 22px; padding: 0 7px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--line); border-radius: 6px; background: rgba(255, 255, 255, .66); color: var(--muted); font-size: 9.2px; white-space: nowrap; transition: .15s ease; }
-.contract-chip:hover { border-color: var(--line-strong); }
-.contract-chip.active { color: var(--text); border-color: rgba(13, 148, 136, .45); background: rgba(13, 148, 136, .1); }
-.contract-chip-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent, var(--cyan)); flex: 0 0 auto; }
-.rule-stats { flex: 0 0 auto; display: flex; gap: 8px; }
-.rule-stats span { color: var(--muted-2); font-size: 8.6px; white-space: nowrap; }
-.rule-stats b { margin-left: 2px; color: var(--text); font: 10px var(--mono); }
-.rule-stats .hit b { color: var(--green); }
+.pipe-node-orb {
+  flex: 0 0 auto;
+  width: 28px; height: 28px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,.08), 0 0 0 4px rgba(255,255,255,.9);
+}
+.pipe-node-orb svg { width: 13px; height: 13px; }
+.pipe-node.actor-comp .pipe-node-orb { background: linear-gradient(135deg, var(--cyan), #5eead4); }
+.pipe-node.actor-micro .pipe-node-orb { background: linear-gradient(135deg, #3b63d8, #6b8ef0); }
+.pipe-node.actor-app .pipe-node-orb { background: linear-gradient(135deg, #d63a52, #ff6a7e); }
+.pipe-node.actor-platform .pipe-node-orb { background: linear-gradient(135deg, #4b5fb8, #7b8cd9); }
+.pipe-node-body { flex: 1; min-width: 0; }
+.pipe-node-name { font-size: 10.6px; font-weight: 650; color: #16323b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pipe-node-sub { font-size: 8.2px; color: var(--muted-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font: 8px var(--mono); }
 
-.rule-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(250px, .75fr); gap: 8px; }
-.rule-panel, .trace-panel { min-width: 0; min-height: 0; padding: 7px 8px; display: flex; flex-direction: column; gap: 5px; border: 1px solid var(--line); border-radius: 9px; background: rgba(255, 255, 255, .6); }
-.rule-panel-head { flex: 0 0 auto; display: flex; align-items: baseline; gap: 6px; font-size: 9.8px; font-weight: 650; }
-.rule-panel-head span { font-size: 8.2px; font-weight: 500; color: var(--muted-2); }
-.rule-list { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 5px; padding-right: 2px; }
-.rule-group-label { display: flex; align-items: center; gap: 6px; margin-top: 3px; color: var(--muted-2); font-size: 8.4px; letter-spacing: .08em; }
-.rule-group-label::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-.rule-group-label:first-child { margin-top: 0; }
-.rule-item { padding: 6px 8px; border: 1px solid rgba(20, 52, 64, .1); border-left: 2px solid var(--cyan); border-radius: 6px; background: rgba(246, 250, 251, .72); }
-.rule-item.platform { border-left-color: var(--blue); background: rgba(59, 99, 216, .045); }
-.rule-item-head { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-.rule-id { font: 9px var(--mono); font-weight: 600; color: var(--cyan); }
-.rule-item.platform .rule-id { color: var(--blue); }
-.rule-group { color: var(--muted-2); font-size: 8.4px; }
-.rule-state { margin-left: auto; height: 16px; padding: 0 5px; display: inline-flex; align-items: center; border-radius: 4px; color: var(--green); background: rgba(22, 138, 91, .09); font-size: 7.8px; font-weight: 600; }
-.rule-line { display: flex; align-items: flex-start; gap: 6px; font-size: 9.2px; line-height: 1.5; }
-.rule-line + .rule-line { margin-top: 2px; }
-.rule-line > b { flex: 0 0 34px; padding-top: 1px; font: 7.6px var(--mono); letter-spacing: .04em; color: var(--muted-2); }
-.rule-line.when > b { color: #4b6485; }
-.rule-line.then > b { color: var(--cyan); }
-.rule-line > span { min-width: 0; color: #29454f; word-break: break-word; }
-.rule-line.then .iface-pill { margin: 0 3px; }
-.rule-line.then code { padding: 0 4px; border-radius: 3px; background: rgba(13, 148, 136, .07); color: #24525c; font: 8.6px var(--mono); word-break: break-all; }
-.rule-line.then b.slot-name { color: var(--cyan); font-weight: 600; }
+/* Connector line */
+.pipe-link { width: 100%; display: flex; justify-content: center; gap: 0; box-sizing: border-box; padding: 0 10px; }
+.pipe-link-inner { position: relative; width: 28px; height: 38px; display: flex; flex-direction: column; align-items: center; }
+.pipe-link-line {
+  position: absolute; left: 50%; top: 0; bottom: 0;
+  width: 1px; transform: translateX(-50%);
+  background: linear-gradient(180deg, rgba(13, 148, 136, .55), rgba(59, 99, 216, .45));
+}
+.pipe-link-dot {
+  flex: 0 0 auto; width: 6px; height: 6px; border-radius: 50%;
+  background: #fff; border: 1.5px solid var(--cyan); z-index: 2; margin-top: 4px;
+}
+.pipe-link-label {
+  position: absolute; left: 36px; top: 50%; transform: translateY(-50%);
+  padding: 2px 7px;
+  font-size: 8.2px; font-weight: 600; color: var(--cyan);
+  background: #fff; border: 1px solid rgba(13, 148, 136, .32); border-radius: 99px;
+  letter-spacing: .04em; white-space: nowrap; z-index: 3;
+  box-shadow: 0 1px 3px rgba(13, 148, 136, .12);
+}
+.pipe-link-sub { font-size: 7.6px; color: var(--muted-2); }
 
-.trace-list { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; }
-.trace-step { display: flex; gap: 7px; padding: 6px 8px; border: 1px solid rgba(13, 148, 136, .16); border-radius: 7px; background: rgba(13, 148, 136, .045); }
-.trace-num { flex: 0 0 auto; width: 20px; height: 20px; display: grid; place-items: center; border: 1px solid rgba(13, 148, 136, .35); border-radius: 50%; background: #fff; color: var(--cyan); font: 8.4px var(--mono); }
-.trace-copy { min-width: 0; }
-.trace-title { display: flex; align-items: center; gap: 6px; font-size: 9.6px; font-weight: 650; color: #16323b; }
-.trace-title span { padding: 0 4px; border-radius: 3px; background: rgba(22, 138, 91, .09); color: var(--green); font-size: 7.6px; font-weight: 600; }
-.trace-desc { margin-top: 2px; color: var(--muted-2); font-size: 8.4px; line-height: 1.45; word-break: break-word; }
-.trace-desc code { color: #24525c; font: 8.2px var(--mono); }
-.trace-link { display: flex; align-items: center; gap: 6px; padding: 2px 0 2px 9px; color: var(--muted-2); font-size: 7.8px; }
-.trace-link::before { content: "↓"; color: var(--cyan); font-size: 10px; }
-.trace-foot { flex: 0 0 auto; padding-top: 2px; border-top: 1px dashed var(--line); color: var(--muted-2); font-size: 8px; }
-.iface-pill { flex: 0 0 auto; font: 7.5px var(--mono); padding: 1px 4px; border-radius: 3px; }
+/* Middle info card */
+.pipe-card {
+  width: 100%; max-width: 620px;
+  border: 1px solid rgba(20, 52, 64, .16);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 6px 22px rgba(22, 52, 64, .1);
+  overflow: hidden;
+}
+.pipe-card-header {
+  height: 5px;
+  background: linear-gradient(90deg, #f2b300, #ffd966);
+}
+.pipe-card-head {
+  padding: 7px 10px 6px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.pipe-card-title { font-size: 10px; font-weight: 650; color: #16323b; }
+.pipe-card-sub { font-size: 7.8px; color: var(--muted-2); font: 7.6px var(--mono); }
+.pipe-card-tabs { margin-left: auto; display: flex; gap: 2px; }
+.pipe-card-tab {
+  height: 20px; padding: 0 7px;
+  font-size: 8.4px; font-weight: 600;
+  border: 1px solid var(--line); border-radius: 4px; background: transparent; color: var(--muted-2);
+  cursor: pointer; transition: .15s;
+}
+.pipe-card-tab:hover { color: var(--text); }
+.pipe-card-tab.active { color: var(--cyan); border-color: rgba(13, 148, 136, .4); background: rgba(13, 148, 136, .07); }
+.pipe-card-body { padding: 8px 10px; }
+
+.pipe-tab-pane { display: none; }
+.pipe-tab-pane.active { display: block; }
+
+/* Table-ish rows */
+.pipe-rows { display: flex; flex-direction: column; gap: 4px; }
+.pipe-row {
+  display: grid; grid-template-columns: 16px 110px 14px 1fr auto; gap: 6px;
+  align-items: center;
+  padding: 4px 6px;
+  border: 1px solid rgba(20, 52, 64, .1); border-radius: 5px;
+  background: rgba(246, 250, 251, .7);
+  font-size: 9px;
+}
+.pipe-row.platform { border-style: dashed; background: rgba(59, 99, 216, .04); }
+.pipe-row-slot { display: flex; align-items: center; gap: 4px; color: var(--cyan); font-weight: 600; font-size: 8.4px; white-space: nowrap; }
+.pipe-row-slot svg { width: 10px; height: 10px; }
+.pipe-row-arrow { color: var(--muted-2); justify-self: center; }
+.pipe-row-provider { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.pipe-row-provider-name { font-size: 8.8px; color: #29454f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pipe-row-provider-name em { font-style: normal; font: 7.6px var(--mono); color: var(--muted-2); margin-left: 3px; }
+.pipe-row-provider-iface { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.pipe-row-provider-iface code { font: 8px var(--mono); color: var(--muted-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pipe-row-tag { margin-left: auto; font: 7px var(--mono); color: var(--muted-2); border: 1px solid var(--line); border-radius: 3px; padding: 0 3px; }
+.pipe-row.platform .pipe-row-tag { color: var(--blue); border-color: rgba(59, 99, 216, .3); }
+
+/* Contract properties (= page / = size style) */
+.pipe-props { display: flex; flex-direction: column; gap: 3px; }
+.pipe-prop {
+  display: grid; grid-template-columns: 72px 12px 1fr; gap: 0; align-items: center;
+  font-size: 9px;
+}
+.pipe-prop > span:first-child { color: var(--muted-2); font-size: 8.4px; }
+.pipe-prop-eq { font: 8px var(--mono); color: var(--cyan); text-align: center; }
+.pipe-prop code {
+  font: 8.6px var(--mono); color: #24525c;
+  background: rgba(13, 148, 136, .06); padding: 1px 5px; border-radius: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pipe-prop-events { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 3px; margin-top: 2px; }
+.pipe-prop-events span { font: 7.6px var(--mono); color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; }
+.pipe-prop-events span.event { color: #8a5a12; border-color: rgba(183, 121, 31, .25); background: rgba(183, 121, 31, .07); }
+
+/* Final platform node */
+.pipe-platform-card {
+  width: 100%; max-width: 620px;
+  border: 1px solid rgba(59, 99, 216, .2);
+  border-radius: 10px;
+  background: linear-gradient(130deg, rgba(59, 99, 216, .07), rgba(255,255,255,.9));
+  padding: 9px 10px;
+  display: flex; align-items: center; gap: 10px;
+}
+.pipe-platform-orb {
+  flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%;
+  display: grid; place-items: center; color: #fff;
+  background: linear-gradient(135deg, #4b5fb8, #7b8cd9);
+  box-shadow: 0 0 0 4px rgba(59, 99, 216, .12);
+}
+.pipe-platform-orb svg { width: 14px; height: 14px; }
+.pipe-platform-info { flex: 1; min-width: 0; }
+.pipe-platform-title { font-size: 10px; font-weight: 650; }
+.pipe-platform-sub { font-size: 8.2px; color: var(--muted-2); font: 8px var(--mono); }
+
+.iface-pill { flex: 0 0 auto; font: 7.2px var(--mono); padding: 0 3px; border-radius: 3px; }
 .iface-pill.rest { color: #0d6f8a; background: rgba(13, 126, 168, .1); }
 .iface-pill.event { color: #8a5a12; background: rgba(183, 121, 31, .1); }
 .iface-pill.spi { color: #4368c9; background: rgba(67, 104, 201, .1); }
 .contract-empty { height: 100%; display: flex; align-items: center; gap: 12px; padding: 10px; }
 
 @media (max-width: 1270px) {
-  .rule-body { grid-template-columns: minmax(0, 1.1fr) minmax(235px, .8fr); }
+  .pipe-left { flex-basis: 186px; }
+  .pipe-card, .pipe-platform-card { max-width: 560px; }
+  .pipe-row { grid-template-columns: 14px 94px 12px 1fr auto; }
 }
 @media (max-height: 780px) {
-  .rule-top { padding: 4px 7px; }
-  .rule-brand em { display: none; }
-  .rule-body { gap: 6px; }
-  .rule-item { padding: 5px 7px; }
-  .trace-step { padding: 5px 7px; }
+  .pipe-canvas { padding: 6px 12px; }
+  .pipe-link-inner { height: 30px; }
+  .pipe-node { padding: 4px 8px 4px; }
 }
 
 </style>
@@ -1930,7 +2035,7 @@ svg { display: block; }
         <button class="dock-tab active" data-tab="overview">解析结果 <span class="tab-badge" id="tabBadgeOverview">—</span></button>
         <button class="dock-tab" data-tab="graph">依赖关系 <span class="tab-badge" id="tabBadgeGraph">—</span></button>
         <button class="dock-tab" data-tab="shared">共享依赖 <span class="tab-badge" id="tabBadgeShared">—</span></button>
-        <button class="dock-tab" data-tab="contract">衔接规则 <span class="tab-badge" id="tabBadgeContract">—</span></button>
+        <button class="dock-tab" data-tab="contract">衔接流水线 <span class="tab-badge" id="tabBadgeContract">—</span></button>
         <button class="dock-tab" data-tab="lock">版本锁定 <span class="tab-badge" id="tabBadgeLock">—</span></button>
         <button class="dock-tab" data-tab="build">构建交付 <span class="tab-badge" id="tabBadgeBuild">—</span></button>
       </nav>
@@ -3235,8 +3340,8 @@ function renderTabs() {
     shared.className = 'tab-badge';
   }
   if (contract) {
-    const cid = getContractMicroId();
-    contract.textContent = cid ? String(getSlotBindings(cid).length + 4) : '—';
+    const members = getAppMicroApps();
+    contract.textContent = members.length ? '4 级' : '—';
     contract.className = 'tab-badge';
   }
   if (lock) {
@@ -3309,6 +3414,13 @@ function renderDock() {
     el.addEventListener('click', (event) => {
       event.stopPropagation();
       openContract(el.dataset.openContract);
+    });
+  });
+  content.querySelectorAll('[data-pipe-tab]').forEach(el => {
+    el.addEventListener('click', () => {
+      const tab = el.dataset.pipeTab;
+      el.closest('.pipe-card').querySelectorAll('.pipe-card-tab').forEach(t => t.classList.toggle('active', t === el));
+      el.closest('.pipe-card').querySelectorAll('.pipe-tab-pane').forEach(p => p.classList.toggle('active', p.dataset.pipePane === tab));
     });
   });
   content.querySelectorAll('[data-node-component]').forEach(el => {
@@ -3782,9 +3894,9 @@ function renderContractTab() {
     return `<div class="contract-empty">
       <div class="empty-orb">${icon('shared', 20)}</div>
       <div class="empty-copy">
-        <div class="eyebrow">INTEGRATION RULES</div>
-        <h3>暂无微应用可生成衔接规则</h3>
-        <p>先在「应用」中加入微应用，规则引擎会自动根据组件接口生成插槽绑定与应用注册规则。</p>
+        <div class="eyebrow">INTEGRATION PIPELINE</div>
+        <h3>暂无微应用可展示衔接流水线</h3>
+        <p>先在「应用」中加入微应用，流水线会从后端组件接口→微应用插槽→应用注册，逐级可视化。</p>
       </div>
     </div>`;
   }
@@ -3794,93 +3906,140 @@ function renderContractTab() {
   const bindings = getSlotBindings(activeId);
   const directBindings = bindings.filter(b => !b.platform);
   const platformBindings = bindings.filter(b => b.platform);
-  const appRules = 4;
-  const totalRules = bindings.length + appRules;
 
-  const chips = members.map(m => `<button class="contract-chip ${m.id === activeId ? 'active' : ''}" data-contract-micro="${m.id}" style="--accent:${m.accent}">
-    <span class="contract-chip-dot"></span>${escapeHtml(m.name)}
+  const chips = members.map(m => `<button class="pipe-chip ${m.id === activeId ? 'active' : ''}" data-contract-micro="${m.id}" style="--accent:${m.accent}">
+    <span class="pipe-chip-dot"></span>${escapeHtml(m.name)}
   </button>`).join('');
 
-  const ruleItem = (id, group, when, thenHtml, platform) => `
-    <div class="rule-item ${platform ? 'platform' : ''}">
-      <div class="rule-item-head"><span class="rule-id">${id}</span><span class="rule-group">${group}</span><span class="rule-state">命中</span></div>
-      <div class="rule-line when"><b>WHEN</b><span>${when}</span></div>
-      <div class="rule-line then"><b>THEN</b><span>${thenHtml}</span></div>
+  // Stage 1: summary of all components used
+  const compNames = directBindings.map(b => escapeHtml(b.componentName)).join(' · ') || '暂无直接组件';
+
+  // Stage 2: slot bindings (main middle card, Tab 1)
+  const slotRowsHtml = bindings.map(b => `
+    <div class="pipe-row ${b.platform ? 'platform' : ''}">
+      <span class="pipe-row-slot">${icon('shared', 10)}${escapeHtml(b.slot.label)}</span>
+      <span class="pipe-row-arrow">${icon('arrow', 8)}</span>
+      <span class="pipe-row-provider">
+        <span class="pipe-row-provider-name">${escapeHtml(b.componentName)}<em>${escapeHtml(b.version)}</em></span>
+        <span class="pipe-row-provider-iface"><b class="iface-pill ${b.iface.type.toLowerCase()}">${b.iface.type}</b><code>${escapeHtml(b.iface.path)}</code></span>
+      </span>
+      <span class="pipe-row-tag">${b.platform ? '平台注入' : '装配'}</span>
+    </div>`).join('');
+
+  // Stage 2 Tab 2: raw interface list
+  const allIfaces = directBindings.flatMap(b => COMPONENTS[b.componentId].provides.map(p => ({ ...p, compName: b.componentName })));
+  const ifaceRowsHtml = allIfaces.length
+    ? allIfaces.map(p => `<div class="pipe-row">
+        <span class="pipe-row-slot">${escapeHtml(p.compName)}</span>
+        <span class="pipe-row-arrow">${icon('arrow', 8)}</span>
+        <span class="pipe-row-provider">
+          <span class="pipe-row-provider-iface" style="gap:6px"><b class="iface-pill ${p.type.toLowerCase()}">${p.type}</b><code>${escapeHtml(p.path)}</code></span>
+        </span>
+        <span class="pipe-row-tag">${escapeHtml(p.desc.slice(0, 8))}</span>
+      </div>`).join('')
+    : '<div style="padding:8px;color:var(--muted-2);font-size:8.6px">暂无对外接口</div>';
+
+  // Stage 3: microapp contract properties (= style)
+  const microProps = `
+    <div class="pipe-props">
+      <div class="pipe-prop"><span>路由</span><span class="pipe-prop-eq">=</span><code>${escapeHtml(contract.route)}</code></div>
+      <div class="pipe-prop"><span>挂载点</span><span class="pipe-prop-eq">=</span><code>${escapeHtml(contract.mount)}</code></div>
+      <div class="pipe-prop"><span>入口</span><span class="pipe-prop-eq">=</span><code>${escapeHtml(contract.entry)}</code></div>
+      <div class="pipe-prop"><span>生命周期</span><span class="pipe-prop-eq">=</span><code>${contract.lifecycle.map(escapeHtml).join(' → ')}</code></div>
+      <div class="pipe-prop"><span>共享运行时</span><span class="pipe-prop-eq">=</span><code>${escapeHtml(contract.runtime)}</code></div>
+      <div class="pipe-prop-events"><span class="event">${escapeHtml(contract.events[0])}</span>${contract.events.slice(1).map(e => `<span class="event">${escapeHtml(e)}</span>`).join('')}</div>
     </div>`;
 
-  const compRules = directBindings.map((b, i) => ruleItem(
-    'R-' + String(i + 1).padStart(2, '0'),
-    '组件接入规则',
-    `微应用「${escapeHtml(app.name)}」已装配 ${escapeHtml(b.componentName)} ${escapeHtml(b.version)}`,
-    `绑定插槽 <b class="slot-name">「${escapeHtml(b.slot.label)}」</b> ← <b class="iface-pill ${b.iface.type.toLowerCase()}">${b.iface.type}</b><code>${escapeHtml(b.iface.path)}</code>`,
-    false
-  )).join('');
+  // Stage 4: app runtime card
+  const platformBindingsHtml = platformBindings.map(b => `<div style="font-size:8.2px;color:var(--blue);font-weight:600;margin-top:2px">· ${escapeHtml(b.componentName)}<span style="color:var(--muted-2);font-weight:400"> ${escapeHtml(b.version)}</span></div>`).join('');
 
-  const platformRules = platformBindings.map((b, i) => ruleItem(
-    'P-' + String(i + 1).padStart(2, '0'),
-    '平台注入规则',
-    '平台运行时启动并下发权限上下文',
-    `注入插槽 <b class="slot-name">「${escapeHtml(b.slot.label)}」</b> ← <b class="iface-pill ${b.iface.type.toLowerCase()}">${b.iface.type}</b><code>${escapeHtml(b.iface.path)}</code> · ${escapeHtml(b.version)}`,
-    true
-  )).join('');
-
-  const appRulesHtml = [
-    ruleItem('A-01', '应用注册规则',
-      `微应用「${escapeHtml(app.name)} ${escapeHtml(app.version)}」注册至应用`,
-      `挂载路由 <code>${escapeHtml(contract.route)}</code> → 挂载点 <code>${escapeHtml(contract.mount)}</code>`, false),
-    ruleItem('A-02', '应用注册规则',
-      `入口 <code>${escapeHtml(contract.entry)}</code> 加载完成`,
-      `按序执行生命周期 <code>${contract.lifecycle.map(escapeHtml).join('() → ')}()</code>`, false),
-    ruleItem('A-03', '应用注册规则',
-      '应用运行时启动',
-      `加载共享 <code>${escapeHtml(contract.runtime)}</code><br>订阅事件 ${contract.events.map(e => `<code>${escapeHtml(e)}</code>`).join('、')}`, false),
-    ruleItem('A-04', '应用注册规则',
-      `应用发布清单 <code>${escapeHtml(APP_CONTRACT.manifest)}</code> 加载`,
-      `调用 <code>${escapeHtml(APP_CONTRACT.register)}</code> 完成微应用注册`, false)
-  ].join('');
-
-  const step = (num, title, hit, desc) => `
-    <div class="trace-step">
-      <span class="trace-num">${num}</span>
-      <div class="trace-copy">
-        <div class="trace-title">${title}<span>命中 ${hit}</span></div>
-        <div class="trace-desc">${desc}</div>
-      </div>
-    </div>`;
-
-  return `<div class="rule-layout">
-    <div class="rule-top">
-      <div class="rule-brand">
-        <span class="rule-signal"></span>
-        <div><b>衔接规则引擎</b><em>ems-integration-rules v1.2 · 由组件接口自动生成绑定规则</em></div>
-      </div>
-      <div class="rule-chips">${chips}</div>
-      <div class="rule-stats"><span>规则 <b>${totalRules}</b></span><span class="hit">命中 <b>${totalRules}</b></span><span>跳过 <b>0</b></span></div>
+  // Stage 3: microapp contract node (orb + inline properties, = style)
+  const stage3 = `<div class="pipe-card" style="max-width:460px">
+    <div class="pipe-card-header" style="background:linear-gradient(90deg,#3b63d8,#6b8ef0)"></div>
+    <div class="pipe-card-head">
+      <span class="pipe-node-orb" style="width:22px;height:22px;box-shadow:none;background:linear-gradient(135deg,#3b63d8,#6b8ef0);border:2px solid #fff">${icon('layers', 11)}</span>
+      <span class="pipe-card-title" style="color:#2b4f9a">${escapeHtml(app.name)} ${escapeHtml(app.version)}</span>
+      <span class="pipe-card-sub">接入契约</span>
     </div>
-    <div class="rule-body">
-      <div class="rule-panel">
-        <div class="rule-panel-head">规则列表 <span>WHEN 条件满足时执行 THEN 绑定</span></div>
-        <div class="rule-list">
-          <div class="rule-group-label">组件接入规则 · ${directBindings.length}</div>
-          ${compRules}
-          ${platformBindings.length ? `<div class="rule-group-label">平台注入规则 · ${platformBindings.length}</div>${platformRules}` : ''}
-          <div class="rule-group-label">应用注册规则 · ${appRules}</div>
-          ${appRulesHtml}
-        </div>
+    <div class="pipe-card-body">
+      ${microProps}
+    </div>
+  </div>`;
+
+  // Build pipeline HTML
+  const pipe = [];
+  // Stage 1 endpoint node
+  pipe.push(`<div class="pipe-node actor-comp">
+    <span class="pipe-node-orb">${icon('cube', 13)}</span>
+    <div class="pipe-node-body">
+      <div class="pipe-node-name">后端组件</div>
+      <div class="pipe-node-sub">${escapeHtml(compNames)}</div>
+    </div>
+  </div>`);
+  // Connector 1
+  pipe.push(`<div class="pipe-link"><div class="pipe-link-inner">
+    <span class="pipe-link-line"></span>
+    <span class="pipe-link-label">接口绑定</span>
+    <span class="pipe-link-dot"></span>
+  </div></div>`);
+  // Stage 2 middle card with tabs
+  pipe.push(`<div class="pipe-card">
+    <div class="pipe-card-header"></div>
+    <div class="pipe-card-head">
+      <span class="pipe-card-title">微应用插槽</span>
+      <span class="pipe-card-sub">${bindings.length} 个绑定 · 协议 REST / EVENT / SPI</span>
+      <div class="pipe-card-tabs">
+        <button class="pipe-card-tab active" data-pipe-tab="slots">插槽绑定</button>
+        <button class="pipe-card-tab" data-pipe-tab="ifaces">接口列表</button>
       </div>
-      <div class="trace-panel">
-        <div class="rule-panel-head">执行轨迹 <span>${escapeHtml(app.name)} ${escapeHtml(app.version)}</span></div>
-        <div class="trace-list">
-          ${step('01', '组件接口', bindings.length, bindings.map(b => `${escapeHtml(b.componentName)} <code>${escapeHtml(b.version)}</code>`).join(' · '))}
-          <div class="trace-link">规则 R-01 ~ R-${String(directBindings.length).padStart(2, '0')} 依次命中</div>
-          ${step('02', '插槽消费', bindings.length, bindings.map(b => escapeHtml(b.slot.label)).join(' · '))}
-          <div class="trace-link">规则 A-01 命中</div>
-          ${step('03', '应用挂载', 1, `路由 <code>${escapeHtml(contract.route)}</code> → 挂载点 <code>${escapeHtml(contract.mount)}</code>`)}
-          <div class="trace-link">规则 A-02 ~ A-04 命中</div>
-          ${step('04', '运行时注册', 1, `入口 <code>${escapeHtml(contract.entry)}</code> · 共享 ${escapeHtml(contract.runtime)}<br>注册清单 <code>${escapeHtml(APP_CONTRACT.manifest)}</code>`)}
-        </div>
-        <div class="trace-foot">${icon('check', 8)}规则全部命中，结果即应用运行时的挂载拓扑。</div>
+    </div>
+    <div class="pipe-card-body">
+      <div class="pipe-tab-pane active" data-pipe-pane="slots">
+        <div class="pipe-rows">${slotRowsHtml}</div>
       </div>
+      <div class="pipe-tab-pane" data-pipe-pane="ifaces">
+        <div class="pipe-rows">${ifaceRowsHtml}</div>
+      </div>
+    </div>
+  </div>`);
+  // Connector 2
+  pipe.push(`<div class="pipe-link"><div class="pipe-link-inner">
+    <span class="pipe-link-line" style="background:linear-gradient(180deg,rgba(59,99,216,.55),rgba(13,148,136,.45))"></span>
+    <span class="pipe-link-label">注册接入</span>
+    <span class="pipe-link-dot" style="border-color:#3b63d8"></span>
+  </div></div>`);
+  // Stage 3: microapp contract card
+  pipe.push(stage3);
+  // Connector 3
+  pipe.push(`<div class="pipe-link"><div class="pipe-link-inner">
+    <span class="pipe-link-line" style="background:linear-gradient(180deg,rgba(214,58,82,.55),rgba(59,99,216,.45))"></span>
+    <span class="pipe-link-label">运行时编排</span>
+    <span class="pipe-link-dot" style="border-color:#d63a52"></span>
+  </div></div>`);
+  // Stage 4: platform/app card
+  pipe.push(`<div class="pipe-platform-card">
+    <span class="pipe-platform-orb">${icon('bell', 14)}</span>
+    <div class="pipe-platform-info">
+      <div class="pipe-platform-title">工厂能源管理平台 v1.0.0 · 运行时</div>
+      <div class="pipe-platform-sub">${escapeHtml(APP_CONTRACT.runtime)} · ${escapeHtml(APP_CONTRACT.router)} · ${escapeHtml(APP_CONTRACT.bus)}</div>
+      ${platformBindingsHtml}
+    </div>
+  </div>`);
+
+  return `<div class="pipe-layout">
+    <div class="pipe-left">
+      <div class="pipe-left-title">${icon('layers', 10)} 微应用选择</div>
+      ${chips}
+      <div class="pipe-side-note">
+        <b>流水线说明</b>
+        绿色节点 = 后端组件能力提供<br>
+        中间金顶卡片 = 插槽绑定 / 接口<br>
+        蓝色节点 = 微应用接入契约<br>
+        红色节点 = 应用运行时编排
+      </div>
+    </div>
+    <div class="pipe-canvas" data-pipe-canvas>
+      ${pipe.join('')}
     </div>
   </div>`;
 }
