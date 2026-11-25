@@ -344,6 +344,11 @@ svg { display: block; }
 .app-panel.app-drop-ready { border-color: rgba(13, 148, 136, .5); box-shadow: 0 0 0 1px rgba(13, 148, 136, .22) inset, 0 16px 40px rgba(13, 148, 136, .08); }
 .app-remove-row { align-self: flex-start; margin: 5px 0 2px 14px; height: 20px; padding: 0 6px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid rgba(214, 58, 82, .18); border-radius: 4px; background: rgba(214, 58, 82, .03); color: #b03a4e; font-size: 7.5px; }
 .app-remove-row:hover { background: rgba(214, 58, 82, .09); }
+.app-contract-row { margin: 1px 0 3px; height: 22px; padding: 0 5px; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(13, 148, 136, .18); border-radius: 5px; background: rgba(13, 148, 136, .04); }
+.app-contract-row:hover { background: rgba(13, 148, 136, .09); border-color: rgba(13, 148, 136, .32); }
+.app-contract-tag { flex: 0 0 auto; font-size: 7.2px; color: var(--cyan); border: 1px solid rgba(13, 148, 136, .32); border-radius: 3px; padding: 0 3px; }
+.app-contract-route { font: 8px var(--mono); color: #24525c; }
+.app-contract-mount { margin-left: auto; font: 7.6px var(--mono); color: var(--muted-2); }
 .panel {
   position: relative;
   min-width: 0;
@@ -1367,6 +1372,13 @@ svg { display: block; }
 .detail-chips { display: flex; flex-wrap: wrap; gap: 5px; }
 .detail-chip { height: 23px; padding: 0 8px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 5px; background: rgba(16, 50, 62, .035); color: var(--muted); font-size: 8.5px; }
 .detail-chip svg { width: 9px; height: 9px; color: var(--cyan); }
+.iface-list { display: flex; flex-direction: column; gap: 5px; }
+.iface-row { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: rgba(16, 50, 62, .025); min-width: 0; }
+.iface-row code { font: 8.8px var(--mono); color: #24525c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
+.iface-row > span { color: var(--muted-2); font-size: 8.2px; white-space: nowrap; flex: 0 0 auto; }
+.iface-slot { margin-top: 6px; display: flex; align-items: center; gap: 5px; color: var(--muted-2); font-size: 8.4px; }
+.iface-slot svg { width: 9px; height: 9px; color: var(--cyan); flex: 0 0 auto; }
+.iface-slot b { color: #24525c; font-weight: 600; }
 .detail-note { display: flex; align-items: flex-start; gap: 6px; padding: 8px 9px; border-radius: 6px; border: 1px solid rgba(183, 121, 31, .17); background: rgba(183, 121, 31, .045); color: #8a6420; font-size: 8.5px; line-height: 1.5; }
 .detail-note svg { width: 11px; height: 11px; flex: 0 0 auto; margin-top: 1px; color: var(--amber); }
 .detail-tree { padding: 9px 10px; border: 1px solid var(--line); border-radius: 7px; background: rgba(16, 50, 62, .025); }
@@ -1562,6 +1574,12 @@ svg { display: block; }
 .confirm-dep-group b { display: block; margin-bottom: 3px; color: #6b838d; font-size: 7px; font-weight: 600; letter-spacing: .06em; }
 .confirm-dep-group div { color: #4c6773; font-size: 8px; line-height: 1.55; word-break: break-word; }
 .confirm-note { display: flex; align-items: flex-start; gap: 5px; color: #6b838d; font-size: 7.5px; line-height: 1.45; }
+.confirm-binding { padding: 6px 7px; display: flex; flex-direction: column; gap: 4px; border: 1px solid rgba(13, 148, 136, .22); border-radius: 6px; background: rgba(13, 148, 136, .05); }
+.confirm-bind-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.confirm-slot { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 4px; height: 21px; padding: 0 7px; border: 1px solid var(--accent, rgba(13, 148, 136, .35)); border-radius: 5px; color: var(--accent, var(--cyan)); background: #fff; font-size: 8.6px; font-weight: 600; white-space: nowrap; }
+.confirm-iface { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.confirm-iface code { font: 8.2px var(--mono); color: #24525c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.confirm-bind-note { color: #5c7480; font-size: 7.6px; line-height: 1.45; }
 .confirm-note svg { width: 10px; height: 10px; flex: 0 0 auto; margin-top: 1px; color: var(--cyan); }
 .confirm-actions { position: sticky; bottom: -1px; margin-top: auto; padding-top: 5px; display: flex; justify-content: flex-end; gap: 6px; background: linear-gradient(180deg, rgba(255, 255, 255, 0), #fff 42%); }
 .wizard-btn {
@@ -1655,6 +1673,100 @@ svg { display: block; }
   .shared-layout { grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(190px, .7fr); }
   .conflict-sources { grid-template-columns: 1fr 1fr; }
   .conflict-sources .source-item:last-child { grid-column: span 2; }
+  .contract-side { flex-basis: 188px; }
+  .chain-link { flex-basis: 54px; }
+}
+
+/* Integration contract */
+.contract-layout { height: 100%; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+.contract-chain { flex: 0 0 auto; display: flex; align-items: stretch; gap: 6px; }
+.chain-stage {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: linear-gradient(140deg, rgba(13, 148, 136, .045), rgba(16, 50, 62, .012));
+}
+.chain-stage-head { display: flex; align-items: center; gap: 6px; font-size: 11.5px; min-width: 0; }
+.chain-index { flex: 0 0 auto; font: 8px var(--mono); color: var(--cyan); border: 1px solid rgba(13, 148, 136, .3); border-radius: 4px; padding: 1px 4px; }
+.chain-stage-head b { font-weight: 650; white-space: nowrap; }
+.chain-stage-head em { font-style: normal; color: var(--muted-2); font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chain-body { display: flex; flex-wrap: wrap; gap: 4px; }
+.chain-token { height: 19px; padding: 0 6px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 5px; background: rgba(255, 255, 255, .74); color: var(--muted); font-size: 9.4px; white-space: nowrap; }
+.chain-token b { font-family: var(--mono); color: var(--text); font-weight: 600; }
+.chain-token.accent { color: var(--accent, var(--cyan)); border-color: var(--accent, var(--cyan)); font-weight: 600; }
+.chain-foot { margin-top: auto; color: var(--muted-2); font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chain-link { flex: 0 0 66px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--cyan); }
+.chain-link-tag { font-size: 8.6px; font-weight: 650; color: var(--cyan); white-space: nowrap; }
+.chain-link-line {
+  position: relative;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(13, 148, 136, .12), var(--cyan), rgba(13, 148, 136, .12));
+}
+.chain-link-line::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: -2.5px;
+  border-left: 5px solid var(--cyan);
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
+}
+.chain-link-sub { font-size: 7.6px; color: var(--muted-2); white-space: nowrap; }
+
+.contract-bottom { flex: 1; min-height: 0; display: flex; gap: 8px; }
+.contract-side { flex: 0 0 216px; min-width: 0; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 6px; }
+.contract-side-title { font-size: 8.6px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-2); }
+.contract-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.contract-chip { height: 23px; padding: 0 7px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--line); border-radius: 6px; background: rgba(16, 50, 62, .03); color: var(--muted); font-size: 9.4px; white-space: nowrap; transition: .15s ease; }
+.contract-chip:hover { border-color: var(--line-strong); }
+.contract-chip.active { color: var(--text); border-color: rgba(13, 148, 136, .45); background: rgba(13, 148, 136, .08); }
+.contract-chip-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent, var(--cyan)); flex: 0 0 auto; }
+.contract-app-card { margin-top: auto; padding: 7px 8px; border: 1px solid var(--line); border-radius: 8px; background: rgba(16, 50, 62, .02); }
+.contract-app-title { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; font-size: 9.8px; font-weight: 650; }
+.contract-app-title svg { color: var(--cyan); }
+.contract-app-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 1.5px 0; font-size: 8.5px; }
+.contract-app-row > span { color: var(--muted-2); flex: 0 0 auto; }
+.contract-app-row code { min-width: 0; font: 8.3px var(--mono); color: #24525c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.contract-card { flex: .92; min-width: 0; padding: 8px 9px; display: flex; flex-direction: column; gap: 6px; border: 1px solid var(--line); border-radius: 9px; background: rgba(255, 255, 255, .68); overflow: auto; }
+.contract-card.grow { flex: 1.35; }
+.contract-card-head { display: flex; align-items: center; gap: 5px; font-size: 9.8px; font-weight: 650; color: var(--text); }
+.contract-card-head svg { color: var(--cyan); }
+.contract-card-head span { font-size: 8.4px; font-weight: 500; color: var(--muted-2); }
+.contract-kv { display: flex; flex-direction: column; gap: 4px; }
+.kv-row { display: flex; align-items: flex-start; gap: 8px; font-size: 9.2px; }
+.kv-row > span:first-child { flex: 0 0 42px; color: var(--muted-2); }
+.kv-row code { font: 8.8px var(--mono); color: #24525c; background: rgba(13, 148, 136, .06); padding: 1px 5px; border-radius: 4px; word-break: break-all; }
+.life-chips { display: flex; flex-wrap: wrap; gap: 3px; }
+.life-chip { font: 8.4px var(--mono); color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 1px 4px; }
+.life-chip.event { color: #8a5a12; border-color: rgba(183, 121, 31, .26); background: rgba(183, 121, 31, .06); }
+
+.slot-list { display: flex; flex-direction: column; gap: 4px; }
+.slot-row { display: flex; align-items: center; gap: 6px; padding: 4px 6px; border: 1px solid rgba(20, 52, 64, .09); border-radius: 6px; background: rgba(246, 250, 251, .72); }
+.slot-row.platform { border-style: dashed; background: rgba(59, 99, 216, .045); }
+.slot-port { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 6px; border: 1px solid var(--accent, rgba(13, 148, 136, .3)); border-radius: 5px; color: var(--accent, var(--cyan)); background: rgba(255, 255, 255, .74); font-size: 8.8px; font-weight: 600; white-space: nowrap; }
+.slot-arrow { flex: 0 0 auto; color: var(--muted-2); }
+.slot-provider { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.slot-provider-name { display: flex; align-items: center; gap: 4px; font-size: 9px; color: #29454f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.slot-provider-name em { font-style: normal; font: 8px var(--mono); color: var(--muted-2); }
+.slot-platform { font-style: normal; font-size: 7.4px; color: var(--blue); }
+.slot-iface { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.slot-iface code { min-width: 0; font: 8.2px var(--mono); color: var(--muted-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.iface-pill { flex: 0 0 auto; font: 7.5px var(--mono); padding: 1px 4px; border-radius: 3px; }
+.iface-pill.rest { color: #0d6f8a; background: rgba(13, 126, 168, .1); }
+.iface-pill.event { color: #8a5a12; background: rgba(183, 121, 31, .1); }
+.iface-pill.spi { color: #4368c9; background: rgba(67, 104, 201, .1); }
+.contract-empty { height: 100%; display: flex; align-items: center; gap: 12px; padding: 10px; }
+
+@media (max-height: 780px) {
+  .chain-foot { display: none; }
+  .contract-side { flex-basis: 190px; }
 }
 
 </style>
@@ -1831,6 +1943,7 @@ svg { display: block; }
         <button class="dock-tab active" data-tab="overview">解析结果 <span class="tab-badge" id="tabBadgeOverview">—</span></button>
         <button class="dock-tab" data-tab="graph">依赖关系 <span class="tab-badge" id="tabBadgeGraph">—</span></button>
         <button class="dock-tab" data-tab="shared">共享依赖 <span class="tab-badge" id="tabBadgeShared">—</span></button>
+        <button class="dock-tab" data-tab="contract">衔接契约 <span class="tab-badge" id="tabBadgeContract">—</span></button>
         <button class="dock-tab" data-tab="lock">版本锁定 <span class="tab-badge" id="tabBadgeLock">—</span></button>
         <button class="dock-tab" data-tab="build">构建交付 <span class="tab-badge" id="tabBadgeBuild">—</span></button>
       </nav>
@@ -1853,37 +1966,68 @@ const COMPONENTS = {
     name: '能源数据服务', version: 'v2.0.0', category: 'data', categoryLabel: '数据服务',
     icon: 'data', accent: '#0d9488', code: 'EMS-DATA',
     description: '提供能源实时数据、历史数据、数据查询和数据聚合能力。',
-    depIds: ['storage', 'auth']
+    depIds: ['storage', 'auth'],
+    provides: [
+      { type: 'REST', path: 'GET /api/v2/energy/realtime', desc: '实时能源数据查询' },
+      { type: 'REST', path: 'GET /api/v2/energy/history', desc: '历史能源数据查询' },
+      { type: 'EVENT', path: 'ems.energy.point.changed', desc: '测点数据变更事件' }
+    ],
+    slot: { key: 'energy-source', label: '能源数据源槽', protocol: 'REST + Event' }
   },
   metrics: {
     name: '能源指标服务', version: 'v1.6.0', category: 'data', categoryLabel: '指标服务',
     icon: 'chart', accent: '#159a63', code: 'EMS-METRIC',
     description: '负责能耗指标计算、同环比分析与指标口径统一。',
-    depIds: ['energy-data']
+    depIds: ['energy-data'],
+    provides: [
+      { type: 'REST', path: 'POST /api/v1/metrics/compute', desc: '指标计算' },
+      { type: 'EVENT', path: 'ems.metric.calculated', desc: '指标计算完成事件' }
+    ],
+    slot: { key: 'metric-compute', label: '指标计算槽', protocol: 'REST + Event' }
   },
   device: {
     name: '设备管理服务', version: 'v1.4.0', category: 'device', categoryLabel: '设备服务',
     icon: 'device', accent: '#3b63d8', code: 'EMS-DEVICE',
     description: '维护设备台账、运行状态与能源设备拓扑关系。',
-    depIds: ['device-master', 'auth']
+    depIds: ['device-master', 'auth'],
+    provides: [
+      { type: 'REST', path: 'GET /api/v1/devices/{id}', desc: '设备台账与拓扑查询' },
+      { type: 'EVENT', path: 'ems.device.status.changed', desc: '设备状态变更事件' }
+    ],
+    slot: { key: 'device-context', label: '设备上下文槽', protocol: 'REST + Event' }
   },
   alarm: {
     name: '告警服务', version: 'v1.3.0', category: 'alert', categoryLabel: '告警服务',
     icon: 'bell', accent: '#b7791f', code: 'EMS-ALARM',
     description: '提供阈值告警、事件通知与异常处置闭环能力。',
-    depIds: ['energy-data', 'auth']
+    depIds: ['energy-data', 'auth'],
+    provides: [
+      { type: 'REST', path: 'GET /api/v1/alarms', desc: '告警查询与上报' },
+      { type: 'EVENT', path: 'ems.alarm.raised', desc: '告警触发事件' }
+    ],
+    slot: { key: 'alarm-channel', label: '告警通道槽', protocol: 'REST + Event' }
   },
   report: {
     name: '报表服务', version: 'v1.2.0', category: 'data', categoryLabel: '报表服务',
     icon: 'file', accent: '#7c5cd6', code: 'EMS-REPORT',
     description: '生成能源日报、月报及自定义分析报表。',
-    depIds: ['metrics', 'file']
+    depIds: ['metrics', 'file'],
+    provides: [
+      { type: 'REST', path: 'POST /api/v1/reports', desc: '报表生成' },
+      { type: 'EVENT', path: 'ems.report.ready', desc: '报表生成完成事件' }
+    ],
+    slot: { key: 'report-output', label: '报表输出槽', protocol: 'REST + Event' }
   },
   permission: {
     name: '权限服务', version: 'v2.1.0', category: 'security', categoryLabel: '安全服务',
     icon: 'shield', accent: '#4368c9', code: 'EMS-PERM',
     description: '统一管理业务权限、数据范围与角色授权策略。',
-    depIds: ['auth'], platform: true
+    depIds: ['auth'], platform: true,
+    provides: [
+      { type: 'SPI', path: 'PermissionProvider', desc: '权限校验扩展点' },
+      { type: 'REST', path: 'POST /api/v2/authz/check', desc: '权限校验' }
+    ],
+    slot: { key: 'authz-policy', label: '权限策略槽', protocol: 'SPI + REST' }
   }
 };
 
@@ -1904,7 +2048,12 @@ const MICRO_APPS = [
       { id: 'energy-data', version: 'v2.0.0' },
       { id: 'device', version: 'v1.4.0' },
       { id: 'metrics', version: 'v1.6.0' }
-    ]
+    ],
+    contract: {
+      route: '/monitor', mount: '#mf-monitor', entry: 'ems-monitor@2.3.0/entry.js',
+      lifecycle: ['bootstrap', 'mount', 'unmount'], runtime: '@ems/runtime v1.9.0',
+      events: ['ems.nav.activate', 'ems.context.device']
+    }
   },
   {
     id: 'analysis', name: '能源分析', version: 'v1.8.0', icon: 'chart', accent: '#159a63',
@@ -1912,7 +2061,12 @@ const MICRO_APPS = [
     components: [
       { id: 'energy-data', version: 'v1.5.0' },
       { id: 'metrics', version: 'v1.6.0' }
-    ]
+    ],
+    contract: {
+      route: '/analysis', mount: '#mf-analysis', entry: 'ems-analysis@1.8.0/entry.js',
+      lifecycle: ['bootstrap', 'mount', 'unmount'], runtime: '@ems/runtime v1.9.0',
+      events: ['ems.nav.activate', 'ems.metric.focus']
+    }
   },
   {
     id: 'alarm', name: '告警管理', version: 'v1.5.0', icon: 'bell', accent: '#b7791f',
@@ -1920,7 +2074,12 @@ const MICRO_APPS = [
     components: [
       { id: 'alarm', version: 'v1.3.0' },
       { id: 'energy-data', version: 'v2.0.0' }
-    ]
+    ],
+    contract: {
+      route: '/alarm-center', mount: '#mf-alarm', entry: 'ems-alarm@1.5.0/entry.js',
+      lifecycle: ['bootstrap', 'mount', 'unmount'], runtime: '@ems/runtime v1.9.0',
+      events: ['ems.alarm.raised', 'ems.nav.activate']
+    }
   },
   {
     id: 'report', name: '能源报表', version: 'v1.4.0', icon: 'file', accent: '#7c5cd6',
@@ -1928,7 +2087,12 @@ const MICRO_APPS = [
     components: [
       { id: 'report', version: 'v1.2.0' },
       { id: 'metrics', version: 'v1.6.0' }
-    ]
+    ],
+    contract: {
+      route: '/reports', mount: '#mf-report', entry: 'ems-report@1.4.0/entry.js',
+      lifecycle: ['bootstrap', 'mount', 'unmount'], runtime: '@ems/runtime v1.9.0',
+      events: ['ems.report.ready', 'ems.nav.activate']
+    }
   },
   {
     id: 'efficiency', name: '能效优化', version: 'v1.0.0', icon: 'chart', accent: '#0d7ea8',
@@ -1936,9 +2100,22 @@ const MICRO_APPS = [
     components: [
       { id: 'metrics', version: 'v1.6.0' },
       { id: 'report', version: 'v1.2.0' }
-    ]
+    ],
+    contract: {
+      route: '/efficiency', mount: '#mf-efficiency', entry: 'ems-efficiency@1.0.0/entry.js',
+      lifecycle: ['bootstrap', 'mount', 'unmount'], runtime: '@ems/runtime v1.9.0',
+      events: ['ems.optimize.suggest', 'ems.nav.activate']
+    }
   }
 ];
+
+const APP_CONTRACT = {
+  manifest: 'factory-ems.manifest.json',
+  register: 'registerMicroApp(manifest)',
+  runtime: '@ems/shared-runtime v1.4.2',
+  router: 'EMS Router · history',
+  bus: 'EMS EventBus · 全局事件总线'
+};
 
 const PARSE_STEPS = [
   '扫描应用结构', '扫描微应用装配关系', '扫描后端组件', '展开传递依赖', '识别共享依赖', '检测版本冲突'
@@ -1989,6 +2166,7 @@ const state = {
   buildTimer: null,
   builtAt: null,
   activeTab: 'overview',
+  contractMicroId: null,
   expandedMicroapps: new Set(['monitor']),
   focusConflict: false,
   highlightMicro: null,
@@ -2002,6 +2180,40 @@ const state = {
 function getMicro(id) { return MICRO_APPS.find(m => m.id === id); }
 function getAppMicroApps() { return MICRO_APPS.filter(app => state.appMicroIds.includes(app.id)); }
 function isMicroInApp(id) { return state.appMicroIds.includes(id); }
+
+// 组件接口 → 微应用插槽 的绑定关系（含平台注入的权限策略槽）
+function getSlotBindings(microId) {
+  const bindings = (state.assembly[microId] || []).map(ref => {
+    const comp = COMPONENTS[ref.id];
+    return {
+      componentId: ref.id,
+      componentName: comp.name,
+      version: ref.version,
+      accent: comp.accent,
+      slot: comp.slot,
+      iface: comp.provides[0],
+      platform: false
+    };
+  });
+  bindings.push({
+    componentId: 'permission',
+    componentName: COMPONENTS.permission.name,
+    version: COMPONENTS.permission.version,
+    accent: COMPONENTS.permission.accent,
+    slot: COMPONENTS.permission.slot,
+    iface: COMPONENTS.permission.provides[0],
+    platform: true
+  });
+  return bindings;
+}
+
+function getContractMicroId() {
+  const members = getAppMicroApps();
+  if (!members.length) return null;
+  if (state.contractMicroId && members.some(m => m.id === state.contractMicroId)) return state.contractMicroId;
+  state.contractMicroId = members[0].id;
+  return state.contractMicroId;
+}
 function getCompRef(microId, compId) { return (state.assembly[microId] || []).find(c => c.id === compId); }
 function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s]));
@@ -2525,6 +2737,14 @@ function setTab(tab) {
   renderDock();
 }
 
+function openContract(microId) {
+  state.contractMicroId = microId || null;
+  state.activeTab = 'contract';
+  state.focusConflict = false;
+  renderTabs();
+  renderDock();
+}
+
 function locateMicro(microId) {
   state.highlightMicro = microId;
   state.expandedMicroapps.add(microId);
@@ -2887,6 +3107,14 @@ function renderWizardConfirm(app, compId) {
         <div class="confirm-dep-group"><b>直接依赖 · ${direct.length}</b><div>${direct.length ? direct.map(escapeHtml).join(' · ') : '无额外直接依赖'}</div></div>
         <div class="confirm-dep-group"><b>传递依赖 · ${transitive.length}</b><div>${transitive.length ? transitive.map(escapeHtml).join(' · ') : '无传递依赖'}</div></div>
       </div>
+      <div class="confirm-binding">
+        <div class="confirm-bind-row">
+          <span class="confirm-slot" style="--accent:${comp.accent}">${icon('shared', 9)}${escapeHtml(comp.slot.label)}</span>
+          <span class="confirm-arrow">${icon('arrow', 10)}</span>
+          <span class="confirm-iface"><b class="iface-pill ${comp.provides[0].type.toLowerCase()}">${comp.provides[0].type}</b><code>${escapeHtml(comp.provides[0].path)}</code></span>
+        </div>
+        <div class="confirm-bind-note">组件通过 ${escapeHtml(comp.slot.protocol)} 注入插槽「${escapeHtml(comp.slot.label)}」，微应用只依赖插槽契约，不直接耦合组件实现。</div>
+      </div>
       <div class="confirm-note">${icon('info', 10)}<span>确认后将为「${escapeHtml(app.name)}」新增 ${escapeHtml(comp.name)} ${escapeHtml(comp.version)}；组装变更会使已解析结果、版本锁定和构建结果失效。</span></div>
       <div class="confirm-actions">
         <button class="wizard-btn" data-wizard-reselect>${icon('refresh', 10)}重新选择</button>
@@ -2984,6 +3212,11 @@ function renderAppPanel() {
           <svg class="app-micro-chevron"><use href="#i-chevron"/></svg>
         </button>
         <div class="app-children">
+          <button class="app-contract-row" data-open-contract="${app.id}" title="查看组件接口与接入契约">
+            <span class="app-contract-tag">契约</span>
+            <span class="app-contract-route">${escapeHtml(app.contract.route)}</span>
+            <span class="app-contract-mount">${escapeHtml(app.contract.mount)}</span>
+          </button>
           ${children}
           <div class="app-platform-row">${icon('shield', 8)}平台注入 · 权限服务 v2.1.0</div>
           <button class="app-remove-row" data-remove-micro="${app.id}">${icon('x', 8)}从应用移除该微应用</button>
@@ -2999,6 +3232,7 @@ function renderTabs() {
   const overview = document.getElementById('tabBadgeOverview');
   const graph = document.getElementById('tabBadgeGraph');
   const shared = document.getElementById('tabBadgeShared');
+  const contract = document.getElementById('tabBadgeContract');
   const lock = document.getElementById('tabBadgeLock');
   const build = document.getElementById('tabBadgeBuild');
   if (overview) {
@@ -3012,6 +3246,10 @@ function renderTabs() {
   if (shared) {
     shared.textContent = state.parseState === 'resolved' ? String(getSharedDependencies().length) : '—';
     shared.className = 'tab-badge';
+  }
+  if (contract) {
+    contract.textContent = String(getAppMicroApps().length);
+    contract.className = 'tab-badge';
   }
   if (lock) {
     lock.textContent = state.lock ? '✓' : '—';
@@ -3045,6 +3283,7 @@ function renderDock() {
     case 'overview': html = renderOverviewTab(); break;
     case 'graph': html = renderGraphTab(); break;
     case 'shared': html = renderSharedTab(); break;
+    case 'contract': html = renderContractTab(); break;
     case 'lock': html = renderLockTab(); break;
     case 'build': html = renderBuildTab(); break;
     default: html = renderOverviewTab();
@@ -3070,6 +3309,18 @@ function renderDock() {
   });
   content.querySelectorAll('[data-open-micro]').forEach(el => {
     el.addEventListener('click', () => openMicroappDetail(el.dataset.openMicro));
+  });
+  content.querySelectorAll('[data-contract-micro]').forEach(el => {
+    el.addEventListener('click', () => {
+      state.contractMicroId = el.dataset.contractMicro;
+      renderDock();
+    });
+  });
+  content.querySelectorAll('[data-open-contract]').forEach(el => {
+    el.addEventListener('click', (event) => {
+      event.stopPropagation();
+      openContract(el.dataset.openContract);
+    });
   });
   content.querySelectorAll('[data-node-component]').forEach(el => {
     el.addEventListener('click', (event) => {
@@ -3536,6 +3787,105 @@ function conflictRecommended(item) {
   return conflict ? conflict.recommended : item.versions[item.versions.length - 1];
 }
 
+function renderContractTab() {
+  const members = getAppMicroApps();
+  if (!members.length) {
+    return `<div class="contract-empty">
+      <div class="empty-orb">${icon('shared', 20)}</div>
+      <div class="empty-copy">
+        <div class="eyebrow">INTEGRATION CONTRACT</div>
+        <h3>暂无微应用可查看衔接契约</h3>
+        <p>先在「应用」中加入微应用，才能查看组件接口如何绑定到微应用插槽、微应用如何注册到应用运行时。</p>
+      </div>
+    </div>`;
+  }
+  const activeId = getContractMicroId();
+  const app = getMicro(activeId);
+  const contract = app.contract;
+  const bindings = getSlotBindings(activeId);
+  const restCount = Object.values(COMPONENTS).reduce((n, c) => n + c.provides.filter(p => p.type === 'REST').length, 0);
+  const eventCount = Object.values(COMPONENTS).reduce((n, c) => n + c.provides.filter(p => p.type === 'EVENT').length, 0);
+  const spiCount = Object.values(COMPONENTS).reduce((n, c) => n + c.provides.filter(p => p.type === 'SPI').length, 0);
+
+  const chips = members.map(m => `<button class="contract-chip ${m.id === activeId ? 'active' : ''}" data-contract-micro="${m.id}" style="--accent:${m.accent}">
+    <span class="contract-chip-dot"></span>${escapeHtml(m.name)}
+  </button>`).join('');
+
+  const bindingRows = bindings.map(b => `<div class="slot-row ${b.platform ? 'platform' : ''}">
+    <span class="slot-port" style="--accent:${b.accent}">${icon('shared', 8)}${escapeHtml(b.slot.label)}</span>
+    <span class="slot-arrow">${icon('arrow', 8)}</span>
+    <span class="slot-provider">
+      <span class="slot-provider-name">${escapeHtml(b.componentName)}<em>${escapeHtml(b.version)}</em>${b.platform ? '<i class="slot-platform">平台注入</i>' : ''}</span>
+      <span class="slot-iface"><b class="iface-pill ${b.iface.type.toLowerCase()}">${b.iface.type}</b><code>${escapeHtml(b.iface.path)}</code></span>
+    </span>
+  </div>`).join('');
+
+  const lifecycle = contract.lifecycle.map(s => `<span class="life-chip">${escapeHtml(s)}()</span>`).join('');
+  const events = contract.events.map(e => `<span class="life-chip event">${escapeHtml(e)}</span>`).join('');
+
+  return `<div class="contract-layout">
+    <div class="contract-chain">
+      <div class="chain-stage">
+        <div class="chain-stage-head"><span class="chain-index">01</span><b>后端组件</b><em>能力提供</em></div>
+        <div class="chain-body">
+          <span class="chain-token">REST <b>${restCount}</b></span>
+          <span class="chain-token">EVENT <b>${eventCount}</b></span>
+          <span class="chain-token">SPI <b>${spiCount}</b></span>
+        </div>
+        <div class="chain-foot">暴露 REST 接口 / 事件 Topic / SPI 扩展点</div>
+      </div>
+      <div class="chain-link"><span class="chain-link-tag">接口绑定</span><span class="chain-link-line"></span><span class="chain-link-sub">按插槽注入</span></div>
+      <div class="chain-stage">
+        <div class="chain-stage-head"><span class="chain-index">02</span><b>微应用</b><em>插槽消费</em></div>
+        <div class="chain-body">
+          <span class="chain-token accent" style="--accent:${app.accent}">${escapeHtml(app.name)}</span>
+          <span class="chain-token">${bindings.length} 个插槽</span>
+        </div>
+        <div class="chain-foot">按插槽绑定组件接口，屏蔽组件实现差异</div>
+      </div>
+      <div class="chain-link"><span class="chain-link-tag">注册接入</span><span class="chain-link-line"></span><span class="chain-link-sub">manifest</span></div>
+      <div class="chain-stage">
+        <div class="chain-stage-head"><span class="chain-index">03</span><b>应用</b><em>运行时编排</em></div>
+        <div class="chain-body">
+          <span class="chain-token">${members.length} 微应用</span>
+          <span class="chain-token">${escapeHtml(APP_CONTRACT.runtime)}</span>
+        </div>
+        <div class="chain-foot">注册路由 / 挂载点 / 入口，统一共享运行时</div>
+      </div>
+    </div>
+
+    <div class="contract-bottom">
+      <div class="contract-side">
+        <div class="contract-side-title">微应用接入清单</div>
+        <div class="contract-chips">${chips}</div>
+        <div class="contract-app-card">
+          <div class="contract-app-title">${icon('layers', 9)}应用注册契约</div>
+          <div class="contract-app-row"><span>manifest</span><code>${escapeHtml(APP_CONTRACT.manifest)}</code></div>
+          <div class="contract-app-row"><span>注册 API</span><code>${escapeHtml(APP_CONTRACT.register)}</code></div>
+          <div class="contract-app-row"><span>共享运行时</span><code>${escapeHtml(APP_CONTRACT.runtime)}</code></div>
+          <div class="contract-app-row"><span>路由 / 总线</span><code>${escapeHtml(APP_CONTRACT.router)}</code></div>
+        </div>
+      </div>
+
+      <div class="contract-card">
+        <div class="contract-card-head">${icon('graph', 10)}微应用 → 应用 <span>接入契约</span></div>
+        <div class="contract-kv">
+          <div class="kv-row"><span>路由</span><code>${escapeHtml(contract.route)}</code></div>
+          <div class="kv-row"><span>挂载点</span><code>${escapeHtml(contract.mount)}</code></div>
+          <div class="kv-row"><span>入口</span><code>${escapeHtml(contract.entry)}</code></div>
+          <div class="kv-row"><span>生命周期</span><span class="life-chips">${lifecycle}</span></div>
+          <div class="kv-row"><span>事件</span><span class="life-chips">${events}</span></div>
+        </div>
+      </div>
+
+      <div class="contract-card grow">
+        <div class="contract-card-head">${icon('shared', 10)}组件 → 微应用 <span>插槽绑定</span></div>
+        <div class="slot-list">${bindingRows}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
 function renderLockTab() {
   if (!state.lock) {
     let title = '尚未生成版本锁定清单';
@@ -3735,6 +4085,13 @@ function openComponentDetail(compId, version, microId) {
         <div class="drawer-desc">${escapeHtml(comp.description)}</div>
       </div>
       <div class="drawer-section">
+        <div class="drawer-section-title">对外接口 · 供微应用插槽绑定<span class="line"></span></div>
+        <div class="iface-list">
+          ${comp.provides.map(p => `<div class="iface-row"><b class="iface-pill ${p.type.toLowerCase()}">${p.type}</b><code>${escapeHtml(p.path)}</code><span>${escapeHtml(p.desc)}</span></div>`).join('')}
+        </div>
+        <div class="iface-slot">${icon('shared', 9)}<span>绑定插槽：<b>${escapeHtml(comp.slot.label)}</b> · 协议 ${escapeHtml(comp.slot.protocol)}</span></div>
+      </div>
+      <div class="drawer-section">
         <div class="drawer-section-title">组件信息<span class="line"></span></div>
         <div class="detail-grid">
           <div class="detail-cell"><span>版本</span><strong class="mono">${escapeHtml(displayVersion)}</strong></div>
@@ -3789,6 +4146,19 @@ function openMicroappDetail(microId) {
     </div>
     <div class="drawer-body">
       <div class="drawer-section"><div class="drawer-desc">${escapeHtml(app.description)}</div></div>
+      <div class="drawer-section">
+        <div class="drawer-section-title">接入契约 · 注册到应用运行时<span class="line"></span></div>
+        <div class="detail-grid">
+          <div class="detail-cell"><span>路由</span><strong class="mono">${escapeHtml(app.contract.route)}</strong></div>
+          <div class="detail-cell"><span>挂载点</span><strong class="mono">${escapeHtml(app.contract.mount)}</strong></div>
+          <div class="detail-cell"><span>入口</span><strong class="mono">${escapeHtml(app.contract.entry)}</strong></div>
+          <div class="detail-cell"><span>共享运行时</span><strong class="mono">${escapeHtml(app.contract.runtime)}</strong></div>
+        </div>
+        <div class="detail-chips" style="margin-top:6px">
+          ${app.contract.lifecycle.map(s => `<span class="detail-chip">${escapeHtml(s)}()</span>`).join('')}
+          ${app.contract.events.map(e => `<span class="detail-chip">${icon('bell', 8)}${escapeHtml(e)}</span>`).join('')}
+        </div>
+      </div>
       <div class="drawer-section">
         <div class="drawer-section-title">已组装组件 · 直接依赖<span class="line"></span></div>
         <div class="detail-tree">
@@ -4083,6 +4453,11 @@ function bindEvents() {
       if (state.expandedMicroapps.has(id)) state.expandedMicroapps.delete(id);
       else state.expandedMicroapps.add(id);
       renderAppPanel();
+      return;
+    }
+    const contract = event.target.closest('[data-open-contract]');
+    if (contract) {
+      openContract(contract.dataset.openContract);
       return;
     }
     const child = event.target.closest('[data-open-component]');
