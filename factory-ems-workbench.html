@@ -1677,96 +1677,83 @@ svg { display: block; }
   .chain-link { flex-basis: 54px; }
 }
 
-/* Integration contract */
-.contract-layout { height: 100%; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
-.contract-chain { flex: 0 0 auto; display: flex; align-items: stretch; gap: 6px; }
-.chain-stage {
-  flex: 1;
-  min-width: 0;
-  padding: 7px 9px;
+/* Integration rule engine */
+.rule-layout { height: 100%; display: flex; flex-direction: column; gap: 7px; min-height: 0; }
+.rule-top {
+  flex: 0 0 auto;
   display: flex;
-  flex-direction: column;
-  gap: 5px;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  background: linear-gradient(140deg, rgba(13, 148, 136, .045), rgba(16, 50, 62, .012));
+  align-items: center;
+  gap: 10px;
+  padding: 6px 9px;
+  border: 1px solid rgba(13, 148, 136, .2);
+  border-radius: 8px;
+  background: linear-gradient(120deg, rgba(13, 148, 136, .07), rgba(59, 99, 216, .03));
 }
-.chain-stage-head { display: flex; align-items: center; gap: 6px; font-size: 11.5px; min-width: 0; }
-.chain-index { flex: 0 0 auto; font: 8px var(--mono); color: var(--cyan); border: 1px solid rgba(13, 148, 136, .3); border-radius: 4px; padding: 1px 4px; }
-.chain-stage-head b { font-weight: 650; white-space: nowrap; }
-.chain-stage-head em { font-style: normal; color: var(--muted-2); font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.chain-body { display: flex; flex-wrap: wrap; gap: 4px; }
-.chain-token { height: 19px; padding: 0 6px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 5px; background: rgba(255, 255, 255, .74); color: var(--muted); font-size: 9.4px; white-space: nowrap; }
-.chain-token b { font-family: var(--mono); color: var(--text); font-weight: 600; }
-.chain-token.accent { color: var(--accent, var(--cyan)); border-color: var(--accent, var(--cyan)); font-weight: 600; }
-.chain-foot { margin-top: auto; color: var(--muted-2); font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.chain-link { flex: 0 0 66px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--cyan); }
-.chain-link-tag { font-size: 8.6px; font-weight: 650; color: var(--cyan); white-space: nowrap; }
-.chain-link-line {
-  position: relative;
-  width: 100%;
-  height: 1px;
-  background: linear-gradient(90deg, rgba(13, 148, 136, .12), var(--cyan), rgba(13, 148, 136, .12));
-}
-.chain-link-line::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  top: -2.5px;
-  border-left: 5px solid var(--cyan);
-  border-top: 3px solid transparent;
-  border-bottom: 3px solid transparent;
-}
-.chain-link-sub { font-size: 7.6px; color: var(--muted-2); white-space: nowrap; }
-
-.contract-bottom { flex: 1; min-height: 0; display: flex; gap: 8px; }
-.contract-side { flex: 0 0 216px; min-width: 0; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 6px; }
-.contract-side-title { font-size: 8.6px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-2); }
-.contract-chips { display: flex; flex-wrap: wrap; gap: 4px; }
-.contract-chip { height: 23px; padding: 0 7px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--line); border-radius: 6px; background: rgba(16, 50, 62, .03); color: var(--muted); font-size: 9.4px; white-space: nowrap; transition: .15s ease; }
+.rule-brand { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
+.rule-signal { width: 7px; height: 7px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 0 4px rgba(13, 148, 136, .12); animation: pulse 1.8s infinite; }
+.rule-brand b { display: block; font-size: 11px; font-weight: 700; }
+.rule-brand em { display: block; font-style: normal; font: 8.4px var(--mono); color: var(--muted-2); }
+.rule-chips { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+.contract-chip { height: 22px; padding: 0 7px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--line); border-radius: 6px; background: rgba(255, 255, 255, .66); color: var(--muted); font-size: 9.2px; white-space: nowrap; transition: .15s ease; }
 .contract-chip:hover { border-color: var(--line-strong); }
-.contract-chip.active { color: var(--text); border-color: rgba(13, 148, 136, .45); background: rgba(13, 148, 136, .08); }
+.contract-chip.active { color: var(--text); border-color: rgba(13, 148, 136, .45); background: rgba(13, 148, 136, .1); }
 .contract-chip-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent, var(--cyan)); flex: 0 0 auto; }
-.contract-app-card { margin-top: auto; padding: 7px 8px; border: 1px solid var(--line); border-radius: 8px; background: rgba(16, 50, 62, .02); }
-.contract-app-title { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; font-size: 9.8px; font-weight: 650; }
-.contract-app-title svg { color: var(--cyan); }
-.contract-app-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 1.5px 0; font-size: 8.5px; }
-.contract-app-row > span { color: var(--muted-2); flex: 0 0 auto; }
-.contract-app-row code { min-width: 0; font: 8.3px var(--mono); color: #24525c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rule-stats { flex: 0 0 auto; display: flex; gap: 8px; }
+.rule-stats span { color: var(--muted-2); font-size: 8.6px; white-space: nowrap; }
+.rule-stats b { margin-left: 2px; color: var(--text); font: 10px var(--mono); }
+.rule-stats .hit b { color: var(--green); }
 
-.contract-card { flex: .92; min-width: 0; padding: 8px 9px; display: flex; flex-direction: column; gap: 6px; border: 1px solid var(--line); border-radius: 9px; background: rgba(255, 255, 255, .68); overflow: auto; }
-.contract-card.grow { flex: 1.35; }
-.contract-card-head { display: flex; align-items: center; gap: 5px; font-size: 9.8px; font-weight: 650; color: var(--text); }
-.contract-card-head svg { color: var(--cyan); }
-.contract-card-head span { font-size: 8.4px; font-weight: 500; color: var(--muted-2); }
-.contract-kv { display: flex; flex-direction: column; gap: 4px; }
-.kv-row { display: flex; align-items: flex-start; gap: 8px; font-size: 9.2px; }
-.kv-row > span:first-child { flex: 0 0 42px; color: var(--muted-2); }
-.kv-row code { font: 8.8px var(--mono); color: #24525c; background: rgba(13, 148, 136, .06); padding: 1px 5px; border-radius: 4px; word-break: break-all; }
-.life-chips { display: flex; flex-wrap: wrap; gap: 3px; }
-.life-chip { font: 8.4px var(--mono); color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 1px 4px; }
-.life-chip.event { color: #8a5a12; border-color: rgba(183, 121, 31, .26); background: rgba(183, 121, 31, .06); }
+.rule-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(250px, .75fr); gap: 8px; }
+.rule-panel, .trace-panel { min-width: 0; min-height: 0; padding: 7px 8px; display: flex; flex-direction: column; gap: 5px; border: 1px solid var(--line); border-radius: 9px; background: rgba(255, 255, 255, .6); }
+.rule-panel-head { flex: 0 0 auto; display: flex; align-items: baseline; gap: 6px; font-size: 9.8px; font-weight: 650; }
+.rule-panel-head span { font-size: 8.2px; font-weight: 500; color: var(--muted-2); }
+.rule-list { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 5px; padding-right: 2px; }
+.rule-group-label { display: flex; align-items: center; gap: 6px; margin-top: 3px; color: var(--muted-2); font-size: 8.4px; letter-spacing: .08em; }
+.rule-group-label::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.rule-group-label:first-child { margin-top: 0; }
+.rule-item { padding: 6px 8px; border: 1px solid rgba(20, 52, 64, .1); border-left: 2px solid var(--cyan); border-radius: 6px; background: rgba(246, 250, 251, .72); }
+.rule-item.platform { border-left-color: var(--blue); background: rgba(59, 99, 216, .045); }
+.rule-item-head { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.rule-id { font: 9px var(--mono); font-weight: 600; color: var(--cyan); }
+.rule-item.platform .rule-id { color: var(--blue); }
+.rule-group { color: var(--muted-2); font-size: 8.4px; }
+.rule-state { margin-left: auto; height: 16px; padding: 0 5px; display: inline-flex; align-items: center; border-radius: 4px; color: var(--green); background: rgba(22, 138, 91, .09); font-size: 7.8px; font-weight: 600; }
+.rule-line { display: flex; align-items: flex-start; gap: 6px; font-size: 9.2px; line-height: 1.5; }
+.rule-line + .rule-line { margin-top: 2px; }
+.rule-line > b { flex: 0 0 34px; padding-top: 1px; font: 7.6px var(--mono); letter-spacing: .04em; color: var(--muted-2); }
+.rule-line.when > b { color: #4b6485; }
+.rule-line.then > b { color: var(--cyan); }
+.rule-line > span { min-width: 0; color: #29454f; word-break: break-word; }
+.rule-line.then .iface-pill { margin: 0 3px; }
+.rule-line.then code { padding: 0 4px; border-radius: 3px; background: rgba(13, 148, 136, .07); color: #24525c; font: 8.6px var(--mono); word-break: break-all; }
+.rule-line.then b.slot-name { color: var(--cyan); font-weight: 600; }
 
-.slot-list { display: flex; flex-direction: column; gap: 4px; }
-.slot-row { display: flex; align-items: center; gap: 6px; padding: 4px 6px; border: 1px solid rgba(20, 52, 64, .09); border-radius: 6px; background: rgba(246, 250, 251, .72); }
-.slot-row.platform { border-style: dashed; background: rgba(59, 99, 216, .045); }
-.slot-port { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 6px; border: 1px solid var(--accent, rgba(13, 148, 136, .3)); border-radius: 5px; color: var(--accent, var(--cyan)); background: rgba(255, 255, 255, .74); font-size: 8.8px; font-weight: 600; white-space: nowrap; }
-.slot-arrow { flex: 0 0 auto; color: var(--muted-2); }
-.slot-provider { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.slot-provider-name { display: flex; align-items: center; gap: 4px; font-size: 9px; color: #29454f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.slot-provider-name em { font-style: normal; font: 8px var(--mono); color: var(--muted-2); }
-.slot-platform { font-style: normal; font-size: 7.4px; color: var(--blue); }
-.slot-iface { display: flex; align-items: center; gap: 4px; min-width: 0; }
-.slot-iface code { min-width: 0; font: 8.2px var(--mono); color: var(--muted-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.trace-list { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; }
+.trace-step { display: flex; gap: 7px; padding: 6px 8px; border: 1px solid rgba(13, 148, 136, .16); border-radius: 7px; background: rgba(13, 148, 136, .045); }
+.trace-num { flex: 0 0 auto; width: 20px; height: 20px; display: grid; place-items: center; border: 1px solid rgba(13, 148, 136, .35); border-radius: 50%; background: #fff; color: var(--cyan); font: 8.4px var(--mono); }
+.trace-copy { min-width: 0; }
+.trace-title { display: flex; align-items: center; gap: 6px; font-size: 9.6px; font-weight: 650; color: #16323b; }
+.trace-title span { padding: 0 4px; border-radius: 3px; background: rgba(22, 138, 91, .09); color: var(--green); font-size: 7.6px; font-weight: 600; }
+.trace-desc { margin-top: 2px; color: var(--muted-2); font-size: 8.4px; line-height: 1.45; word-break: break-word; }
+.trace-desc code { color: #24525c; font: 8.2px var(--mono); }
+.trace-link { display: flex; align-items: center; gap: 6px; padding: 2px 0 2px 9px; color: var(--muted-2); font-size: 7.8px; }
+.trace-link::before { content: "↓"; color: var(--cyan); font-size: 10px; }
+.trace-foot { flex: 0 0 auto; padding-top: 2px; border-top: 1px dashed var(--line); color: var(--muted-2); font-size: 8px; }
 .iface-pill { flex: 0 0 auto; font: 7.5px var(--mono); padding: 1px 4px; border-radius: 3px; }
 .iface-pill.rest { color: #0d6f8a; background: rgba(13, 126, 168, .1); }
 .iface-pill.event { color: #8a5a12; background: rgba(183, 121, 31, .1); }
 .iface-pill.spi { color: #4368c9; background: rgba(67, 104, 201, .1); }
 .contract-empty { height: 100%; display: flex; align-items: center; gap: 12px; padding: 10px; }
 
+@media (max-width: 1270px) {
+  .rule-body { grid-template-columns: minmax(0, 1.1fr) minmax(235px, .8fr); }
+}
 @media (max-height: 780px) {
-  .chain-foot { display: none; }
-  .contract-side { flex-basis: 190px; }
+  .rule-top { padding: 4px 7px; }
+  .rule-brand em { display: none; }
+  .rule-body { gap: 6px; }
+  .rule-item { padding: 5px 7px; }
+  .trace-step { padding: 5px 7px; }
 }
 
 </style>
@@ -1943,7 +1930,7 @@ svg { display: block; }
         <button class="dock-tab active" data-tab="overview">解析结果 <span class="tab-badge" id="tabBadgeOverview">—</span></button>
         <button class="dock-tab" data-tab="graph">依赖关系 <span class="tab-badge" id="tabBadgeGraph">—</span></button>
         <button class="dock-tab" data-tab="shared">共享依赖 <span class="tab-badge" id="tabBadgeShared">—</span></button>
-        <button class="dock-tab" data-tab="contract">衔接契约 <span class="tab-badge" id="tabBadgeContract">—</span></button>
+        <button class="dock-tab" data-tab="contract">衔接规则 <span class="tab-badge" id="tabBadgeContract">—</span></button>
         <button class="dock-tab" data-tab="lock">版本锁定 <span class="tab-badge" id="tabBadgeLock">—</span></button>
         <button class="dock-tab" data-tab="build">构建交付 <span class="tab-badge" id="tabBadgeBuild">—</span></button>
       </nav>
@@ -3248,7 +3235,8 @@ function renderTabs() {
     shared.className = 'tab-badge';
   }
   if (contract) {
-    contract.textContent = String(getAppMicroApps().length);
+    const cid = getContractMicroId();
+    contract.textContent = cid ? String(getSlotBindings(cid).length + 4) : '—';
     contract.className = 'tab-badge';
   }
   if (lock) {
@@ -3313,6 +3301,7 @@ function renderDock() {
   content.querySelectorAll('[data-contract-micro]').forEach(el => {
     el.addEventListener('click', () => {
       state.contractMicroId = el.dataset.contractMicro;
+      renderTabs();
       renderDock();
     });
   });
@@ -3793,9 +3782,9 @@ function renderContractTab() {
     return `<div class="contract-empty">
       <div class="empty-orb">${icon('shared', 20)}</div>
       <div class="empty-copy">
-        <div class="eyebrow">INTEGRATION CONTRACT</div>
-        <h3>暂无微应用可查看衔接契约</h3>
-        <p>先在「应用」中加入微应用，才能查看组件接口如何绑定到微应用插槽、微应用如何注册到应用运行时。</p>
+        <div class="eyebrow">INTEGRATION RULES</div>
+        <h3>暂无微应用可生成衔接规则</h3>
+        <p>先在「应用」中加入微应用，规则引擎会自动根据组件接口生成插槽绑定与应用注册规则。</p>
       </div>
     </div>`;
   }
@@ -3803,84 +3792,94 @@ function renderContractTab() {
   const app = getMicro(activeId);
   const contract = app.contract;
   const bindings = getSlotBindings(activeId);
-  const restCount = Object.values(COMPONENTS).reduce((n, c) => n + c.provides.filter(p => p.type === 'REST').length, 0);
-  const eventCount = Object.values(COMPONENTS).reduce((n, c) => n + c.provides.filter(p => p.type === 'EVENT').length, 0);
-  const spiCount = Object.values(COMPONENTS).reduce((n, c) => n + c.provides.filter(p => p.type === 'SPI').length, 0);
+  const directBindings = bindings.filter(b => !b.platform);
+  const platformBindings = bindings.filter(b => b.platform);
+  const appRules = 4;
+  const totalRules = bindings.length + appRules;
 
   const chips = members.map(m => `<button class="contract-chip ${m.id === activeId ? 'active' : ''}" data-contract-micro="${m.id}" style="--accent:${m.accent}">
     <span class="contract-chip-dot"></span>${escapeHtml(m.name)}
   </button>`).join('');
 
-  const bindingRows = bindings.map(b => `<div class="slot-row ${b.platform ? 'platform' : ''}">
-    <span class="slot-port" style="--accent:${b.accent}">${icon('shared', 8)}${escapeHtml(b.slot.label)}</span>
-    <span class="slot-arrow">${icon('arrow', 8)}</span>
-    <span class="slot-provider">
-      <span class="slot-provider-name">${escapeHtml(b.componentName)}<em>${escapeHtml(b.version)}</em>${b.platform ? '<i class="slot-platform">平台注入</i>' : ''}</span>
-      <span class="slot-iface"><b class="iface-pill ${b.iface.type.toLowerCase()}">${b.iface.type}</b><code>${escapeHtml(b.iface.path)}</code></span>
-    </span>
-  </div>`).join('');
+  const ruleItem = (id, group, when, thenHtml, platform) => `
+    <div class="rule-item ${platform ? 'platform' : ''}">
+      <div class="rule-item-head"><span class="rule-id">${id}</span><span class="rule-group">${group}</span><span class="rule-state">命中</span></div>
+      <div class="rule-line when"><b>WHEN</b><span>${when}</span></div>
+      <div class="rule-line then"><b>THEN</b><span>${thenHtml}</span></div>
+    </div>`;
 
-  const lifecycle = contract.lifecycle.map(s => `<span class="life-chip">${escapeHtml(s)}()</span>`).join('');
-  const events = contract.events.map(e => `<span class="life-chip event">${escapeHtml(e)}</span>`).join('');
+  const compRules = directBindings.map((b, i) => ruleItem(
+    'R-' + String(i + 1).padStart(2, '0'),
+    '组件接入规则',
+    `微应用「${escapeHtml(app.name)}」已装配 ${escapeHtml(b.componentName)} ${escapeHtml(b.version)}`,
+    `绑定插槽 <b class="slot-name">「${escapeHtml(b.slot.label)}」</b> ← <b class="iface-pill ${b.iface.type.toLowerCase()}">${b.iface.type}</b><code>${escapeHtml(b.iface.path)}</code>`,
+    false
+  )).join('');
 
-  return `<div class="contract-layout">
-    <div class="contract-chain">
-      <div class="chain-stage">
-        <div class="chain-stage-head"><span class="chain-index">01</span><b>后端组件</b><em>能力提供</em></div>
-        <div class="chain-body">
-          <span class="chain-token">REST <b>${restCount}</b></span>
-          <span class="chain-token">EVENT <b>${eventCount}</b></span>
-          <span class="chain-token">SPI <b>${spiCount}</b></span>
-        </div>
-        <div class="chain-foot">暴露 REST 接口 / 事件 Topic / SPI 扩展点</div>
+  const platformRules = platformBindings.map((b, i) => ruleItem(
+    'P-' + String(i + 1).padStart(2, '0'),
+    '平台注入规则',
+    '平台运行时启动并下发权限上下文',
+    `注入插槽 <b class="slot-name">「${escapeHtml(b.slot.label)}」</b> ← <b class="iface-pill ${b.iface.type.toLowerCase()}">${b.iface.type}</b><code>${escapeHtml(b.iface.path)}</code> · ${escapeHtml(b.version)}`,
+    true
+  )).join('');
+
+  const appRulesHtml = [
+    ruleItem('A-01', '应用注册规则',
+      `微应用「${escapeHtml(app.name)} ${escapeHtml(app.version)}」注册至应用`,
+      `挂载路由 <code>${escapeHtml(contract.route)}</code> → 挂载点 <code>${escapeHtml(contract.mount)}</code>`, false),
+    ruleItem('A-02', '应用注册规则',
+      `入口 <code>${escapeHtml(contract.entry)}</code> 加载完成`,
+      `按序执行生命周期 <code>${contract.lifecycle.map(escapeHtml).join('() → ')}()</code>`, false),
+    ruleItem('A-03', '应用注册规则',
+      '应用运行时启动',
+      `加载共享 <code>${escapeHtml(contract.runtime)}</code><br>订阅事件 ${contract.events.map(e => `<code>${escapeHtml(e)}</code>`).join('、')}`, false),
+    ruleItem('A-04', '应用注册规则',
+      `应用发布清单 <code>${escapeHtml(APP_CONTRACT.manifest)}</code> 加载`,
+      `调用 <code>${escapeHtml(APP_CONTRACT.register)}</code> 完成微应用注册`, false)
+  ].join('');
+
+  const step = (num, title, hit, desc) => `
+    <div class="trace-step">
+      <span class="trace-num">${num}</span>
+      <div class="trace-copy">
+        <div class="trace-title">${title}<span>命中 ${hit}</span></div>
+        <div class="trace-desc">${desc}</div>
       </div>
-      <div class="chain-link"><span class="chain-link-tag">接口绑定</span><span class="chain-link-line"></span><span class="chain-link-sub">按插槽注入</span></div>
-      <div class="chain-stage">
-        <div class="chain-stage-head"><span class="chain-index">02</span><b>微应用</b><em>插槽消费</em></div>
-        <div class="chain-body">
-          <span class="chain-token accent" style="--accent:${app.accent}">${escapeHtml(app.name)}</span>
-          <span class="chain-token">${bindings.length} 个插槽</span>
-        </div>
-        <div class="chain-foot">按插槽绑定组件接口，屏蔽组件实现差异</div>
+    </div>`;
+
+  return `<div class="rule-layout">
+    <div class="rule-top">
+      <div class="rule-brand">
+        <span class="rule-signal"></span>
+        <div><b>衔接规则引擎</b><em>ems-integration-rules v1.2 · 由组件接口自动生成绑定规则</em></div>
       </div>
-      <div class="chain-link"><span class="chain-link-tag">注册接入</span><span class="chain-link-line"></span><span class="chain-link-sub">manifest</span></div>
-      <div class="chain-stage">
-        <div class="chain-stage-head"><span class="chain-index">03</span><b>应用</b><em>运行时编排</em></div>
-        <div class="chain-body">
-          <span class="chain-token">${members.length} 微应用</span>
-          <span class="chain-token">${escapeHtml(APP_CONTRACT.runtime)}</span>
-        </div>
-        <div class="chain-foot">注册路由 / 挂载点 / 入口，统一共享运行时</div>
-      </div>
+      <div class="rule-chips">${chips}</div>
+      <div class="rule-stats"><span>规则 <b>${totalRules}</b></span><span class="hit">命中 <b>${totalRules}</b></span><span>跳过 <b>0</b></span></div>
     </div>
-
-    <div class="contract-bottom">
-      <div class="contract-side">
-        <div class="contract-side-title">微应用接入清单</div>
-        <div class="contract-chips">${chips}</div>
-        <div class="contract-app-card">
-          <div class="contract-app-title">${icon('layers', 9)}应用注册契约</div>
-          <div class="contract-app-row"><span>manifest</span><code>${escapeHtml(APP_CONTRACT.manifest)}</code></div>
-          <div class="contract-app-row"><span>注册 API</span><code>${escapeHtml(APP_CONTRACT.register)}</code></div>
-          <div class="contract-app-row"><span>共享运行时</span><code>${escapeHtml(APP_CONTRACT.runtime)}</code></div>
-          <div class="contract-app-row"><span>路由 / 总线</span><code>${escapeHtml(APP_CONTRACT.router)}</code></div>
+    <div class="rule-body">
+      <div class="rule-panel">
+        <div class="rule-panel-head">规则列表 <span>WHEN 条件满足时执行 THEN 绑定</span></div>
+        <div class="rule-list">
+          <div class="rule-group-label">组件接入规则 · ${directBindings.length}</div>
+          ${compRules}
+          ${platformBindings.length ? `<div class="rule-group-label">平台注入规则 · ${platformBindings.length}</div>${platformRules}` : ''}
+          <div class="rule-group-label">应用注册规则 · ${appRules}</div>
+          ${appRulesHtml}
         </div>
       </div>
-
-      <div class="contract-card">
-        <div class="contract-card-head">${icon('graph', 10)}微应用 → 应用 <span>接入契约</span></div>
-        <div class="contract-kv">
-          <div class="kv-row"><span>路由</span><code>${escapeHtml(contract.route)}</code></div>
-          <div class="kv-row"><span>挂载点</span><code>${escapeHtml(contract.mount)}</code></div>
-          <div class="kv-row"><span>入口</span><code>${escapeHtml(contract.entry)}</code></div>
-          <div class="kv-row"><span>生命周期</span><span class="life-chips">${lifecycle}</span></div>
-          <div class="kv-row"><span>事件</span><span class="life-chips">${events}</span></div>
+      <div class="trace-panel">
+        <div class="rule-panel-head">执行轨迹 <span>${escapeHtml(app.name)} ${escapeHtml(app.version)}</span></div>
+        <div class="trace-list">
+          ${step('01', '组件接口', bindings.length, bindings.map(b => `${escapeHtml(b.componentName)} <code>${escapeHtml(b.version)}</code>`).join(' · '))}
+          <div class="trace-link">规则 R-01 ~ R-${String(directBindings.length).padStart(2, '0')} 依次命中</div>
+          ${step('02', '插槽消费', bindings.length, bindings.map(b => escapeHtml(b.slot.label)).join(' · '))}
+          <div class="trace-link">规则 A-01 命中</div>
+          ${step('03', '应用挂载', 1, `路由 <code>${escapeHtml(contract.route)}</code> → 挂载点 <code>${escapeHtml(contract.mount)}</code>`)}
+          <div class="trace-link">规则 A-02 ~ A-04 命中</div>
+          ${step('04', '运行时注册', 1, `入口 <code>${escapeHtml(contract.entry)}</code> · 共享 ${escapeHtml(contract.runtime)}<br>注册清单 <code>${escapeHtml(APP_CONTRACT.manifest)}</code>`)}
         </div>
-      </div>
-
-      <div class="contract-card grow">
-        <div class="contract-card-head">${icon('shared', 10)}组件 → 微应用 <span>插槽绑定</span></div>
-        <div class="slot-list">${bindingRows}</div>
+        <div class="trace-foot">${icon('check', 8)}规则全部命中，结果即应用运行时的挂载拓扑。</div>
       </div>
     </div>
   </div>`;
