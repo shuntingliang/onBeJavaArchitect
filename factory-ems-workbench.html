@@ -1974,18 +1974,44 @@ svg { display: block; }
 
 /* Blocker markers & popup */
 .warn-badge {
-  width: 18px; height: 18px; flex: 0 0 auto; display: inline-grid; place-items: center;
-  padding: 0; border: 1px solid rgba(214, 58, 82, .3); border-radius: 5px;
-  background: rgba(214, 58, 82, .08); color: var(--red); cursor: pointer;
-  transition: background .15s ease, border-color .15s ease, transform .15s ease;
-  vertical-align: middle;
+  position: relative; flex: 0 0 auto; height: 22px; min-width: 22px; padding: 0 7px 0 4px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  border: 1px solid #d9660a; border-radius: 7px;
+  background: linear-gradient(145deg, #fbbf24, #f97316 60%, #ea580c);
+  color: #ffffff; cursor: pointer; vertical-align: middle;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset, 0 3px 10px rgba(234, 88, 12, .34);
+  transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
 }
-.warn-badge svg { width: 9px; height: 9px; }
-.warn-badge:hover { background: rgba(214, 58, 82, .16); border-color: rgba(214, 58, 82, .5); transform: translateY(-1px); }
-.warn-badge.tiny { width: 15px; height: 15px; border-radius: 4px; }
-.warn-badge.tiny svg { width: 8px; height: 8px; }
-.warn-badge.head { margin-left: 2px; }
-.dock-tab .warn-badge { margin-left: 1px; }
+.warn-badge .wb-mark {
+  width: 13px; height: 13px; border-radius: 50%;
+  display: grid; place-items: center; font-style: normal;
+  font-size: 10px; font-weight: 900; line-height: 1;
+  background: rgba(255, 255, 255, .26);
+}
+.warn-badge .wb-txt {
+  font-size: 10.5px; font-weight: 800; letter-spacing: .05em; line-height: 1;
+  text-shadow: 0 1px 1px rgba(120, 45, 0, .25);
+}
+.warn-badge::after {
+  content: ""; position: absolute; inset: -3px; border-radius: inherit;
+  border: 1.5px solid rgba(249, 115, 22, .6);
+  animation: warnPulse 2.2s ease-out infinite; pointer-events: none;
+}
+@keyframes warnPulse {
+  0% { opacity: .85; transform: scale(1); }
+  70% { opacity: 0; transform: scale(1.22); }
+  100% { opacity: 0; transform: scale(1.22); }
+}
+.warn-badge:hover { transform: translateY(-1px); filter: brightness(1.07); box-shadow: 0 1px 0 rgba(255, 255, 255, .55) inset, 0 6px 16px rgba(234, 88, 12, .42); }
+.warn-badge.head { margin-left: 4px; }
+.warn-badge.tiny { height: 16px; min-width: 16px; padding: 0; border-radius: 5px; }
+.warn-badge.tiny .wb-mark { width: 100%; height: 100%; background: transparent; font-size: 9px; }
+.warn-badge.tiny .wb-txt { display: none; }
+.warn-badge.tiny::after { inset: -2px; animation-duration: 2.6s; }
+.dock-tab .warn-badge { margin-left: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .warn-badge::after { animation: none; opacity: 0; }
+}
 
 .blocker-overlay {
   position: fixed; inset: 0; z-index: 70; display: flex; align-items: center; justify-content: center;
@@ -2097,7 +2123,7 @@ svg { display: block; }
     <div class="top-actions">
       <button class="btn btn-secondary" id="parseBtn"><svg><use href="#i-target"/></svg><span>解析依赖</span></button>
       <button class="btn btn-secondary" id="lockBtn"><svg><use href="#i-lock"/></svg><span>锁定版本</span></button>
-      <button type="button" class="warn-badge" data-blocker="05" title="落地卡点 #05 · 版本锁定对象未定义" aria-label="查看落地卡点 #05"><svg width="9" height="9"><use href="#i-warn"/></svg></button>
+      <button type="button" class="warn-badge" data-blocker="05" title="落地卡点 #05 · 版本锁定对象未定义" aria-label="查看落地卡点 #05"><b class="wb-mark" aria-hidden="true">!</b><span class="wb-txt">卡点</span></button>
       <button class="btn btn-primary" id="buildBtn"><svg><use href="#i-build"/></svg><span>构建应用</span></button>
       <button class="btn-icon" id="resetBtn" title="重置原型演示" aria-label="重置原型演示"><svg width="14" height="14"><use href="#i-refresh"/></svg></button>
     </div>
@@ -2126,7 +2152,7 @@ svg { display: block; }
       <div class="panel-head">
         <div class="panel-step">01</div>
         <div class="panel-heading">
-          <div class="panel-title">后端组件 <span class="count-badge" id="componentCount">06</span> <button type="button" class="warn-badge head" data-blocker="01" title="落地卡点 #01 · 后端组件的技术载体未定义" aria-label="查看落地卡点 #01"><svg width="9" height="9"><use href="#i-warn"/></svg></button></div>
+          <div class="panel-title">后端组件 <span class="count-badge" id="componentCount">06</span> <button type="button" class="warn-badge head" data-blocker="01" title="落地卡点 #01 · 后端组件的技术载体未定义" aria-label="查看落地卡点 #01"><b class="wb-mark" aria-hidden="true">!</b><span class="wb-txt">卡点</span></button></div>
           <div class="panel-desc" id="libraryDesc">资源库 · 选择组件后按向导组装到微应用</div>
         </div>
         <div class="panel-tools"><svg width="13" height="13" style="color:var(--muted-2)"><use href="#i-layers"/></svg></div>
@@ -2232,11 +2258,11 @@ svg { display: block; }
       <div class="dock-brand"><span class="dock-signal"></span>DEPENDENCY CONTROL</div>
       <nav class="dock-tabs" id="dockTabs" aria-label="依赖分析视图">
         <button class="dock-tab active" data-tab="overview">解析结果 <span class="tab-badge" id="tabBadgeOverview">—</span></button>
-        <button class="dock-tab" data-tab="graph">依赖关系 <span class="tab-badge" id="tabBadgeGraph">—</span><span class="warn-badge tiny" data-blocker="04" role="button" tabindex="0" title="落地卡点 #04 · 依赖关系的权威来源未定义" aria-label="查看落地卡点 #04"><svg width="8" height="8"><use href="#i-warn"/></svg></span></button>
-        <button class="dock-tab" data-tab="shared">共享依赖 <span class="tab-badge" id="tabBadgeShared">—</span><span class="warn-badge tiny" data-blocker="06" role="button" tabindex="0" title="落地卡点 #06 · 共享依赖的注入机制未定义" aria-label="查看落地卡点 #06"><svg width="8" height="8"><use href="#i-warn"/></svg></span></button>
+        <button class="dock-tab" data-tab="graph">依赖关系 <span class="tab-badge" id="tabBadgeGraph">—</span><span class="warn-badge tiny" data-blocker="04" role="button" tabindex="0" title="落地卡点 #04 · 依赖关系的权威来源未定义" aria-label="查看落地卡点 #04"><b class="wb-mark" aria-hidden="true">!</b></span></button>
+        <button class="dock-tab" data-tab="shared">共享依赖 <span class="tab-badge" id="tabBadgeShared">—</span><span class="warn-badge tiny" data-blocker="06" role="button" tabindex="0" title="落地卡点 #06 · 共享依赖的注入机制未定义" aria-label="查看落地卡点 #06"><b class="wb-mark" aria-hidden="true">!</b></span></button>
         <button class="dock-tab" data-tab="contract">衔接契约 <span class="tab-badge" id="tabBadgeContract">—</span></button>
         <button class="dock-tab" data-tab="lock">版本锁定 <span class="tab-badge" id="tabBadgeLock">—</span></button>
-        <button class="dock-tab" data-tab="build">构建交付 <span class="tab-badge" id="tabBadgeBuild">—</span><span class="warn-badge tiny" data-blocker="09" role="button" tabindex="0" title="落地卡点 #09 · 应用构建产物未定义" aria-label="查看落地卡点 #09"><svg width="8" height="8"><use href="#i-warn"/></svg></span></button>
+        <button class="dock-tab" data-tab="build">构建交付 <span class="tab-badge" id="tabBadgeBuild">—</span><span class="warn-badge tiny" data-blocker="09" role="button" tabindex="0" title="落地卡点 #09 · 应用构建产物未定义" aria-label="查看落地卡点 #09"><b class="wb-mark" aria-hidden="true">!</b></span></button>
       </nav>
       <div class="dock-head-right" id="dockHeadRight">
         <span class="dock-state" id="dockState"><span class="status-dot"></span>待解析</span>
@@ -2650,12 +2676,12 @@ function icon(name, size = 14) {
 function warnBadge(no, cls = '') {
   const b = BLOCKERS[no];
   const tip = `落地卡点 #${no}${b ? ' · ' + b.title : ''}`;
-  return `<button type="button" class="warn-badge ${cls}" data-blocker="${no}" title="${escapeHtml(tip)}" aria-label="查看${escapeHtml(tip)}">${icon('warn', 9)}</button>`;
+  return `<button type="button" class="warn-badge ${cls}" data-blocker="${no}" title="${escapeHtml(tip)}" aria-label="查看${escapeHtml(tip)}"><b class="wb-mark" aria-hidden="true">!</b><span class="wb-txt">卡点</span></button>`;
 }
 function warnTag(no, cls = 'tiny') {
   const b = BLOCKERS[no];
   const tip = `落地卡点 #${no}${b ? ' · ' + b.title : ''}`;
-  return `<span class="warn-badge ${cls}" data-blocker="${no}" role="button" tabindex="0" title="${escapeHtml(tip)}" aria-label="查看${escapeHtml(tip)}">${icon('warn', 8)}</span>`;
+  return `<span class="warn-badge ${cls}" data-blocker="${no}" role="button" tabindex="0" title="${escapeHtml(tip)}" aria-label="查看${escapeHtml(tip)}"><b class="wb-mark" aria-hidden="true">!</b><span class="wb-txt">卡点</span></span>`;
 }
 function renderBlockers() {
   const wrap = document.getElementById('blockerTableWrap');
