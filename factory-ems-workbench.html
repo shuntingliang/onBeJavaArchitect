@@ -1673,25 +1673,127 @@ svg { display: block; }
   .shared-layout { grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(190px, .7fr); }
   .conflict-sources { grid-template-columns: 1fr 1fr; }
   .conflict-sources .source-item:last-child { grid-column: span 2; }
-  .contract-side { flex-basis: 188px; }
-  .chain-link { flex-basis: 54px; }
 }
+
+/* Contract chain overview (initial layout) */
+.contract-layout { height: 100%; display: flex; gap: 10px; min-height: 0; }
+.contract-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+.contract-chain { flex: 0 0 auto; display: flex; align-items: stretch; gap: 0; }
+.chain-stage {
+  flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 4px;
+  padding: 7px 9px; border: 1px solid var(--line); border-radius: 9px; background: #fff;
+  box-shadow: 0 1px 2px rgba(22, 52, 64, .04);
+}
+.chain-stage.is-focus { border-color: rgba(13, 148, 136, .38); box-shadow: 0 0 0 2px rgba(13, 148, 136, .07); }
+.chain-stage-head { display: flex; align-items: center; gap: 6px; font-size: 10.4px; font-weight: 680; color: #16323b; }
+.chain-index {
+  width: 17px; height: 17px; flex: 0 0 auto; display: grid; place-items: center;
+  border-radius: 50%; background: var(--cyan-soft); color: var(--cyan);
+  font: 8px var(--mono); font-style: normal;
+}
+.chain-stage.actor-micro .chain-index { background: rgba(59, 99, 216, .1); color: var(--blue); }
+.chain-stage.actor-app .chain-index { background: rgba(214, 58, 82, .1); color: var(--red); }
+.chain-count { margin-left: auto; font: 7.8px var(--mono); color: var(--muted-2); font-weight: 400; }
+.chain-body { display: flex; flex-wrap: wrap; gap: 3px; align-content: flex-start; max-height: 52px; overflow: hidden; }
+.chain-token {
+  display: inline-flex; align-items: center; gap: 4px; padding: 1px 5px;
+  border: 1px solid var(--line); border-radius: 4px; background: rgba(16, 50, 62, .025);
+  font-size: 8.6px; color: #29454f; white-space: nowrap;
+}
+.chain-token em { font: 7.2px var(--mono); color: var(--muted-2); font-style: normal; }
+.chain-token.platform { border-style: dashed; color: var(--blue); background: rgba(59, 99, 216, .05); }
+.chain-foot {
+  margin-top: auto; display: flex; align-items: center; gap: 4px; min-width: 0;
+  font-size: 7.8px; color: var(--muted-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.chain-foot code { font: 7.8px var(--mono); color: #24525c; }
+.chain-link { flex: 0 0 94px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0 5px; }
+.chain-link-tag { font-size: 8.6px; font-weight: 650; color: var(--cyan); white-space: nowrap; }
+.chain-link-line { position: relative; width: 100%; height: 1px; background: linear-gradient(90deg, rgba(13, 148, 136, .55), rgba(13, 148, 136, .18)); }
+.chain-link-line::after {
+  content: ""; position: absolute; right: 0; top: -3px;
+  border-left: 5px solid rgba(13, 148, 136, .55);
+  border-top: 3.5px solid transparent; border-bottom: 3.5px solid transparent;
+}
+.chain-link.phase-register .chain-link-tag { color: var(--blue); }
+.chain-link.phase-register .chain-link-line { background: linear-gradient(90deg, rgba(59, 99, 216, .55), rgba(59, 99, 216, .18)); }
+.chain-link.phase-register .chain-link-line::after { border-left-color: rgba(59, 99, 216, .55); }
+.chain-link-sub { font-size: 7.2px; color: var(--muted-2); text-align: center; line-height: 1.25; max-width: 96px; }
+.contract-bottom { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: 8px; }
+.contract-card { min-width: 0; min-height: 0; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 9px; background: #fff; overflow: hidden; }
+.contract-card-head {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 6px; padding: 5px 9px;
+  border-bottom: 1px solid var(--line); background: rgba(246, 250, 251, .7);
+  color: #16323b; font-size: 9.6px; font-weight: 650;
+}
+.contract-card-head svg { width: 11px; height: 11px; color: var(--cyan); }
+.contract-card-head span { margin-left: auto; font: 7.6px var(--mono); color: var(--muted-2); font-weight: 400; }
+.contract-card-body { flex: 1; min-height: 0; overflow: auto; padding: 6px 9px; display: flex; flex-direction: column; gap: 5px; }
+.contract-kv { display: flex; flex-direction: column; gap: 3px; }
+.kv-row { display: grid; grid-template-columns: 64px 10px minmax(0, 1fr); align-items: center; gap: 2px; font-size: 8.8px; }
+.kv-row > span:first-child { color: var(--muted-2); }
+.kv-row i { font: 7.6px var(--mono); color: var(--cyan); font-style: normal; text-align: center; }
+.kv-row code {
+  font: 8.6px var(--mono); color: #24525c; background: rgba(13, 148, 136, .06);
+  padding: 1px 5px; border-radius: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.life-chips { display: flex; flex-wrap: wrap; gap: 3px; }
+.life-chip {
+  font: 7.6px var(--mono); color: var(--muted); border: 1px solid var(--line);
+  border-radius: 3px; padding: 0 4px; background: #fff;
+}
+.life-chip.event { color: #8a5a12; border-color: rgba(183, 121, 31, .25); background: rgba(183, 121, 31, .07); }
+.contract-side { flex: 0 0 258px; min-width: 0; display: flex; flex-direction: column; gap: 6px; padding-left: 10px; border-left: 1px solid var(--line); overflow: auto; }
+.contract-side-title { display: flex; align-items: center; gap: 5px; font-size: 8.6px; font-weight: 650; letter-spacing: .04em; color: var(--muted); text-transform: uppercase; }
+.contract-side-title svg { width: 10px; height: 10px; color: var(--cyan); }
+.contract-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.contract-chip {
+  height: 22px; padding: 0 7px; display: inline-flex; align-items: center; gap: 4px;
+  border: 1px solid var(--line); border-radius: 5px; background: #fff; color: var(--muted);
+  font-size: 8.6px; white-space: nowrap; transition: .15s ease;
+}
+.contract-chip:hover { border-color: var(--line-strong); color: var(--text); }
+.contract-chip.active { color: var(--cyan); border-color: rgba(13, 148, 136, .45); background: rgba(13, 148, 136, .07); }
+.contract-chip .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent, var(--cyan)); }
+.slot-list { display: flex; flex-direction: column; gap: 4px; }
+.slot-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) 12px minmax(0, 1.15fr); gap: 4px; align-items: center;
+  padding: 4px 6px; border: 1px solid rgba(20, 52, 64, .1); border-radius: 5px; background: rgba(246, 250, 251, .6);
+}
+.slot-row.platform { border-style: dashed; background: rgba(59, 99, 216, .045); }
+.slot-port { display: flex; align-items: center; gap: 3px; min-width: 0; font-size: 8.4px; font-weight: 600; color: var(--cyan); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.slot-port svg { width: 9px; height: 9px; flex: 0 0 auto; }
+.slot-row.platform .slot-port { color: var(--blue); }
+.slot-arrow { justify-self: center; color: var(--muted-2); }
+.slot-arrow svg { width: 9px; height: 9px; }
+.slot-provider { min-width: 0; }
+.slot-provider-name { display: block; font-size: 8.4px; color: #29454f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.slot-provider-name em { font: 7.2px var(--mono); color: var(--muted-2); font-style: normal; margin-left: 3px; }
+.slot-iface { display: flex; align-items: center; gap: 3px; min-width: 0; margin-top: 1px; }
+.slot-iface code { font: 7.4px var(--mono); color: var(--muted-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.slot-platform { font: 7.2px var(--mono); color: var(--blue); }
+.contract-side-note {
+  margin-top: auto; padding: 6px 7px; border: 1px solid var(--line); border-radius: 6px;
+  background: rgba(16, 50, 62, .02); color: var(--muted); font-size: 7.8px; line-height: 1.5;
+}
+
+/* Assembly canvas — reuses pipeline graph primitives */
+.assemble-canvas { flex: 1; min-height: 0; justify-content: flex-start; border: 1px solid rgba(20, 52, 64, .08); border-radius: 8px; }
+.assemble-canvas .pipe-node { max-width: 620px; }
+.assemble-canvas .pipe-node .wizard-back { margin-left: auto; }
+.assemble-canvas .pipe-card,
+.assemble-canvas .pipe-platform-card { max-width: 620px; }
+.assemble-canvas .pipe-card-body { max-height: 186px; overflow: auto; }
+.assemble-canvas .wizard-tree,
+.assemble-canvas .wizard-options { margin-top: 0; max-height: 132px; }
+.assemble-canvas .confirm-binding { margin: 0; }
+.assemble-canvas .confirm-deps { margin-top: 2px; }
+.assemble-canvas .pipe-node.locate-pulse { animation: locatePulse 1.8s ease; }
+.assemble-canvas .pipe-card.is-new-target { animation: cardFlash 1.2s ease; }
+.confirm-actions-bar { position: static; margin-top: 0; padding: 0 2px 2px; background: none; }
+.pipe-node-ver { margin-left: 4px; font: 8px var(--mono); color: var(--muted-2); font-weight: 400; }
 
 /* Integration pipeline graph — inspired by 双生编排 */
-.pipe-layout { height: 100%; display: flex; min-height: 0; }
-.pipe-left {
-  flex: 0 0 210px; min-width: 0; display: flex; flex-direction: column; gap: 6px;
-  padding: 7px 7px 7px 0; border-right: 1px solid var(--line); overflow: auto;
-}
-.pipe-left-title { display: flex; align-items: center; gap: 6px; font-size: 8.6px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-2); }
-.pipe-left-title svg { width: 10px; height: 10px; color: var(--cyan); }
-.pipe-chip { height: 22px; padding: 0 7px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--line); border-radius: 6px; background: rgba(255, 255, 255, .66); color: var(--muted); font-size: 9.2px; white-space: nowrap; transition: .15s ease; }
-.pipe-chip:hover { border-color: var(--line-strong); }
-.pipe-chip.active { color: var(--text); border-color: rgba(13, 148, 136, .45); background: rgba(13, 148, 136, .1); }
-.pipe-chip-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent, var(--cyan)); }
-.pipe-side-note { margin-top: auto; padding: 7px 8px; border: 1px solid var(--line); border-radius: 8px; background: rgba(16, 50, 62, .02); font-size: 8.4px; color: var(--muted); line-height: 1.5; }
-.pipe-side-note b { display: block; font-size: 9.2px; color: var(--text); margin-bottom: 2px; }
-
 .pipe-canvas {
   flex: 1; min-width: 0; padding: 10px 14px; overflow: auto;
   display: flex; flex-direction: column; align-items: center; gap: 0;
@@ -1788,7 +1890,7 @@ svg { display: block; }
 /* Table-ish rows */
 .pipe-rows { display: flex; flex-direction: column; gap: 4px; }
 .pipe-row {
-  display: grid; grid-template-columns: 16px 110px 14px 1fr auto; gap: 6px;
+  display: grid; grid-template-columns: minmax(0, 128px) 12px minmax(0, 1fr) auto; gap: 6px;
   align-items: center;
   padding: 4px 6px;
   border: 1px solid rgba(20, 52, 64, .1); border-radius: 5px;
@@ -1806,23 +1908,6 @@ svg { display: block; }
 .pipe-row-provider-iface code { font: 8px var(--mono); color: var(--muted-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pipe-row-tag { margin-left: auto; font: 7px var(--mono); color: var(--muted-2); border: 1px solid var(--line); border-radius: 3px; padding: 0 3px; }
 .pipe-row.platform .pipe-row-tag { color: var(--blue); border-color: rgba(59, 99, 216, .3); }
-
-/* Contract properties (= page / = size style) */
-.pipe-props { display: flex; flex-direction: column; gap: 3px; }
-.pipe-prop {
-  display: grid; grid-template-columns: 72px 12px 1fr; gap: 0; align-items: center;
-  font-size: 9px;
-}
-.pipe-prop > span:first-child { color: var(--muted-2); font-size: 8.4px; }
-.pipe-prop-eq { font: 8px var(--mono); color: var(--cyan); text-align: center; }
-.pipe-prop code {
-  font: 8.6px var(--mono); color: #24525c;
-  background: rgba(13, 148, 136, .06); padding: 1px 5px; border-radius: 3px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.pipe-prop-events { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 3px; margin-top: 2px; }
-.pipe-prop-events span { font: 7.6px var(--mono); color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; }
-.pipe-prop-events span.event { color: #8a5a12; border-color: rgba(183, 121, 31, .25); background: rgba(183, 121, 31, .07); }
 
 /* Final platform node */
 .pipe-platform-card {
@@ -1851,9 +1936,10 @@ svg { display: block; }
 .contract-empty { height: 100%; display: flex; align-items: center; gap: 12px; padding: 10px; }
 
 @media (max-width: 1270px) {
-  .pipe-left { flex-basis: 186px; }
   .pipe-card, .pipe-platform-card { max-width: 560px; }
-  .pipe-row { grid-template-columns: 14px 94px 12px 1fr auto; }
+  .pipe-row { grid-template-columns: minmax(0, 108px) 10px minmax(0, 1fr) auto; }
+  .contract-side { flex-basis: 214px; }
+  .chain-link { flex-basis: 64px; }
 }
 @media (max-height: 780px) {
   .pipe-canvas { padding: 6px 12px; }
@@ -2035,7 +2121,7 @@ svg { display: block; }
         <button class="dock-tab active" data-tab="overview">解析结果 <span class="tab-badge" id="tabBadgeOverview">—</span></button>
         <button class="dock-tab" data-tab="graph">依赖关系 <span class="tab-badge" id="tabBadgeGraph">—</span></button>
         <button class="dock-tab" data-tab="shared">共享依赖 <span class="tab-badge" id="tabBadgeShared">—</span></button>
-        <button class="dock-tab" data-tab="contract">衔接流水线 <span class="tab-badge" id="tabBadgeContract">—</span></button>
+        <button class="dock-tab" data-tab="contract">衔接契约 <span class="tab-badge" id="tabBadgeContract">—</span></button>
         <button class="dock-tab" data-tab="lock">版本锁定 <span class="tab-badge" id="tabBadgeLock">—</span></button>
         <button class="dock-tab" data-tab="build">构建交付 <span class="tab-badge" id="tabBadgeBuild">—</span></button>
       </nav>
@@ -3153,25 +3239,57 @@ function renderWizardFocus(app) {
   const pickerEmpty = available === 0
     ? `<div class="wizard-tree-empty">该微应用已组装全部可用组件</div>`
     : options;
+  const showMounted = refs.length > 0;
   return `<div class="wizard">
     ${renderWizardSteps(app, null)}
     <div class="wizard-body">
-      <div class="wizard-focus">
-        <div class="wizard-target ${conflict ? 'has-conflict' : ''} ${state.highlightMicro === app.id ? 'locate-pulse' : ''} ${state.lastAdded && state.lastAdded.microId === app.id ? 'is-new-target' : ''}"
+      <div class="pipe-canvas assemble-canvas">
+        <div class="pipe-node actor-micro ${state.highlightMicro === app.id ? 'locate-pulse' : ''}"
           data-micro-card="${app.id}" data-drop-target="${app.id}">
-          <div class="wizard-target-head">
-            <span style="color:var(--cyan);display:inline-flex">${icon(app.icon, 12)}</span>
-            <span class="wizard-target-name">${escapeHtml(app.name)}</span>
-            <span class="wizard-target-ver">${escapeHtml(app.version)}</span>
-            <button class="wizard-back" data-wizard-back>${icon('x', 8)}换一个</button>
+          <span class="pipe-node-orb">${icon(app.icon, 13)}</span>
+          <div class="pipe-node-body">
+            <div class="pipe-node-name">${escapeHtml(app.name)}<span class="pipe-node-ver">${escapeHtml(app.version)}</span></div>
+            <div class="pipe-node-sub">${escapeHtml(app.contract.route)} · ${refs.length} 个组件已装配 · 插件通过插槽接入</div>
           </div>
-          <div class="wizard-tree">${rows || '<div class="wizard-tree-empty">当前还没有组件，从右侧选择或拖入</div>'}</div>
-          <div class="wizard-drop">${icon('plus', 10)}拖拽后端组件到这里</div>
+          <button class="wizard-back" data-wizard-back>${icon('x', 8)}换一个</button>
         </div>
-        <div class="wizard-picker">
-          <div class="wizard-picker-head">选择要组装的组件<span>${available} 个可选</span></div>
-          <div class="wizard-options">${pickerEmpty}</div>
-          <div class="wizard-picker-note">已组装 ${refs.length} 个 · 平台注入 ${platformCount} 个</div>
+        <div class="pipe-link"><div class="pipe-link-inner">
+          <span class="pipe-link-line"></span>
+          <span class="pipe-link-label">接口绑定</span>
+          <span class="pipe-link-dot"></span>
+        </div></div>
+        <div class="pipe-card ${state.lastAdded && state.lastAdded.microId === app.id ? 'is-new-target' : ''}" data-drop-target="${app.id}">
+          <div class="pipe-card-header"></div>
+          <div class="pipe-card-head">
+            <span class="pipe-card-title">组件装配</span>
+            <span class="pipe-card-sub">${refs.length} 已装配 · ${available} 可选</span>
+            <div class="pipe-card-tabs">
+              <button class="pipe-card-tab ${showMounted ? 'active' : ''}" data-pipe-tab="mounted">已装配 ${refs.length}</button>
+              <button class="pipe-card-tab ${showMounted ? '' : 'active'}" data-pipe-tab="options">可选组件 ${available}</button>
+            </div>
+          </div>
+          <div class="pipe-card-body">
+            <div class="pipe-tab-pane ${showMounted ? 'active' : ''}" data-pipe-pane="mounted">
+              <div class="wizard-tree">${rows || '<div class="wizard-tree-empty">当前还没有组件，切换到「可选组件」选择，或直接拖入</div>'}</div>
+              <div class="wizard-drop">${icon('plus', 10)}拖拽后端组件到卡片区域完成装配</div>
+            </div>
+            <div class="pipe-tab-pane ${showMounted ? '' : 'active'}" data-pipe-pane="options">
+              <div class="wizard-options">${pickerEmpty}</div>
+              <div class="wizard-picker-note">已组装 ${refs.length} 个 · 平台注入 ${platformCount} 个</div>
+            </div>
+          </div>
+        </div>
+        <div class="pipe-link"><div class="pipe-link-inner">
+          <span class="pipe-link-line"></span>
+          <span class="pipe-link-label">写入微应用</span>
+          <span class="pipe-link-dot"></span>
+        </div></div>
+        <div class="pipe-platform-card">
+          <span class="pipe-platform-orb" style="background:linear-gradient(135deg,#0d9488,#5eead4)">${icon('check', 14)}</span>
+          <div class="pipe-platform-info">
+            <div class="pipe-platform-title">${conflict ? '当前装配存在版本冲突' : '装配关系实时生效'}</div>
+            <div class="pipe-platform-sub">${escapeHtml(app.name)} · ${escapeHtml(app.contract.route)} · 变更后需重新解析依赖与锁定版本</div>
+          </div>
         </div>
       </div>
     </div>
@@ -3184,31 +3302,75 @@ function renderWizardConfirm(app, compId) {
   const transitiveIds = [];
   traverseDeps(compId, new Set([compId]), new Set([compId]), transitiveIds);
   const transitive = transitiveIds.map(id => NODES[id] ? `${NODES[id].name} ${NODES[id].version}` : id);
+  const ifaceRows = comp.provides.map(p => `<div class="pipe-row">
+      <span class="pipe-row-slot"><span class="iface-pill ${p.type.toLowerCase()}">${p.type}</span></span>
+      <span class="pipe-row-arrow">${icon('arrow', 8)}</span>
+      <span class="pipe-row-provider">
+        <span class="pipe-row-provider-iface"><code>${escapeHtml(p.path)}</code></span>
+      </span>
+      <span class="pipe-row-tag">${escapeHtml(p.desc.slice(0, 10))}</span>
+    </div>`).join('');
   return `<div class="wizard">
     ${renderWizardSteps(app, compId)}
-    <div class="wizard-confirm">
-      <div class="confirm-flow">
-        <span class="confirm-node target">${icon(app.icon, 10)}<strong>${escapeHtml(app.name)}</strong><span class="cv">${escapeHtml(app.version)}</span></span>
-        <span class="confirm-arrow">${icon('plus', 10)}</span>
-        <span class="confirm-node"><span class="opt-dot" style="background:${comp.accent}"></span><strong>${escapeHtml(comp.name)}</strong><span class="cv">${escapeHtml(comp.version)}</span></span>
-        <span class="confirm-arrow">${icon('arrow', 10)}</span>
-        <span class="confirm-node" style="color:var(--cyan);border-color:rgba(13,148,136,.28)">组装完成</span>
-      </div>
-      <div class="confirm-title">${icon('cube', 11)}确认组装关系</div>
-      <div class="confirm-deps">
-        <div class="confirm-dep-group"><b>直接依赖 · ${direct.length}</b><div>${direct.length ? direct.map(escapeHtml).join(' · ') : '无额外直接依赖'}</div></div>
-        <div class="confirm-dep-group"><b>传递依赖 · ${transitive.length}</b><div>${transitive.length ? transitive.map(escapeHtml).join(' · ') : '无传递依赖'}</div></div>
-      </div>
-      <div class="confirm-binding">
-        <div class="confirm-bind-row">
-          <span class="confirm-slot" style="--accent:${comp.accent}">${icon('shared', 9)}${escapeHtml(comp.slot.label)}</span>
-          <span class="confirm-arrow">${icon('arrow', 10)}</span>
-          <span class="confirm-iface"><b class="iface-pill ${comp.provides[0].type.toLowerCase()}">${comp.provides[0].type}</b><code>${escapeHtml(comp.provides[0].path)}</code></span>
+    <div class="wizard-body">
+      <div class="pipe-canvas assemble-canvas">
+        <div class="pipe-node actor-comp">
+          <span class="pipe-node-orb">${icon('cube', 13)}</span>
+          <div class="pipe-node-body">
+            <div class="pipe-node-name">${escapeHtml(comp.name)}<span class="pipe-node-ver">${escapeHtml(comp.version)}</span></div>
+            <div class="pipe-node-sub">${escapeHtml(comp.slot.label)} · ${escapeHtml(comp.slot.protocol)}</div>
+          </div>
         </div>
-        <div class="confirm-bind-note">组件通过 ${escapeHtml(comp.slot.protocol)} 注入插槽「${escapeHtml(comp.slot.label)}」，微应用只依赖插槽契约，不直接耦合组件实现。</div>
+        <div class="pipe-link"><div class="pipe-link-inner">
+          <span class="pipe-link-line"></span>
+          <span class="pipe-link-label">接口绑定</span>
+          <span class="pipe-link-dot"></span>
+        </div></div>
+        <div class="pipe-card">
+          <div class="pipe-card-header"></div>
+          <div class="pipe-card-head">
+            <span class="pipe-card-title">插槽契约</span>
+            <span class="pipe-card-sub">${escapeHtml(comp.slot.label)}</span>
+            <div class="pipe-card-tabs">
+              <button class="pipe-card-tab active" data-pipe-tab="binding">接口绑定</button>
+              <button class="pipe-card-tab" data-pipe-tab="impact">依赖影响</button>
+            </div>
+          </div>
+          <div class="pipe-card-body">
+            <div class="pipe-tab-pane active" data-pipe-pane="binding">
+              <div class="confirm-binding">
+                <div class="confirm-bind-row">
+                  <span class="confirm-slot" style="--accent:${comp.accent}">${icon('shared', 9)}${escapeHtml(comp.slot.label)}</span>
+                  <span class="confirm-arrow">${icon('arrow', 10)}</span>
+                  <span class="confirm-iface"><b class="iface-pill ${comp.provides[0].type.toLowerCase()}">${comp.provides[0].type}</b><code>${escapeHtml(comp.provides[0].path)}</code></span>
+                </div>
+                <div class="confirm-bind-note">组件通过 ${escapeHtml(comp.slot.protocol)} 注入插槽「${escapeHtml(comp.slot.label)}」，微应用只依赖插槽契约，不直接耦合组件实现。</div>
+              </div>
+              <div class="pipe-rows" style="margin-top:6px">${ifaceRows}</div>
+            </div>
+            <div class="pipe-tab-pane" data-pipe-pane="impact">
+              <div class="confirm-deps">
+                <div class="confirm-dep-group"><b>直接依赖 · ${direct.length}</b><div>${direct.length ? direct.map(escapeHtml).join(' · ') : '无额外直接依赖'}</div></div>
+                <div class="confirm-dep-group"><b>传递依赖 · ${transitive.length}</b><div>${transitive.length ? transitive.map(escapeHtml).join(' · ') : '无传递依赖'}</div></div>
+              </div>
+              <div class="confirm-note" style="margin-top:6px">${icon('info', 10)}<span>确认后将为「${escapeHtml(app.name)}」新增 ${escapeHtml(comp.name)} ${escapeHtml(comp.version)}；组装变更会使已解析结果、版本锁定和构建结果失效。</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="pipe-link"><div class="pipe-link-inner">
+          <span class="pipe-link-line"></span>
+          <span class="pipe-link-label">写入微应用</span>
+          <span class="pipe-link-dot"></span>
+        </div></div>
+        <div class="pipe-node actor-micro">
+          <span class="pipe-node-orb">${icon(app.icon, 13)}</span>
+          <div class="pipe-node-body">
+            <div class="pipe-node-name">${escapeHtml(app.name)}<span class="pipe-node-ver">${escapeHtml(app.version)}</span></div>
+            <div class="pipe-node-sub">${escapeHtml(app.contract.route)} · 当前 ${(state.assembly[app.id] || []).length} 个组件</div>
+          </div>
+        </div>
       </div>
-      <div class="confirm-note">${icon('info', 10)}<span>确认后将为「${escapeHtml(app.name)}」新增 ${escapeHtml(comp.name)} ${escapeHtml(comp.version)}；组装变更会使已解析结果、版本锁定和构建结果失效。</span></div>
-      <div class="confirm-actions">
+      <div class="confirm-actions confirm-actions-bar">
         <button class="wizard-btn" data-wizard-reselect>${icon('refresh', 10)}重新选择</button>
         <button class="wizard-btn primary" data-wizard-confirm>${icon('check', 10)}确认组装</button>
       </div>
@@ -3341,7 +3503,7 @@ function renderTabs() {
   }
   if (contract) {
     const members = getAppMicroApps();
-    contract.textContent = members.length ? '4 级' : '—';
+    contract.textContent = members.length ? String(members.length) : '—';
     contract.className = 'tab-badge';
   }
   if (lock) {
@@ -3894,153 +4056,107 @@ function renderContractTab() {
     return `<div class="contract-empty">
       <div class="empty-orb">${icon('shared', 20)}</div>
       <div class="empty-copy">
-        <div class="eyebrow">INTEGRATION PIPELINE</div>
-        <h3>暂无微应用可展示衔接流水线</h3>
-        <p>先在「应用」中加入微应用，流水线会从后端组件接口→微应用插槽→应用注册，逐级可视化。</p>
+        <div class="eyebrow">CONTRACT CHAIN</div>
+        <h3>暂无微应用可展示衔接契约</h3>
+        <p>先在「应用」中加入微应用，链路会按「后端组件 → 微应用 → 应用」三段展示接口绑定与注册接入关系。</p>
       </div>
     </div>`;
   }
   const activeId = getContractMicroId();
   const app = getMicro(activeId);
   const contract = app.contract;
+  const refs = state.assembly[activeId] || [];
   const bindings = getSlotBindings(activeId);
-  const directBindings = bindings.filter(b => !b.platform);
   const platformBindings = bindings.filter(b => b.platform);
 
-  const chips = members.map(m => `<button class="pipe-chip ${m.id === activeId ? 'active' : ''}" data-contract-micro="${m.id}" style="--accent:${m.accent}">
-    <span class="pipe-chip-dot"></span>${escapeHtml(m.name)}
+  const chips = members.map(m => `<button class="contract-chip ${m.id === activeId ? 'active' : ''}" data-contract-micro="${m.id}" style="--accent:${m.accent}">
+    <span class="dot"></span>${escapeHtml(m.name)}
   </button>`).join('');
 
-  // Stage 1: summary of all components used
-  const compNames = directBindings.map(b => escapeHtml(b.componentName)).join(' · ') || '暂无直接组件';
+  const compTokens = refs.map(ref => `<span class="chain-token">${escapeHtml(COMPONENTS[ref.id].name)}<em>${escapeHtml(ref.version)}</em></span>`).join('')
+    + `<span class="chain-token platform">权限服务<em>v2.1.0</em></span>`;
+  const microTokens = members.map(m => `<span class="chain-token">${escapeHtml(m.name)}<em>${escapeHtml(m.version)}</em></span>`).join('');
 
-  // Stage 2: slot bindings (main middle card, Tab 1)
-  const slotRowsHtml = bindings.map(b => `
-    <div class="pipe-row ${b.platform ? 'platform' : ''}">
-      <span class="pipe-row-slot">${icon('shared', 10)}${escapeHtml(b.slot.label)}</span>
-      <span class="pipe-row-arrow">${icon('arrow', 8)}</span>
-      <span class="pipe-row-provider">
-        <span class="pipe-row-provider-name">${escapeHtml(b.componentName)}<em>${escapeHtml(b.version)}</em></span>
-        <span class="pipe-row-provider-iface"><b class="iface-pill ${b.iface.type.toLowerCase()}">${b.iface.type}</b><code>${escapeHtml(b.iface.path)}</code></span>
+  const slotRows = bindings.map(b => `<div class="slot-row ${b.platform ? 'platform' : ''}">
+      <span class="slot-port">${icon('shared', 9)}${escapeHtml(b.slot.label)}</span>
+      <span class="slot-arrow">${icon('arrow', 9)}</span>
+      <span class="slot-provider">
+        <span class="slot-provider-name">${escapeHtml(b.componentName)}<em>${escapeHtml(b.version)}</em></span>
+        <span class="slot-iface"><span class="iface-pill ${b.iface.type.toLowerCase()}">${b.iface.type}</span><code>${escapeHtml(b.iface.path)}</code></span>
       </span>
-      <span class="pipe-row-tag">${b.platform ? '平台注入' : '装配'}</span>
     </div>`).join('');
 
-  // Stage 2 Tab 2: raw interface list
-  const allIfaces = directBindings.flatMap(b => COMPONENTS[b.componentId].provides.map(p => ({ ...p, compName: b.componentName })));
-  const ifaceRowsHtml = allIfaces.length
-    ? allIfaces.map(p => `<div class="pipe-row">
-        <span class="pipe-row-slot">${escapeHtml(p.compName)}</span>
-        <span class="pipe-row-arrow">${icon('arrow', 8)}</span>
-        <span class="pipe-row-provider">
-          <span class="pipe-row-provider-iface" style="gap:6px"><b class="iface-pill ${p.type.toLowerCase()}">${p.type}</b><code>${escapeHtml(p.path)}</code></span>
-        </span>
-        <span class="pipe-row-tag">${escapeHtml(p.desc.slice(0, 8))}</span>
-      </div>`).join('')
-    : '<div style="padding:8px;color:var(--muted-2);font-size:8.6px">暂无对外接口</div>';
+  const lifeChips = contract.lifecycle.map(l => `<span class="life-chip">${escapeHtml(l)}</span>`).join('');
+  const eventChips = contract.events.map(e => `<span class="life-chip event">${escapeHtml(e)}</span>`).join('');
+  const platformNames = platformBindings.map(b => `${escapeHtml(b.componentName)} ${escapeHtml(b.version)}`).join(' / ') || '权限服务 v2.1.0';
 
-  // Stage 3: microapp contract properties (= style)
-  const microProps = `
-    <div class="pipe-props">
-      <div class="pipe-prop"><span>路由</span><span class="pipe-prop-eq">=</span><code>${escapeHtml(contract.route)}</code></div>
-      <div class="pipe-prop"><span>挂载点</span><span class="pipe-prop-eq">=</span><code>${escapeHtml(contract.mount)}</code></div>
-      <div class="pipe-prop"><span>入口</span><span class="pipe-prop-eq">=</span><code>${escapeHtml(contract.entry)}</code></div>
-      <div class="pipe-prop"><span>生命周期</span><span class="pipe-prop-eq">=</span><code>${contract.lifecycle.map(escapeHtml).join(' → ')}</code></div>
-      <div class="pipe-prop"><span>共享运行时</span><span class="pipe-prop-eq">=</span><code>${escapeHtml(contract.runtime)}</code></div>
-      <div class="pipe-prop-events"><span class="event">${escapeHtml(contract.events[0])}</span>${contract.events.slice(1).map(e => `<span class="event">${escapeHtml(e)}</span>`).join('')}</div>
-    </div>`;
-
-  // Stage 4: app runtime card
-  const platformBindingsHtml = platformBindings.map(b => `<div style="font-size:8.2px;color:var(--blue);font-weight:600;margin-top:2px">· ${escapeHtml(b.componentName)}<span style="color:var(--muted-2);font-weight:400"> ${escapeHtml(b.version)}</span></div>`).join('');
-
-  // Stage 3: microapp contract node (orb + inline properties, = style)
-  const stage3 = `<div class="pipe-card" style="max-width:460px">
-    <div class="pipe-card-header" style="background:linear-gradient(90deg,#3b63d8,#6b8ef0)"></div>
-    <div class="pipe-card-head">
-      <span class="pipe-node-orb" style="width:22px;height:22px;box-shadow:none;background:linear-gradient(135deg,#3b63d8,#6b8ef0);border:2px solid #fff">${icon('layers', 11)}</span>
-      <span class="pipe-card-title" style="color:#2b4f9a">${escapeHtml(app.name)} ${escapeHtml(app.version)}</span>
-      <span class="pipe-card-sub">接入契约</span>
-    </div>
-    <div class="pipe-card-body">
-      ${microProps}
-    </div>
-  </div>`;
-
-  // Build pipeline HTML
-  const pipe = [];
-  // Stage 1 endpoint node
-  pipe.push(`<div class="pipe-node actor-comp">
-    <span class="pipe-node-orb">${icon('cube', 13)}</span>
-    <div class="pipe-node-body">
-      <div class="pipe-node-name">后端组件</div>
-      <div class="pipe-node-sub">${escapeHtml(compNames)}</div>
-    </div>
-  </div>`);
-  // Connector 1
-  pipe.push(`<div class="pipe-link"><div class="pipe-link-inner">
-    <span class="pipe-link-line"></span>
-    <span class="pipe-link-label">接口绑定</span>
-    <span class="pipe-link-dot"></span>
-  </div></div>`);
-  // Stage 2 middle card with tabs
-  pipe.push(`<div class="pipe-card">
-    <div class="pipe-card-header"></div>
-    <div class="pipe-card-head">
-      <span class="pipe-card-title">微应用插槽</span>
-      <span class="pipe-card-sub">${bindings.length} 个绑定 · 协议 REST / EVENT / SPI</span>
-      <div class="pipe-card-tabs">
-        <button class="pipe-card-tab active" data-pipe-tab="slots">插槽绑定</button>
-        <button class="pipe-card-tab" data-pipe-tab="ifaces">接口列表</button>
+  return `<div class="contract-layout">
+    <div class="contract-main">
+      <div class="contract-chain">
+        <div class="chain-stage">
+          <div class="chain-stage-head"><span class="chain-index">1</span>后端组件<span class="chain-count">${refs.length + 1} 个</span></div>
+          <div class="chain-body">${compTokens}</div>
+          <div class="chain-foot">对外提供 <code>REST / EVENT / SPI</code></div>
+        </div>
+        <div class="chain-link">
+          <span class="chain-link-tag">接口绑定</span>
+          <span class="chain-link-line"></span>
+          <span class="chain-link-sub">组件 provides → 微应用插槽</span>
+        </div>
+        <div class="chain-stage actor-micro is-focus">
+          <div class="chain-stage-head"><span class="chain-index">2</span>微应用<span class="chain-count">${members.length} 个</span></div>
+          <div class="chain-body">${microTokens}</div>
+          <div class="chain-foot">当前 ${escapeHtml(app.name)} · ${bindings.length} 个插槽绑定</div>
+        </div>
+        <div class="chain-link phase-register">
+          <span class="chain-link-tag">注册接入</span>
+          <span class="chain-link-line"></span>
+          <span class="chain-link-sub">manifest → registerMicroApp</span>
+        </div>
+        <div class="chain-stage actor-app">
+          <div class="chain-stage-head"><span class="chain-index">3</span>应用<span class="chain-count">1 个</span></div>
+          <div class="chain-body">
+            <span class="chain-token">工厂能源管理平台<em>v1.0.0</em></span>
+            <span class="chain-token platform">${members.length} 个微应用</span>
+          </div>
+          <div class="chain-foot"><code>${escapeHtml(APP_CONTRACT.runtime)}</code></div>
+        </div>
+      </div>
+      <div class="contract-bottom">
+        <div class="contract-card">
+          <div class="contract-card-head">${icon('layers', 11)}微应用 → 应用接入契约<span>${escapeHtml(app.name)}</span></div>
+          <div class="contract-card-body">
+            <div class="contract-kv">
+              <div class="kv-row"><span>路由</span><i>=</i><code>${escapeHtml(contract.route)}</code></div>
+              <div class="kv-row"><span>挂载点</span><i>=</i><code>${escapeHtml(contract.mount)}</code></div>
+              <div class="kv-row"><span>入口</span><i>=</i><code>${escapeHtml(contract.entry)}</code></div>
+              <div class="kv-row"><span>运行时</span><i>=</i><code>${escapeHtml(contract.runtime)}</code></div>
+            </div>
+            <div class="life-chips">${lifeChips}</div>
+            <div class="life-chips">${eventChips}</div>
+          </div>
+        </div>
+        <div class="contract-card">
+          <div class="contract-card-head">${icon('build', 11)}应用注册契约<span>APP</span></div>
+          <div class="contract-card-body">
+            <div class="contract-kv">
+              <div class="kv-row"><span>清单</span><i>=</i><code>${escapeHtml(APP_CONTRACT.manifest)}</code></div>
+              <div class="kv-row"><span>注册</span><i>=</i><code>${escapeHtml(APP_CONTRACT.register)}</code></div>
+              <div class="kv-row"><span>路由</span><i>=</i><code>${escapeHtml(APP_CONTRACT.router)}</code></div>
+              <div class="kv-row"><span>事件总线</span><i>=</i><code>${escapeHtml(APP_CONTRACT.bus)}</code></div>
+            </div>
+            <div class="chain-foot" style="margin-top:auto">平台注入 · ${platformNames}</div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="pipe-card-body">
-      <div class="pipe-tab-pane active" data-pipe-pane="slots">
-        <div class="pipe-rows">${slotRowsHtml}</div>
-      </div>
-      <div class="pipe-tab-pane" data-pipe-pane="ifaces">
-        <div class="pipe-rows">${ifaceRowsHtml}</div>
-      </div>
-    </div>
-  </div>`);
-  // Connector 2
-  pipe.push(`<div class="pipe-link"><div class="pipe-link-inner">
-    <span class="pipe-link-line" style="background:linear-gradient(180deg,rgba(59,99,216,.55),rgba(13,148,136,.45))"></span>
-    <span class="pipe-link-label">注册接入</span>
-    <span class="pipe-link-dot" style="border-color:#3b63d8"></span>
-  </div></div>`);
-  // Stage 3: microapp contract card
-  pipe.push(stage3);
-  // Connector 3
-  pipe.push(`<div class="pipe-link"><div class="pipe-link-inner">
-    <span class="pipe-link-line" style="background:linear-gradient(180deg,rgba(214,58,82,.55),rgba(59,99,216,.45))"></span>
-    <span class="pipe-link-label">运行时编排</span>
-    <span class="pipe-link-dot" style="border-color:#d63a52"></span>
-  </div></div>`);
-  // Stage 4: platform/app card
-  pipe.push(`<div class="pipe-platform-card">
-    <span class="pipe-platform-orb">${icon('bell', 14)}</span>
-    <div class="pipe-platform-info">
-      <div class="pipe-platform-title">工厂能源管理平台 v1.0.0 · 运行时</div>
-      <div class="pipe-platform-sub">${escapeHtml(APP_CONTRACT.runtime)} · ${escapeHtml(APP_CONTRACT.router)} · ${escapeHtml(APP_CONTRACT.bus)}</div>
-      ${platformBindingsHtml}
-    </div>
-  </div>`);
-
-  return `<div class="pipe-layout">
-    <div class="pipe-left">
-      <div class="pipe-left-title">${icon('layers', 10)} 微应用选择</div>
-      ${chips}
-      <div class="pipe-side-note">
-        <b>流水线说明</b>
-        绿色节点 = 后端组件能力提供<br>
-        中间金顶卡片 = 插槽绑定 / 接口<br>
-        蓝色节点 = 微应用接入契约<br>
-        红色节点 = 应用运行时编排
-      </div>
-    </div>
-    <div class="pipe-canvas" data-pipe-canvas>
-      ${pipe.join('')}
-    </div>
+    <aside class="contract-side">
+      <div class="contract-side-title">${icon('layers', 10)}微应用接入清单</div>
+      <div class="contract-chips">${chips}</div>
+      <div class="contract-side-title">${icon('shared', 10)}组件 → 微应用插槽绑定 (${bindings.length})</div>
+      <div class="slot-list">${slotRows}</div>
+      <div class="contract-side-note">微应用只依赖插槽契约：组件通过 REST / EVENT / SPI 提供能力，插槽以统一协议注入，替换组件实现无需改动微应用。</div>
+    </aside>
   </div>`;
 }
 
@@ -4488,6 +4604,14 @@ function bindEvents() {
   microGrid.addEventListener('click', (event) => {
     const detailBtn = event.target.closest('[data-open-component]');
     if (detailBtn) { openComponentDetail(detailBtn.dataset.openComponent, detailBtn.dataset.version, detailBtn.dataset.microId); return; }
+    const pipeTab = event.target.closest('[data-pipe-tab]');
+    if (pipeTab) {
+      const tab = pipeTab.dataset.pipeTab;
+      const card = pipeTab.closest('.pipe-card');
+      card.querySelectorAll('.pipe-card-tab').forEach(t => t.classList.toggle('active', t === pipeTab));
+      card.querySelectorAll('.pipe-tab-pane').forEach(p => p.classList.toggle('active', p.dataset.pipePane === tab));
+      return;
+    }
     const microBtn = event.target.closest('[data-wizard-micro]');
     if (microBtn) {
       const id = microBtn.dataset.wizardMicro;
