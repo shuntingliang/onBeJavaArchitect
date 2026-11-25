@@ -1377,6 +1377,148 @@ svg { display: block; }
 .panel-foot { background: rgba(244, 249, 251, .6); }
 .drawer-actions { background: rgba(244, 249, 251, .7); }
 
+/* Assembly wizard */
+.canvas-panel .micro-grid { display: flex; flex-direction: column; gap: 0; padding: 8px; }
+.wizard { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.wizard-steps {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 5px;
+  padding: 7px 9px; border: 1px solid rgba(20, 52, 64, .1); border-radius: 8px;
+  background: rgba(16, 50, 62, .025);
+}
+.wizard-step { display: flex; align-items: center; gap: 5px; min-width: 0; color: #6b838d; font-size: 8.5px; white-space: nowrap; }
+.wizard-step i {
+  width: 17px; height: 17px; display: grid; place-items: center; border-radius: 50%;
+  border: 1px solid rgba(20, 52, 64, .22); background: #fff; color: #6b838d;
+  font: 7.5px var(--mono); font-style: normal; flex: 0 0 auto;
+}
+.wizard-step i svg { width: 8px; height: 8px; }
+.wizard-step.active { color: var(--cyan); font-weight: 600; }
+.wizard-step.active i { border-color: rgba(13, 148, 136, .55); background: rgba(13, 148, 136, .09); color: var(--cyan); }
+.wizard-step.done { color: var(--green); }
+.wizard-step.done i { border-color: rgba(22, 138, 91, .4); background: rgba(22, 138, 91, .09); color: var(--green); }
+.wizard-step b { color: #16323b; font-weight: 650; max-width: 82px; overflow: hidden; text-overflow: ellipsis; }
+.wizard-sep { flex: 1; min-width: 6px; height: 1px; background: rgba(20, 52, 64, .14); }
+.wizard-body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 7px; }
+.wizard-overview-label { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; color: #6b838d; font-size: 8px; letter-spacing: .06em; }
+.wizard-overview-tip { flex: 0 0 auto; display: flex; align-items: center; gap: 5px; padding-top: 1px; color: #6b838d; font-size: 7.5px; }
+.wizard-overview-tip svg { width: 9px; height: 9px; flex: 0 0 auto; color: var(--cyan); }
+.wizard-micro-grid { flex: 1; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; align-content: start; }
+.wizard-micro {
+  min-width: 0; padding: 9px; text-align: left; border: 1px solid rgba(20, 52, 64, .12);
+  border-radius: 9px; background: #fff; box-shadow: 0 1px 2px rgba(22, 52, 64, .04);
+  transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+.wizard-micro:hover { border-color: rgba(13, 148, 136, .4); box-shadow: 0 8px 20px rgba(22, 52, 64, .09); transform: translateY(-1px); }
+.wizard-micro.has-conflict { border-color: rgba(214, 58, 82, .38); }
+.wizard-micro.drop-active { border-color: rgba(13, 148, 136, .65); background: rgba(13, 148, 136, .05); }
+.wizard-micro.locate-pulse { animation: locatePulse 1.8s ease; }
+.wizard-micro.is-new-target { animation: cardFlash 1.2s ease; }
+.wizard-micro-top { display: flex; align-items: flex-start; gap: 7px; }
+.wizard-micro-icon {
+  width: 25px; height: 25px; flex: 0 0 auto; display: grid; place-items: center;
+  border-radius: 7px; color: var(--accent, var(--cyan));
+  background: color-mix(in srgb, var(--accent, var(--cyan)) 10%, #fff);
+  border: 1px solid color-mix(in srgb, var(--accent, var(--cyan)) 20%, transparent);
+}
+.wizard-micro-icon svg { width: 14px; height: 14px; }
+.wizard-micro-name { font-size: 10px; font-weight: 650; color: #16323b; line-height: 1.2; }
+.wizard-micro-ver { margin-top: 1px; font: 7px var(--mono); color: #6b838d; }
+.wizard-micro-count { margin-left: auto; flex: 0 0 auto; padding: 1px 4px; border: 1px solid rgba(20, 52, 64, .12); border-radius: 4px; font: 7px var(--mono); color: #6b838d; }
+.wizard-micro-comps { margin-top: 6px; display: flex; flex-direction: column; gap: 2px; }
+.wizard-micro-comp { display: flex; align-items: center; gap: 4px; min-width: 0; font-size: 8px; color: #4c6773; line-height: 1.5; }
+.wizard-micro-comp .dot { width: 4px; height: 4px; border-radius: 1px; flex: 0 0 auto; background: var(--cyan); }
+.wizard-micro-comp .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wizard-micro-comp .vr { margin-left: auto; flex: 0 0 auto; font: 7px var(--mono); color: #6b838d; }
+.wizard-micro-empty { color: #6b838d; font-size: 8px; }
+.wizard-micro-hint { margin-top: 6px; display: flex; align-items: center; gap: 4px; color: var(--cyan); font-size: 8px; font-weight: 600; }
+.wizard-micro-hint svg { width: 9px; height: 9px; }
+.wizard-focus { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, .84fr) minmax(0, 1.16fr); gap: 7px; }
+.wizard-target {
+  min-width: 0; min-height: 0; display: flex; flex-direction: column; padding: 8px;
+  border: 1px solid rgba(20, 52, 64, .12); border-radius: 8px; background: rgba(16, 50, 62, .022);
+  transition: border-color .16s ease, background .16s ease;
+}
+.wizard-target.has-conflict { border-color: rgba(214, 58, 82, .35); background: rgba(214, 58, 82, .03); }
+.wizard-target.drop-active { border-color: rgba(13, 148, 136, .6); background: rgba(13, 148, 136, .06); }
+.wizard-target.locate-pulse { animation: locatePulse 1.8s ease; }
+.wizard-target-head { flex: 0 0 auto; display: flex; align-items: center; gap: 5px; padding-bottom: 6px; border-bottom: 1px solid rgba(20, 52, 64, .1); }
+.wizard-target-name { font-size: 9.5px; font-weight: 650; color: #16323b; white-space: nowrap; }
+.wizard-target-ver { font: 7px var(--mono); color: #6b838d; }
+.wizard-back {
+  margin-left: auto; height: 19px; padding: 0 6px; display: inline-flex; align-items: center; gap: 3px;
+  border: 1px solid rgba(20, 52, 64, .14); border-radius: 4px; background: #fff;
+  color: #6b838d; font-size: 7.5px; white-space: nowrap;
+}
+.wizard-back:hover { color: var(--cyan); border-color: rgba(13, 148, 136, .35); }
+.wizard-back svg { width: 8px; height: 8px; }
+.wizard-tree { margin-top: 6px; flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; }
+.wizard-tree-row {
+  width: 100%; height: 22px; flex: 0 0 auto; padding: 0 5px; display: flex; align-items: center; gap: 4px;
+  border: 1px solid rgba(20, 52, 64, .1); border-radius: 4px; background: #fff;
+  color: #29454f; font-size: 8px; text-align: left;
+}
+.wizard-tree-row:hover { border-color: rgba(13, 148, 136, .3); }
+.wizard-tree-row .tdot { width: 4px; height: 4px; border-radius: 1px; flex: 0 0 auto; background: var(--accent, var(--cyan)); }
+.wizard-tree-row .tnm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wizard-tree-row .tv { margin-left: auto; flex: 0 0 auto; font: 7px var(--mono); color: #6b838d; }
+.wizard-tree-row.version-conflict { border-color: rgba(214, 58, 82, .3); background: rgba(214, 58, 82, .045); color: #8f1f30; }
+.wizard-tree-row.version-conflict .tv { color: var(--red); }
+.wizard-tree-empty { flex: 0 0 auto; padding: 8px 4px; text-align: center; color: #6b838d; font-size: 8px; }
+.wizard-drop {
+  margin-top: 6px; flex: 0 0 auto; min-height: 33px; display: flex; align-items: center; justify-content: center; gap: 5px;
+  border: 1px dashed rgba(13, 148, 136, .38); border-radius: 5px; background: rgba(13, 148, 136, .04);
+  color: var(--cyan); font-size: 8px; text-align: center; padding: 4px;
+}
+.wizard-drop svg { width: 10px; height: 10px; flex: 0 0 auto; }
+.wizard-picker { min-width: 0; min-height: 0; display: flex; flex-direction: column; padding: 8px; border: 1px solid rgba(20, 52, 64, .12); border-radius: 8px; background: #fff; }
+.wizard-picker-head { flex: 0 0 auto; display: flex; align-items: center; gap: 5px; padding-bottom: 5px; border-bottom: 1px solid rgba(20, 52, 64, .1); color: #4c6773; font-size: 8.5px; font-weight: 600; }
+.wizard-picker-head span { margin-left: auto; font: 7px var(--mono); color: #6b838d; font-weight: 400; }
+.wizard-options { margin-top: 5px; flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; }
+.wizard-option {
+  width: 100%; min-height: 27px; flex: 0 0 auto; padding: 3px 6px; display: flex; align-items: center; gap: 6px;
+  border: 1px solid rgba(20, 52, 64, .1); border-radius: 5px; background: #fff; text-align: left;
+  transition: border-color .15s ease, background .15s ease;
+}
+.wizard-option:hover:not(:disabled) { border-color: rgba(13, 148, 136, .35); background: rgba(13, 148, 136, .03); }
+.wizard-option:disabled { opacity: .58; cursor: not-allowed; }
+.wizard-option .opt-dot { width: 5px; height: 5px; border-radius: 2px; flex: 0 0 auto; background: var(--accent, var(--cyan)); }
+.wizard-option .opt-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 8.3px; color: #16323b; }
+.wizard-option .opt-ver { flex: 0 0 auto; font: 7px var(--mono); color: #6b838d; }
+.wizard-option .opt-state { margin-left: auto; flex: 0 0 auto; height: 14px; padding: 0 4px; display: inline-flex; align-items: center; border-radius: 3px; font-size: 6.8px; color: #6b838d; background: rgba(16, 50, 62, .05); }
+.wizard-option .opt-state.added { color: var(--green); background: rgba(22, 138, 91, .08); }
+.wizard-option .opt-state.platform { color: var(--blue); background: rgba(59, 99, 216, .08); }
+.wizard-picker-note { flex: 0 0 auto; margin-top: 4px; padding-top: 4px; border-top: 1px dashed rgba(20, 52, 64, .14); color: #6b838d; font-size: 7px; letter-spacing: .02em; }
+.wizard-confirm {
+  flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 7px; padding: 10px;
+  border: 1px solid rgba(13, 148, 136, .28); border-radius: 9px;
+  background: linear-gradient(150deg, rgba(13, 148, 136, .055), #fff 58%);
+}
+.confirm-flow { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.confirm-node { display: inline-flex; align-items: center; gap: 5px; padding: 4px 7px; border: 1px solid rgba(20, 52, 64, .13); border-radius: 6px; background: #fff; font-size: 8.5px; color: #16323b; }
+.confirm-node strong { font-weight: 650; }
+.confirm-node .cv { font: 7px var(--mono); color: #6b838d; }
+.confirm-node.target { border-color: rgba(59, 99, 216, .25); background: rgba(59, 99, 216, .045); }
+.confirm-arrow { display: grid; place-items: center; color: var(--cyan); }
+.confirm-arrow svg { width: 11px; height: 11px; }
+.confirm-title { display: flex; align-items: center; gap: 5px; font-size: 9.5px; font-weight: 650; color: #16323b; }
+.confirm-title svg { width: 11px; height: 11px; color: var(--cyan); }
+.confirm-deps { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.confirm-dep-group { padding: 6px 7px; border: 1px solid rgba(20, 52, 64, .1); border-radius: 6px; background: #fff; min-width: 0; }
+.confirm-dep-group b { display: block; margin-bottom: 3px; color: #6b838d; font-size: 7px; font-weight: 600; letter-spacing: .06em; }
+.confirm-dep-group div { color: #4c6773; font-size: 8px; line-height: 1.55; word-break: break-word; }
+.confirm-note { display: flex; align-items: flex-start; gap: 5px; color: #6b838d; font-size: 7.5px; line-height: 1.45; }
+.confirm-note svg { width: 10px; height: 10px; flex: 0 0 auto; margin-top: 1px; color: var(--cyan); }
+.confirm-actions { position: sticky; bottom: -1px; margin-top: auto; padding-top: 5px; display: flex; justify-content: flex-end; gap: 6px; background: linear-gradient(180deg, rgba(255, 255, 255, 0), #fff 42%); }
+.wizard-btn {
+  height: 27px; padding: 0 10px; display: inline-flex; align-items: center; gap: 5px;
+  border: 1px solid rgba(20, 52, 64, .16); border-radius: 6px; background: #fff;
+  color: #29454f; font-size: 8.5px; font-weight: 600;
+}
+.wizard-btn:hover { border-color: rgba(13, 148, 136, .35); color: var(--cyan); }
+.wizard-btn.primary { border-color: transparent; color: #fff; background: linear-gradient(135deg, #14b8a6, #0d9488 60%, #3b6fd8); box-shadow: 0 4px 12px rgba(13, 148, 136, .18); }
+.wizard-btn.primary:hover { filter: brightness(1.05); color: #fff; }
+.wizard-btn svg { width: 10px; height: 10px; }
+
 @media (max-width: 1320px) {
   .assembly-pipeline { display: none; }
   .brand { min-width: 0; }
@@ -1399,7 +1541,7 @@ svg { display: block; }
 @media (max-height: 860px) {
   .topbar { height: 60px; }
   .status-rail { height: 40px; }
-  .bottom-dock { flex-basis: 292px; min-height: 224px; }
+  .bottom-dock { flex-basis: 260px; min-height: 208px; }
   .micro-desc { display: none; }
   .component-card { padding-top: 7px; padding-bottom: 7px; }
   .comp-desc { -webkit-line-clamp: 1; margin: 4px 0 5px; }
@@ -1410,12 +1552,17 @@ svg { display: block; }
   .micro-tree { margin-top: 6px; gap: 2px; }
   .tree-component { height: 22px; }
   .add-zone { height: 23px; }
+  .wizard-steps { padding: 5px 7px; }
+  .wizard-step { font-size: 8px; }
+  .wizard-micro { padding: 7px; }
+  .wizard-focus { gap: 6px; }
+  .wizard-confirm { padding: 8px; gap: 6px; }
 }
 @media (max-height: 780px) {
   .app-shell { min-height: 600px; }
   .topbar { height: 56px; }
   .status-rail { height: 38px; }
-  .bottom-dock { flex-basis: 262px; min-height: 210px; }
+  .bottom-dock { flex-basis: 226px; min-height: 190px; }
   .workspace { padding-top: 8px; }
   .panel-head { padding-top: 10px; padding-bottom: 8px; }
   .component-list { gap: 5px; }
@@ -1425,6 +1572,18 @@ svg { display: block; }
   .app-hero { margin-top: 7px; }
   .res-stats { margin-top: 6px; }
   .empty-scope { padding: 4px 0; gap: 4px; }
+  .wizard-steps { padding: 4px 6px; }
+  .wizard-step b { max-width: 64px; }
+  .wizard-micro-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; align-content: center; }
+  .wizard-micro { padding: 6px; }
+  .wizard-micro-comps, .wizard-micro-hint, .wizard-micro-count { display: none; }
+  .wizard-micro-icon { width: 20px; height: 20px; border-radius: 5px; }
+  .wizard-micro-icon svg { width: 11px; height: 11px; }
+  .wizard-micro-name { font-size: 8.8px; }
+  .wizard-drop { display: none; }
+  .wizard-tree-row { height: 21px; }
+  .wizard-confirm { padding: 7px; gap: 5px; }
+  .confirm-note { display: none; }
 }
 @media (max-width: 1270px) {
   .shared-layout { grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(190px, .7fr); }
@@ -1510,7 +1669,7 @@ svg { display: block; }
     </div>
     <div class="rail-divider"></div>
     <div class="rail-readiness" id="readiness"><span>构建就绪</span><span class="readiness-value">未就绪</span></div>
-    <div class="key-hint">拖拽或点选组件进行组装</div>
+    <div class="key-hint">分步选择微应用与组件</div>
   </div>
 
   <main class="workspace">
@@ -1540,7 +1699,7 @@ svg { display: block; }
       <div class="component-list" id="componentList"></div>
       <div class="panel-foot" id="libraryFoot">
         <svg><use href="#i-info"/></svg>
-        <span>点击选中组件，再点击微应用中的「组装组件」</span>
+        <span>先在中间选择微应用，再按步骤选择组件并确认组装</span>
       </div>
     </section>
 
@@ -1549,14 +1708,14 @@ svg { display: block; }
         <div class="panel-step">02</div>
         <div class="panel-heading">
           <div class="panel-title">微应用组装区 <span class="count-badge">04</span></div>
-          <div class="panel-desc">将后端组件装入微应用，组件版本随组装关系冻结</div>
+          <div class="panel-desc">选择微应用 → 选择组件 → 确认组装，版本随组装关系冻结</div>
         </div>
         <div class="canvas-head-extra"><span class="pulse-dot"></span><span>ASSEMBLY CANVAS</span></div>
       </div>
       <div class="micro-grid" id="microGrid"></div>
       <div class="panel-foot">
         <svg><use href="#i-cube"/></svg>
-        <span>后端组件 → 微应用 · 拖拽组件卡片到任意微应用即可组装</span>
+        <span>分步组装 · 先选微应用，再选组件并确认；也可从左侧直接拖入当前微应用</span>
       </div>
     </section>
 
@@ -1735,6 +1894,8 @@ function createInitialAssembly() {
 const state = {
   assembly: createInitialAssembly(),
   selectedComponentId: null,
+  assembleMicroId: null,
+  assembleCompId: null,
   search: '',
   category: 'all',
   parseState: 'idle',
@@ -1980,7 +2141,22 @@ function markAssemblyDirty(message) {
 
 function selectComponent(compId) {
   if (isBusy()) return;
+  const comp = COMPONENTS[compId];
+  if (!comp) return;
   state.selectedComponentId = compId;
+  if (state.assembleMicroId) {
+    const app = getMicro(state.assembleMicroId);
+    const added = app && (state.assembly[app.id] || []).some(c => c.id === compId);
+    if (comp.platform) {
+      state.assembleCompId = null;
+      showToast('平台级共享依赖', `${comp.name} 已作为平台能力自动注入全部微应用，无需重复组装。`, 'warn');
+    } else if (added) {
+      state.assembleCompId = null;
+      showToast('无需重复添加', `该组件已经在此微应用中，无需重复添加。`, 'warn');
+    } else {
+      state.assembleCompId = compId;
+    }
+  }
   renderLibrary();
   renderMicroApps();
   renderLibraryFoot();
@@ -2003,10 +2179,14 @@ function addComponentToMicro(microId, compId, source = 'click') {
     return false;
   }
   state.assembly[microId].push({ id: compId, version: comp.version });
+  state.assembleMicroId = microId;
+  state.assembleCompId = null;
+  state.selectedComponentId = null;
   state.lastAdded = { microId, compId };
   markAssemblyDirty('请重新解析依赖，之前生成的锁定与构建结果已失效。');
   renderAll();
-  showToast('组装成功', `${comp.name} ${comp.version} 已组装到「${app.name}」。${source === 'drag' ? '拖拽' : '点击'}组装已完成。`, 'success');
+  const how = source === 'drag' ? '拖拽' : source === 'wizard' ? '向导' : '点击';
+  showToast('组装成功', `${comp.name} ${comp.version} 已组装到「${app.name}」。${how}组装已完成。`, 'success');
   setTimeout(() => {
     if (state.lastAdded && state.lastAdded.microId === microId && state.lastAdded.compId === compId) {
       state.lastAdded = null;
@@ -2145,6 +2325,8 @@ function resetDemo() {
   state.highlightTimer = null;
   state.assembly = createInitialAssembly();
   state.selectedComponentId = null;
+  state.assembleMicroId = null;
+  state.assembleCompId = null;
   state.search = '';
   state.category = 'all';
   state.parseState = 'idle';
@@ -2181,6 +2363,8 @@ function setTab(tab) {
 function locateMicro(microId) {
   state.highlightMicro = microId;
   state.expandedMicroapps.add(microId);
+  state.assembleMicroId = microId;
+  state.assembleCompId = null;
   if (state.highlightTimer) clearTimeout(state.highlightTimer);
   renderMicroApps();
   renderAppPanel();
@@ -2248,7 +2432,11 @@ function openDrawer(html) {
     btn.addEventListener('click', () => {
       closeDrawer();
       selectComponent(btn.dataset.selectAssemble);
-      showToast('已选中组件', '请选择目标微应用并点击「组装组件」。', 'info');
+      if (state.assembleMicroId) {
+        showToast('已选中组件', '已带入当前微应用的「确认组装」步骤。', 'info');
+      } else {
+        showToast('已选中组件', '请在中间面板选择微应用，按向导确认组装。', 'info');
+      }
     });
   });
   drawer.querySelectorAll('[data-open-micro]').forEach(btn => {
@@ -2400,52 +2588,165 @@ function renderLibrary() {
 function renderLibraryFoot() {
   const foot = document.getElementById('libraryFoot');
   if (!foot) return;
+  const micro = state.assembleMicroId ? getMicro(state.assembleMicroId) : null;
   if (state.selectedComponentId && COMPONENTS[state.selectedComponentId]) {
     const comp = COMPONENTS[state.selectedComponentId];
-    foot.innerHTML = `<svg style="color:var(--cyan)"><use href="#i-target"/></svg><span class="selection-note">已选择 ${escapeHtml(comp.name)} ${escapeHtml(comp.version)}</span><span>· 点击微应用「组装组件」</span>`;
+    const hint = micro ? `· 在中间「确认组装」步骤提交到 ${micro.name}` : '· 再点击中间微应用进入组装向导';
+    foot.innerHTML = `<svg style="color:var(--cyan)"><use href="#i-target"/></svg><span class="selection-note">已选择 ${escapeHtml(comp.name)} ${escapeHtml(comp.version)}</span><span>${escapeHtml(hint)}</span>`;
+  } else if (micro) {
+    foot.innerHTML = `<svg style="color:var(--cyan)"><use href="#i-target"/></svg><span>正在组装「${escapeHtml(micro.name)}」· 选择右侧组件或直接拖入</span>`;
   } else {
-    foot.innerHTML = `<svg><use href="#i-info"/></svg><span>点击选中组件，再点击微应用中的「组装组件」</span>`;
+    foot.innerHTML = `<svg><use href="#i-info"/></svg><span>先在中间选择微应用，再按步骤选择组件并确认组装</span>`;
   }
+}
+
+function renderWizardSteps(app, compId) {
+  return `<div class="wizard-steps">
+    <div class="wizard-step done"><i>${icon('check', 8)}</i><span>选择微应用</span><b>${escapeHtml(app.name)}</b></div>
+    <div class="wizard-sep"></div>
+    <div class="wizard-step ${compId ? 'done' : 'active'}"><i>${compId ? icon('check', 8) : '2'}</i><span>选择组件</span></div>
+    <div class="wizard-sep"></div>
+    <div class="wizard-step ${compId ? 'active' : ''}"><i>3</i><span>确认组装</span></div>
+  </div>`;
+}
+
+function renderWizardOverview() {
+  const cards = MICRO_APPS.map(app => {
+    const refs = state.assembly[app.id] || [];
+    const conflict = state.parseState === 'resolved' && isMicroConflict(app.id);
+    const rows = refs.slice(0, 3).map(ref => {
+      const comp = COMPONENTS[ref.id];
+      return `<div class="wizard-micro-comp"><span class="dot" style="background:${comp.accent}"></span><span class="nm">${escapeHtml(comp.name)}</span><span class="vr">${escapeHtml(ref.version)}</span></div>`;
+    }).join('');
+    const more = refs.length > 3 ? `<div class="wizard-micro-empty">另有 ${refs.length - 3} 个组件</div>` : '';
+    return `<button class="wizard-micro ${conflict ? 'has-conflict' : ''} ${state.highlightMicro === app.id ? 'locate-pulse' : ''}"
+      data-wizard-micro="${app.id}" data-micro-card="${app.id}" data-drop-target="${app.id}" style="--accent:${app.accent}">
+      <div class="wizard-micro-top">
+        <div class="wizard-micro-icon">${icon(app.icon, 14)}</div>
+        <div style="min-width:0">
+          <div class="wizard-micro-name">${escapeHtml(app.name)}</div>
+          <div class="wizard-micro-ver">${escapeHtml(app.version)}</div>
+        </div>
+        <span class="wizard-micro-count">${refs.length} 组件</span>
+      </div>
+      <div class="wizard-micro-comps">${rows || '<div class="wizard-micro-empty">暂无组件</div>'}${more}</div>
+      <div class="wizard-micro-hint" ${conflict ? 'style="color:var(--red)"' : ''}>${icon(conflict ? 'warn' : 'plus', 9)}${conflict ? '存在版本冲突 · 点击查看' : '点击进入组装'}</div>
+    </button>`;
+  }).join('');
+  return `<div class="wizard">
+    <div class="wizard-steps">
+      <div class="wizard-step active"><i>1</i><span>选择微应用</span></div>
+      <div class="wizard-sep"></div>
+      <div class="wizard-step"><i>2</i><span>选择组件</span></div>
+      <div class="wizard-sep"></div>
+      <div class="wizard-step"><i>3</i><span>确认组装</span></div>
+    </div>
+    <div class="wizard-body">
+      <div class="wizard-overview-label"><span>选择要组装的微应用</span><span>${MICRO_APPS.length} 个微应用 · 支持拖拽</span></div>
+      <div class="wizard-micro-grid">${cards}</div>
+      <div class="wizard-overview-tip">${icon('info', 9)}选择微应用后进入组件选择，确认组装后才会写入应用结构</div>
+    </div>
+  </div>`;
+}
+
+function renderWizardFocus(app) {
+  const refs = state.assembly[app.id] || [];
+  const conflict = state.parseState === 'resolved' && isMicroConflict(app.id);
+  const rows = refs.map(ref => {
+    const comp = COMPONENTS[ref.id];
+    const isConflict = state.parseState === 'resolved' && isRefConflict(app.id, ref.id, ref.version);
+    const isAdded = state.lastAdded && state.lastAdded.microId === app.id && state.lastAdded.compId === ref.id;
+    return `<button class="wizard-tree-row ${isConflict ? 'version-conflict' : ''} ${isAdded ? 'added-flash' : ''}"
+      data-open-component="${ref.id}" data-version="${ref.version}" data-micro-id="${app.id}" title="查看 ${escapeHtml(comp.name)} ${ref.version} 详情">
+      <span class="tdot" style="background:${comp.accent}"></span>
+      <span class="tnm">${escapeHtml(comp.name)}</span>
+      <span class="tv">${escapeHtml(ref.version)}</span>
+      ${isConflict ? icon('warn', 9) : ''}
+    </button>`;
+  }).join('');
+  const options = Object.entries(COMPONENTS)
+    .filter(([id, comp]) => !comp.platform && !refs.some(r => r.id === id))
+    .map(([id, comp]) => `<button class="wizard-option" data-wizard-comp="${id}" style="--accent:${comp.accent}" title="${escapeHtml(comp.description)}">
+      <span class="opt-dot"></span>
+      <span class="opt-name">${escapeHtml(comp.name)}</span>
+      <span class="opt-ver">${escapeHtml(comp.version)}</span>
+      <span class="opt-state">可组装</span>
+    </button>`).join('');
+  const platformCount = Object.values(COMPONENTS).filter(c => c.platform).length;
+  const available = Object.keys(COMPONENTS).filter(id => !COMPONENTS[id].platform && !refs.some(r => r.id === id)).length;
+  const pickerEmpty = available === 0
+    ? `<div class="wizard-tree-empty">该微应用已组装全部可用组件</div>`
+    : options;
+  return `<div class="wizard">
+    ${renderWizardSteps(app, null)}
+    <div class="wizard-body">
+      <div class="wizard-focus">
+        <div class="wizard-target ${conflict ? 'has-conflict' : ''} ${state.highlightMicro === app.id ? 'locate-pulse' : ''} ${state.lastAdded && state.lastAdded.microId === app.id ? 'is-new-target' : ''}"
+          data-micro-card="${app.id}" data-drop-target="${app.id}">
+          <div class="wizard-target-head">
+            <span style="color:var(--cyan);display:inline-flex">${icon(app.icon, 12)}</span>
+            <span class="wizard-target-name">${escapeHtml(app.name)}</span>
+            <span class="wizard-target-ver">${escapeHtml(app.version)}</span>
+            <button class="wizard-back" data-wizard-back>${icon('x', 8)}换一个</button>
+          </div>
+          <div class="wizard-tree">${rows || '<div class="wizard-tree-empty">当前还没有组件，从右侧选择或拖入</div>'}</div>
+          <div class="wizard-drop">${icon('plus', 10)}拖拽后端组件到这里</div>
+        </div>
+        <div class="wizard-picker">
+          <div class="wizard-picker-head">选择要组装的组件<span>${available} 个可选</span></div>
+          <div class="wizard-options">${pickerEmpty}</div>
+          <div class="wizard-picker-note">已组装 ${refs.length} 个 · 平台注入 ${platformCount} 个</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderWizardConfirm(app, compId) {
+  const comp = COMPONENTS[compId];
+  const direct = (comp.depIds || []).map(id => NODES[id] ? `${NODES[id].name} ${NODES[id].version}` : id);
+  const transitiveIds = [];
+  traverseDeps(compId, new Set([compId]), new Set([compId]), transitiveIds);
+  const transitive = transitiveIds.map(id => NODES[id] ? `${NODES[id].name} ${NODES[id].version}` : id);
+  return `<div class="wizard">
+    ${renderWizardSteps(app, compId)}
+    <div class="wizard-confirm">
+      <div class="confirm-flow">
+        <span class="confirm-node target">${icon(app.icon, 10)}<strong>${escapeHtml(app.name)}</strong><span class="cv">${escapeHtml(app.version)}</span></span>
+        <span class="confirm-arrow">${icon('plus', 10)}</span>
+        <span class="confirm-node"><span class="opt-dot" style="background:${comp.accent}"></span><strong>${escapeHtml(comp.name)}</strong><span class="cv">${escapeHtml(comp.version)}</span></span>
+        <span class="confirm-arrow">${icon('arrow', 10)}</span>
+        <span class="confirm-node" style="color:var(--cyan);border-color:rgba(13,148,136,.28)">组装完成</span>
+      </div>
+      <div class="confirm-title">${icon('cube', 11)}确认组装关系</div>
+      <div class="confirm-deps">
+        <div class="confirm-dep-group"><b>直接依赖 · ${direct.length}</b><div>${direct.length ? direct.map(escapeHtml).join(' · ') : '无额外直接依赖'}</div></div>
+        <div class="confirm-dep-group"><b>传递依赖 · ${transitive.length}</b><div>${transitive.length ? transitive.map(escapeHtml).join(' · ') : '无传递依赖'}</div></div>
+      </div>
+      <div class="confirm-note">${icon('info', 10)}<span>确认后将为「${escapeHtml(app.name)}」新增 ${escapeHtml(comp.name)} ${escapeHtml(comp.version)}；组装变更会使已解析结果、版本锁定和构建结果失效。</span></div>
+      <div class="confirm-actions">
+        <button class="wizard-btn" data-wizard-reselect>${icon('refresh', 10)}重新选择</button>
+        <button class="wizard-btn primary" data-wizard-confirm>${icon('check', 10)}确认组装</button>
+      </div>
+    </div>
+  </div>`;
 }
 
 function renderMicroApps() {
   const grid = document.getElementById('microGrid');
   if (!grid) return;
-  grid.innerHTML = MICRO_APPS.map(app => {
-    const refs = state.assembly[app.id] || [];
-    const conflict = state.parseState === 'resolved' && isMicroConflict(app.id);
-    const selected = state.selectedComponentId && COMPONENTS[state.selectedComponentId];
-    const hasSelected = selected && refs.some(r => r.id === selected.id);
-    const addLabel = selected ? (hasSelected ? '已组装 · 选择其他组件' : `＋ 组装 ${selected.name}`) : '＋ 组装组件';
-    const rows = refs.map(ref => {
-      const comp = COMPONENTS[ref.id];
-      const isConflict = state.parseState === 'resolved' && isRefConflict(app.id, ref.id, ref.version);
-      const isAdded = state.lastAdded && state.lastAdded.microId === app.id && state.lastAdded.compId === ref.id;
-      return `<button class="tree-component ${isConflict ? 'version-conflict' : ''} ${isAdded ? 'added-flash' : ''}" data-open-component="${ref.id}" data-version="${ref.version}" data-micro-id="${app.id}" style="--accent:${comp.accent}" title="查看 ${escapeHtml(comp.name)} ${ref.version} 详情">
-        <span class="comp-dot"></span>
-        <span class="tree-name">${escapeHtml(comp.name)}</span>
-        <span class="tree-version">${escapeHtml(ref.version)}</span>
-        ${isConflict ? `<span class="conflict-mark">${icon('warn', 11)}</span>` : ''}
-      </button>`;
-    }).join('');
-    return `
-      <article class="micro-card ${conflict ? 'has-conflict' : ''} ${state.highlightMicro === app.id ? 'locate-pulse' : ''} ${state.lastAdded && state.lastAdded.microId === app.id ? 'is-new-target' : ''}"
-        data-micro-card="${app.id}" data-drop-target="${app.id}" style="--accent:${app.accent}">
-        <div class="micro-head">
-          <div class="micro-icon">${icon(app.icon, 15)}</div>
-          <div class="micro-title-wrap">
-            <div class="micro-title-row"><span class="micro-title">${escapeHtml(app.name)}</span><span class="micro-version">${escapeHtml(app.version)}</span></div>
-            <div class="micro-desc">${escapeHtml(app.description)}</div>
-          </div>
-          <div class="micro-head-right">
-            <span class="micro-count">${refs.length} 组件</span>
-            <button class="micro-expand-btn" data-micro-detail="${app.id}" title="查看微应用依赖详情" aria-label="查看 ${escapeHtml(app.name)} 依赖详情">${icon('chevron', 11)}</button>
-          </div>
-        </div>
-        <div class="micro-tree">${rows}</div>
-        <button class="add-zone ${state.selectedComponentId ? 'has-selection' : ''}" data-add-to="${app.id}">${icon('plus', 11)}<span>${escapeHtml(addLabel)}</span></button>
-      </article>`;
-  }).join('');
+  const app = state.assembleMicroId ? getMicro(state.assembleMicroId) : null;
+  if (!app) {
+    state.assembleMicroId = null;
+    state.assembleCompId = null;
+    grid.innerHTML = renderWizardOverview();
+    return;
+  }
+  const comp = state.assembleCompId && COMPONENTS[state.assembleCompId] ? COMPONENTS[state.assembleCompId] : null;
+  if (!comp) state.assembleCompId = null;
+  const refs = state.assembly[app.id] || [];
+  if (comp && (comp.platform || refs.some(r => r.id === comp.id))) state.assembleCompId = null;
+  grid.innerHTML = state.assembleCompId ? renderWizardConfirm(app, state.assembleCompId) : renderWizardFocus(app);
 }
 
 function renderAppPanel() {
@@ -3425,22 +3726,57 @@ function bindEvents() {
     const card = event.target.closest('[data-component-card]');
     if (card) card.classList.remove('is-dragging');
     state.dragId = null;
-    document.querySelectorAll('.micro-card.drop-active').forEach(el => el.classList.remove('drop-active'));
+    document.querySelectorAll('[data-drop-target].drop-active').forEach(el => el.classList.remove('drop-active'));
   });
 
   const microGrid = document.getElementById('microGrid');
   microGrid.addEventListener('click', (event) => {
-    const detailBtn = event.target.closest('[data-micro-detail]');
-    if (detailBtn) { openMicroappDetail(detailBtn.dataset.microDetail); return; }
-    const compBtn = event.target.closest('[data-open-component]');
-    if (compBtn) { openComponentDetail(compBtn.dataset.openComponent, compBtn.dataset.version, compBtn.dataset.microId); return; }
-    const addBtn = event.target.closest('[data-add-to]');
-    if (addBtn) {
-      if (!state.selectedComponentId) {
-        showToast('尚未选择组件', '请先在左侧后端组件库选择一个组件，再点击组装。', 'info');
-        return;
-      }
-      addComponentToMicro(addBtn.dataset.addTo, state.selectedComponentId, 'click');
+    const detailBtn = event.target.closest('[data-open-component]');
+    if (detailBtn) { openComponentDetail(detailBtn.dataset.openComponent, detailBtn.dataset.version, detailBtn.dataset.microId); return; }
+    const microBtn = event.target.closest('[data-wizard-micro]');
+    if (microBtn) {
+      const id = microBtn.dataset.wizardMicro;
+      state.assembleMicroId = id;
+      state.expandedMicroapps.add(id);
+      const selected = state.selectedComponentId && COMPONENTS[state.selectedComponentId];
+      const added = selected && (state.assembly[id] || []).some(c => c.id === selected.id);
+      state.assembleCompId = selected && !selected.platform && !added ? selected.id : null;
+      renderMicroApps();
+      renderAppPanel();
+      renderLibraryFoot();
+      return;
+    }
+    const option = event.target.closest('[data-wizard-comp]');
+    if (option && !option.disabled) {
+      state.selectedComponentId = option.dataset.wizardComp;
+      state.assembleCompId = option.dataset.wizardComp;
+      renderLibrary();
+      renderMicroApps();
+      renderLibraryFoot();
+      return;
+    }
+    const back = event.target.closest('[data-wizard-back]');
+    if (back) {
+      state.assembleMicroId = null;
+      state.assembleCompId = null;
+      state.selectedComponentId = null;
+      renderLibrary();
+      renderMicroApps();
+      renderLibraryFoot();
+      return;
+    }
+    const reselect = event.target.closest('[data-wizard-reselect]');
+    if (reselect) {
+      state.assembleCompId = null;
+      state.selectedComponentId = null;
+      renderLibrary();
+      renderMicroApps();
+      renderLibraryFoot();
+      return;
+    }
+    const confirm = event.target.closest('[data-wizard-confirm]');
+    if (confirm && state.assembleMicroId && state.assembleCompId) {
+      addComponentToMicro(state.assembleMicroId, state.assembleCompId, 'wizard');
     }
   });
   microGrid.addEventListener('dragover', (event) => {
@@ -3448,7 +3784,7 @@ function bindEvents() {
     if (!card) return;
     event.preventDefault();
     event.dataTransfer.dropEffect = 'copy';
-    document.querySelectorAll('.micro-card.drop-active').forEach(el => { if (el !== card) el.classList.remove('drop-active'); });
+    document.querySelectorAll('[data-drop-target].drop-active').forEach(el => { if (el !== card) el.classList.remove('drop-active'); });
     card.classList.add('drop-active');
   });
   microGrid.addEventListener('dragleave', (event) => {
@@ -3480,7 +3816,7 @@ function bindEvents() {
     appPanel.classList.add('app-drop-deny');
     setTimeout(() => appPanel.classList.remove('app-drop-deny'), 1100);
     state.dragId = null;
-    document.querySelectorAll('.micro-card.drop-active').forEach(el => el.classList.remove('drop-active'));
+    document.querySelectorAll('[data-drop-target].drop-active').forEach(el => el.classList.remove('drop-active'));
     showToast('应用层不接受后端组件', '微应用必须先完成组件组装，再由微应用组成应用。组件不能直接挂载到应用。', 'error');
   });
 
