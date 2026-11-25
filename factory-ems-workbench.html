@@ -1779,13 +1779,25 @@ svg { display: block; }
 
 /* Assembly canvas — reuses pipeline graph primitives */
 .assemble-canvas { flex: 1; min-height: 0; justify-content: flex-start; border: 1px solid rgba(20, 52, 64, .08); border-radius: 8px; }
-.assemble-canvas .pipe-node { max-width: 620px; }
+.assemble-canvas > * { flex: 0 0 auto; }
+.assemble-canvas .pipe-node { max-width: 720px; }
 .assemble-canvas .pipe-node .wizard-back { margin-left: auto; }
 .assemble-canvas .pipe-card,
-.assemble-canvas .pipe-platform-card { max-width: 620px; }
-.assemble-canvas .pipe-card-body { max-height: 186px; overflow: auto; }
+.assemble-canvas .pipe-platform-card { max-width: 720px; }
+.assemble-canvas .pipe-card-body { max-height: none; overflow: visible; }
 .assemble-canvas .wizard-tree,
-.assemble-canvas .wizard-options { margin-top: 0; max-height: 132px; }
+.assemble-canvas .wizard-options { margin-top: 0; max-height: none; }
+.assemble-canvas .wizard-tree { gap: 4px; }
+.assemble-canvas .wizard-tree-row { height: 30px; padding: 0 8px; border-radius: 6px; font-size: 10px; }
+.assemble-canvas .wizard-tree-row .tdot { width: 6px; height: 6px; border-radius: 2px; }
+.assemble-canvas .wizard-tree-row .tv { font-size: 8px; }
+.assemble-canvas .wizard-tree-row .tgo { margin-left: 4px; display: inline-flex; color: var(--muted-2); }
+.assemble-canvas .wizard-tree-row:hover .tgo { color: var(--cyan); }
+.assemble-canvas .wizard-option { min-height: 30px; padding: 4px 8px; }
+.assemble-canvas .wizard-option .opt-name { font-size: 9.6px; }
+.assemble-canvas .wizard-option .opt-ver { font-size: 7.8px; }
+.assemble-canvas .wizard-option .opt-state { height: 16px; font-size: 7.4px; }
+.assemble-canvas .wizard-tree-empty { font-size: 9px; padding: 10px 4px; }
 .assemble-canvas .confirm-binding { margin: 0; }
 .assemble-canvas .confirm-deps { margin-top: 2px; }
 .assemble-canvas .pipe-node.locate-pulse { animation: locatePulse 1.8s ease; }
@@ -1946,6 +1958,19 @@ svg { display: block; }
   .pipe-link-inner { height: 30px; }
   .pipe-node { padding: 4px 8px 4px; }
 }
+
+/* Collapsible bottom dock */
+.dock-collapse {
+  height: 26px; padding: 0 8px; display: inline-flex; align-items: center; gap: 4px;
+  border: 1px solid var(--line); border-radius: 6px; background: rgba(16, 50, 62, .035);
+  color: var(--muted); font-size: 9.5px; font-weight: 600; white-space: nowrap;
+  transition: color .15s ease, border-color .15s ease;
+}
+.dock-collapse:hover { color: var(--cyan); border-color: rgba(13, 148, 136, .35); }
+.dock-collapse svg { width: 11px; height: 11px; transform: rotate(90deg); transition: transform .2s ease; }
+.app-shell.dock-collapsed .bottom-dock { flex: 0 0 52px; min-height: 52px; }
+.app-shell.dock-collapsed .dock-content { display: none; }
+.app-shell.dock-collapsed .dock-collapse svg { transform: rotate(-90deg); }
 
 </style>
 </head>
@@ -2127,6 +2152,9 @@ svg { display: block; }
       </nav>
       <div class="dock-head-right" id="dockHeadRight">
         <span class="dock-state" id="dockState"><span class="status-dot"></span>待解析</span>
+        <button class="dock-collapse" id="dockCollapseBtn" aria-expanded="true" aria-controls="dockContent" title="收起依赖面板">
+          <svg><use href="#i-chevron"/></svg><span>收起</span>
+        </button>
       </div>
     </div>
     <div class="dock-content" id="dockContent"></div>
@@ -2344,6 +2372,7 @@ const state = {
   buildTimer: null,
   builtAt: null,
   activeTab: 'overview',
+  dockCollapsed: false,
   contractMicroId: null,
   expandedMicroapps: new Set(['monitor']),
   focusConflict: false,
@@ -2911,14 +2940,27 @@ function resetDemo() {
 function setTab(tab) {
   state.activeTab = tab;
   state.focusConflict = false;
+  if (state.dockCollapsed) setDockCollapsed(false);
   renderTabs();
   renderDock();
+}
+
+function setDockCollapsed(collapsed) {
+  state.dockCollapsed = collapsed;
+  document.querySelector('.app-shell').classList.toggle('dock-collapsed', collapsed);
+  const btn = document.getElementById('dockCollapseBtn');
+  if (!btn) return;
+  btn.setAttribute('aria-expanded', String(!collapsed));
+  btn.title = collapsed ? '展开依赖面板' : '收起依赖面板';
+  const label = btn.querySelector('span');
+  if (label) label.textContent = collapsed ? '展开' : '收起';
 }
 
 function openContract(microId) {
   state.contractMicroId = microId || null;
   state.activeTab = 'contract';
   state.focusConflict = false;
+  if (state.dockCollapsed) setDockCollapsed(false);
   renderTabs();
   renderDock();
 }
@@ -3224,6 +3266,7 @@ function renderWizardFocus(app) {
       <span class="tnm">${escapeHtml(comp.name)}</span>
       <span class="tv">${escapeHtml(ref.version)}</span>
       ${isConflict ? icon('warn', 9) : ''}
+      <span class="tgo">${icon('chevron', 8)}</span>
     </button>`;
   }).join('');
   const options = Object.entries(COMPONENTS)
@@ -4750,6 +4793,8 @@ function bindEvents() {
     const tab = event.target.closest('.dock-tab');
     if (tab) setTab(tab.dataset.tab);
   });
+  const dockCollapseBtn = document.getElementById('dockCollapseBtn');
+  if (dockCollapseBtn) dockCollapseBtn.addEventListener('click', () => setDockCollapsed(!state.dockCollapsed));
 
   const overlay = document.getElementById('drawerOverlay');
   overlay.addEventListener('click', (event) => {
