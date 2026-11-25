@@ -1,0 +1,3508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>工厂 EMS · 可视化组装与依赖解析</title>
+<style>
+:root {
+  --bg: #071116;
+  --bg-2: #0a171e;
+  --panel: #0c1a22;
+  --panel-2: #0f202a;
+  --panel-3: #122631;
+  --line: rgba(153, 195, 207, .13);
+  --line-strong: rgba(153, 195, 207, .24);
+  --text: #edf6f8;
+  --muted: #8ca6af;
+  --muted-2: #617b85;
+  --cyan: #55e0d6;
+  --cyan-soft: rgba(85, 224, 214, .12);
+  --blue: #6d96ff;
+  --lime: #b9ef7d;
+  --amber: #f6bf5b;
+  --red: #ff6b7f;
+  --red-soft: rgba(255, 107, 127, .1);
+  --green: #53d99a;
+  --green-soft: rgba(83, 217, 154, .1);
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow: 0 18px 60px rgba(0, 0, 0, .24);
+  --mono: "SFMono-Regular", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+  --sans: "Inter", "SF Pro Display", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  background:
+    radial-gradient(900px 520px at 16% -18%, rgba(54, 144, 155, .16), transparent 62%),
+    radial-gradient(900px 560px at 92% 4%, rgba(89, 103, 255, .1), transparent 60%),
+    linear-gradient(180deg, #071116 0%, #071218 55%, #08141a 100%);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:focus-visible, [tabindex]:focus-visible, input:focus-visible {
+  outline: 2px solid rgba(85, 224, 214, .72);
+  outline-offset: 2px;
+}
+svg { display: block; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(140, 166, 175, .22); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(140, 166, 175, .36); }
+
+.app-shell {
+  position: relative;
+  height: 100vh;
+  min-height: 720px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.app-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .35;
+  background-image:
+    linear-gradient(rgba(160, 210, 220, .028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(160, 210, 220, .028) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: linear-gradient(to bottom, black, transparent 84%);
+}
+.app-shell::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent 0, transparent calc(100% - 1px), rgba(85, 224, 214, .04) 100%);
+}
+
+.topbar {
+  position: relative;
+  z-index: 5;
+  flex: 0 0 auto;
+  height: 68px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(7, 17, 22, .76);
+  backdrop-filter: blur(18px);
+}
+.brand { display: flex; align-items: center; gap: 12px; min-width: 300px; }
+.brand-mark {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  color: #071116;
+  background: linear-gradient(145deg, var(--cyan), #a8fff6 58%, #79b7ff);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .16) inset, 0 8px 24px rgba(85, 224, 214, .2);
+}
+.brand-title { font-size: 15px; font-weight: 720; letter-spacing: -.02em; white-space: nowrap; }
+.brand-title span { color: var(--muted-2); font-weight: 500; padding: 0 3px; }
+.brand-sub { color: var(--muted); font-size: 12px; font-weight: 500; }
+.brand-crumb { margin-top: 3px; color: var(--muted-2); font-size: 10px; letter-spacing: .06em; }
+.assembly-pipeline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 300px;
+}
+.pipeline-step {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+.pipeline-step i {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: rgba(255, 255, 255, .02);
+  color: var(--muted-2);
+  font-style: normal;
+  font-size: 9px;
+  font-family: var(--mono);
+}
+.pipeline-step.active { color: var(--text); }
+.pipeline-step.active i { border-color: rgba(85, 224, 214, .45); color: var(--cyan); background: var(--cyan-soft); }
+.pipeline-arrow { width: 24px; height: 1px; background: linear-gradient(90deg, var(--line-strong), transparent); position: relative; }
+.pipeline-arrow::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: -2px;
+  border-left: 4px solid var(--line-strong);
+  border-top: 2.5px solid transparent;
+  border-bottom: 2.5px solid transparent;
+}
+.top-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex: 0 0 auto; }
+.btn {
+  height: 34px;
+  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease, opacity .18s ease;
+  white-space: nowrap;
+}
+.btn svg { width: 14px; height: 14px; }
+.btn:hover:not(:disabled) { transform: translateY(-1px); }
+.btn:active:not(:disabled) { transform: translateY(0); }
+.btn-secondary {
+  border-color: var(--line-strong);
+  background: rgba(255, 255, 255, .025);
+  color: #cddde1;
+}
+.btn-secondary:hover:not(:disabled) { border-color: rgba(85, 224, 214, .4); background: rgba(85, 224, 214, .06); }
+.btn-primary {
+  color: #061315;
+  background: linear-gradient(135deg, #8ef4e9, #55e0d6 56%, #78b8ff);
+  box-shadow: 0 6px 20px rgba(85, 224, 214, .16), 0 0 0 1px rgba(255, 255, 255, .12) inset;
+}
+.btn-primary:hover:not(:disabled) { filter: brightness(1.06); box-shadow: 0 9px 26px rgba(85, 224, 214, .23); }
+.btn:disabled { opacity: .36; cursor: not-allowed; filter: saturate(.55); }
+.btn.is-busy svg { animation: spin 1s linear infinite; }
+.btn-icon {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, .02);
+  color: var(--muted);
+}
+.btn-icon:hover { color: var(--text); border-color: var(--line-strong); }
+
+.status-rail {
+  position: relative;
+  z-index: 4;
+  flex: 0 0 auto;
+  height: 44px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  border-bottom: 1px solid rgba(153, 195, 207, .08);
+  background: rgba(9, 24, 31, .58);
+  backdrop-filter: blur(14px);
+}
+.app-context { display: flex; align-items: center; gap: 9px; min-width: 320px; }
+.app-context .eyebrow { color: var(--muted-2); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }
+.app-context strong { font-size: 11.5px; font-weight: 650; white-space: nowrap; }
+.lifecycle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 99px;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, .02);
+  white-space: nowrap;
+}
+.lifecycle .status-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--muted-2); }
+.lifecycle.state-ready, .lifecycle.state-resolved, .lifecycle.state-locked, .lifecycle.state-built { color: var(--green); border-color: rgba(83, 217, 154, .26); background: rgba(83, 217, 154, .07); }
+.lifecycle.state-ready .status-dot, .lifecycle.state-resolved .status-dot, .lifecycle.state-locked .status-dot, .lifecycle.state-built .status-dot { background: var(--green); box-shadow: 0 0 8px rgba(83, 217, 154, .65); }
+.lifecycle.state-conflict { color: var(--red); border-color: rgba(255, 107, 127, .28); background: var(--red-soft); }
+.lifecycle.state-conflict .status-dot { background: var(--red); box-shadow: 0 0 8px rgba(255, 107, 127, .65); }
+.lifecycle.state-busy { color: var(--cyan); border-color: rgba(85, 224, 214, .3); background: var(--cyan-soft); }
+.lifecycle.state-busy .status-dot { background: var(--cyan); animation: pulse 1s infinite; }
+.lifecycle.state-warn { color: var(--amber); border-color: rgba(246, 191, 91, .28); background: rgba(246, 191, 91, .07); }
+.lifecycle.state-warn .status-dot { background: var(--amber); }
+.rail-divider { width: 1px; height: 19px; background: var(--line); flex: 0 0 auto; }
+.gate-strip { display: flex; align-items: center; gap: 6px; flex: 1; overflow: hidden; }
+.gate-chip {
+  height: 24px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted-2);
+  font-size: 9.5px;
+  white-space: nowrap;
+  transition: .18s ease;
+}
+.gate-chip:hover { border-color: var(--line-strong); color: var(--muted); background: rgba(255, 255, 255, .02); }
+.gate-chip .gate-index { font-family: var(--mono); font-size: 8px; opacity: .7; }
+.gate-chip .gate-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--muted-2); }
+.gate-chip.done { color: var(--green); border-color: rgba(83, 217, 154, .18); background: rgba(83, 217, 154, .045); }
+.gate-chip.done .gate-dot { background: var(--green); }
+.gate-chip.attention { color: var(--red); border-color: rgba(255, 107, 127, .2); background: rgba(255, 107, 127, .055); }
+.gate-chip.attention .gate-dot { background: var(--red); animation: pulse 1.3s infinite; }
+.gate-chip.warn { color: var(--amber); border-color: rgba(246, 191, 91, .2); background: rgba(246, 191, 91, .05); }
+.gate-chip.warn .gate-dot { background: var(--amber); }
+.rail-readiness {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted-2);
+  font-size: 9.5px;
+  white-space: nowrap;
+}
+.rail-readiness .readiness-value { color: var(--muted); font-weight: 600; }
+.rail-readiness.is-ready .readiness-value { color: var(--green); }
+.rail-readiness.is-blocked .readiness-value { color: var(--amber); }
+.key-hint { color: var(--muted-2); font-size: 9px; letter-spacing: .02em; }
+
+.workspace {
+  position: relative;
+  z-index: 2;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 12px 14px 10px;
+  display: grid;
+  grid-template-columns: minmax(244px, .78fr) minmax(520px, 1.62fr) minmax(286px, .9fr);
+  gap: 10px;
+  overflow: hidden;
+}
+.panel {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .018), transparent 26%),
+    rgba(10, 24, 31, .82);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, .16);
+  overflow: hidden;
+}
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: radial-gradient(rgba(170, 215, 224, .045) .7px, transparent .7px);
+  background-size: 18px 18px;
+  opacity: .45;
+  mask-image: linear-gradient(to bottom, black, transparent 70%);
+}
+.panel-head {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+  padding: 13px 14px 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border-bottom: 1px solid rgba(153, 195, 207, .08);
+}
+.panel-step {
+  width: 25px;
+  height: 25px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: var(--cyan);
+  border: 1px solid rgba(85, 224, 214, .26);
+  background: rgba(85, 224, 214, .07);
+  font: 10px var(--mono);
+  letter-spacing: .02em;
+}
+.panel-heading { min-width: 0; flex: 1; }
+.panel-title { display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 680; letter-spacing: .01em; }
+.panel-title .count-badge {
+  height: 18px;
+  min-width: 18px;
+  padding: 0 5px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 5px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, .045);
+  border: 1px solid var(--line);
+  font: 9px var(--mono);
+}
+.panel-desc { margin-top: 3px; color: var(--muted-2); font-size: 9.8px; line-height: 1.4; }
+.panel-tools { display: flex; align-items: center; gap: 5px; }
+.panel-body { position: relative; z-index: 1; flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+.panel-foot {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+  min-height: 31px;
+  padding: 7px 12px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-top: 1px solid rgba(153, 195, 207, .08);
+  color: var(--muted-2);
+  font-size: 9.3px;
+  line-height: 1.3;
+  background: rgba(3, 11, 15, .28);
+}
+.panel-foot svg { width: 12px; height: 12px; flex: 0 0 auto; }
+.panel-foot .selection-note { color: var(--cyan); }
+
+/* Library */
+.library-tools { position: relative; z-index: 2; flex: 0 0 auto; padding: 9px 11px 8px; display: flex; flex-direction: column; gap: 7px; }
+.search-box {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(3, 11, 15, .35);
+  transition: border-color .18s ease, background .18s ease;
+}
+.search-box:focus-within { border-color: rgba(85, 224, 214, .38); background: rgba(85, 224, 214, .025); }
+.search-box svg { width: 13px; height: 13px; color: var(--muted-2); }
+.search-box input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--text); font-size: 10.5px; }
+.search-box input::placeholder { color: var(--muted-2); }
+.search-clear { border: 0; background: transparent; color: var(--muted-2); padding: 0; display: none; }
+.search-box.has-value .search-clear { display: grid; place-items: center; }
+.category-row { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 1px; scrollbar-width: none; }
+.category-row::-webkit-scrollbar { display: none; }
+.category-chip {
+  flex: 0 0 auto;
+  height: 21px;
+  padding: 0 7px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted-2);
+  font-size: 9px;
+  transition: .16s ease;
+}
+.category-chip:hover { color: var(--muted); background: rgba(255, 255, 255, .025); }
+.category-chip.active { color: var(--cyan); border-color: rgba(85, 224, 214, .22); background: rgba(85, 224, 214, .065); }
+.component-list { flex: 1; min-height: 0; overflow-y: auto; padding: 2px 8px 9px; display: flex; flex-direction: column; gap: 6px; }
+.component-card {
+  position: relative;
+  flex: 0 0 auto;
+  padding: 9px 9px 8px;
+  border: 1px solid rgba(153, 195, 207, .11);
+  border-radius: 9px;
+  background: linear-gradient(150deg, rgba(255, 255, 255, .026), rgba(255, 255, 255, .006));
+  cursor: grab;
+  transition: border-color .18s ease, background .18s ease, transform .18s ease, box-shadow .18s ease;
+  user-select: none;
+}
+.component-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(153, 195, 207, .24);
+  background: linear-gradient(150deg, rgba(255, 255, 255, .045), rgba(255, 255, 255, .01));
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .16);
+}
+.component-card:active { cursor: grabbing; }
+.component-card.selected {
+  border-color: rgba(85, 224, 214, .52);
+  background: linear-gradient(150deg, rgba(85, 224, 214, .095), rgba(85, 224, 214, .018));
+  box-shadow: 0 0 0 1px rgba(85, 224, 214, .1) inset, 0 8px 28px rgba(85, 224, 214, .07);
+}
+.component-card.selected::after {
+  content: "已选中";
+  position: absolute;
+  top: 7px;
+  right: 30px;
+  height: 15px;
+  padding: 0 5px;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  color: #071116;
+  background: var(--cyan);
+  font-size: 8px;
+  font-weight: 700;
+}
+.component-card.is-dragging { opacity: .45; transform: scale(.99); }
+.comp-top { display: flex; align-items: flex-start; gap: 7px; padding-right: 15px; }
+.drag-grip { color: var(--muted-2); opacity: .55; width: 8px; flex: 0 0 auto; margin-top: 3px; display: flex; flex-direction: column; gap: 2px; }
+.drag-grip i { width: 2px; height: 2px; border-radius: 50%; background: currentColor; box-shadow: 3px 0 currentColor; }
+.comp-icon {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  border: 1px solid color-mix(in srgb, var(--accent, #55e0d6) 26%, transparent);
+  background: color-mix(in srgb, var(--accent, #55e0d6) 9%, transparent);
+  color: var(--accent, #55e0d6);
+}
+.comp-icon svg { width: 14px; height: 14px; }
+.comp-main { min-width: 0; flex: 1; }
+.comp-name-row { display: flex; align-items: center; gap: 5px; min-width: 0; flex-wrap: wrap; }
+.comp-name { color: #dcedf0; font-size: 10.8px; font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.version-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 15px;
+  padding: 0 4px;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, .03);
+  color: var(--muted);
+  font: 8.5px var(--mono);
+  white-space: nowrap;
+}
+.platform-pill {
+  height: 15px;
+  padding: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  border-radius: 4px;
+  border: 1px solid rgba(109, 150, 255, .28);
+  background: rgba(109, 150, 255, .08);
+  color: #9db6ff;
+  font-size: 7.5px;
+  white-space: nowrap;
+}
+.platform-pill svg { width: 8px; height: 8px; }
+.comp-detail-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 18px;
+  height: 18px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted-2);
+  display: grid;
+  place-items: center;
+  opacity: .3;
+  transition: .16s ease;
+}
+.component-card:hover .comp-detail-btn, .comp-detail-btn:focus-visible { opacity: 1; }
+.comp-detail-btn:hover { color: var(--cyan); border-color: rgba(85, 224, 214, .22); background: rgba(85, 224, 214, .08); }
+.comp-detail-btn svg { width: 11px; height: 11px; }
+.comp-desc {
+  margin: 5px 0 6px;
+  color: var(--muted-2);
+  font-size: 9.1px;
+  line-height: 1.42;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.comp-dep-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.dep-count { color: var(--muted-2); font-size: 8.3px; white-space: nowrap; }
+.dep-tags { display: flex; align-items: center; gap: 3px; flex-wrap: wrap; }
+.dep-tag { height: 14px; padding: 0 4px; display: inline-flex; align-items: center; border-radius: 3px; color: #8fa9b2; background: rgba(255, 255, 255, .035); font-size: 7.8px; white-space: nowrap; }
+.dep-tag.more { color: var(--muted-2); }
+.empty-filter { padding: 30px 12px; text-align: center; color: var(--muted-2); font-size: 10px; line-height: 1.7; }
+
+/* Micro app assembly */
+.canvas-panel { background: rgba(9, 22, 29, .76); }
+.canvas-head-extra { display: flex; align-items: center; gap: 5px; color: var(--muted-2); font-size: 9px; }
+.canvas-head-extra .pulse-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 0 4px rgba(85, 224, 214, .07); animation: pulse 2s infinite; }
+.micro-grid {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 9px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 8px;
+}
+.micro-card {
+  position: relative;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(153, 195, 207, .12);
+  border-radius: 10px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, .035), rgba(255, 255, 255, .007)),
+    rgba(8, 21, 28, .7);
+  transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+.micro-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(85, 224, 214, .55), transparent 34%) top left / 100% 1px no-repeat;
+  opacity: .3;
+}
+.micro-card:hover { border-color: rgba(153, 195, 207, .22); background: rgba(13, 30, 38, .88); }
+.micro-card.drop-active {
+  border-color: rgba(85, 224, 214, .66);
+  background: rgba(85, 224, 214, .075);
+  box-shadow: 0 0 0 1px rgba(85, 224, 214, .14) inset, 0 0 28px rgba(85, 224, 214, .08);
+}
+.micro-card.has-conflict { border-color: rgba(255, 107, 127, .24); }
+.micro-card.has-conflict::before { background: linear-gradient(90deg, rgba(255, 107, 127, .75), transparent 42%) top left / 100% 1px no-repeat; opacity: .8; }
+.micro-card.locate-pulse { animation: locatePulse 1.8s ease; }
+.micro-card.is-new-target { animation: cardFlash 1.2s ease; }
+.micro-head { display: flex; align-items: flex-start; gap: 8px; cursor: pointer; }
+.micro-icon {
+  width: 29px;
+  height: 29px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--accent, #55e0d6) 24%, transparent);
+  background: color-mix(in srgb, var(--accent, #55e0d6) 8%, transparent);
+  color: var(--accent, #55e0d6);
+}
+.micro-icon svg { width: 15px; height: 15px; }
+.micro-title-wrap { min-width: 0; flex: 1; }
+.micro-title-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.micro-title { font-size: 11.4px; font-weight: 680; color: #e5f2f4; white-space: nowrap; }
+.micro-version { font: 8.3px var(--mono); color: var(--muted-2); }
+.micro-desc {
+  margin-top: 3px;
+  color: var(--muted-2);
+  font-size: 8.5px;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.micro-head-right { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
+.micro-count {
+  height: 16px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, .03);
+  color: var(--muted-2);
+  font: 8px var(--mono);
+  white-space: nowrap;
+}
+.micro-expand-btn { width: 19px; height: 19px; border: 0; border-radius: 4px; background: transparent; color: var(--muted-2); display: grid; place-items: center; }
+.micro-expand-btn:hover { background: rgba(255, 255, 255, .04); color: var(--cyan); }
+.micro-expand-btn svg { width: 11px; height: 11px; }
+.micro-tree { margin-top: 7px; padding-left: 5px; display: flex; flex-direction: column; gap: 3px; }
+.tree-component {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  height: 24px;
+  padding: 0 6px 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid rgba(153, 195, 207, .075);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, .021);
+  color: var(--text);
+  text-align: left;
+  transition: .16s ease;
+}
+.tree-component::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: -2px;
+  bottom: 12px;
+  width: 1px;
+  background: rgba(153, 195, 207, .14);
+}
+.tree-component::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 12px;
+  width: 5px;
+  height: 1px;
+  background: rgba(153, 195, 207, .14);
+}
+.tree-component:last-of-type::before { bottom: 12px; }
+.tree-component:hover { border-color: rgba(153, 195, 207, .18); background: rgba(255, 255, 255, .045); }
+.tree-component .comp-dot { width: 5px; height: 5px; border-radius: 2px; background: var(--accent, var(--cyan)); flex: 0 0 auto; box-shadow: 0 0 7px color-mix(in srgb, var(--accent, #55e0d6) 48%, transparent); }
+.tree-component .tree-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 9.1px; font-weight: 520; }
+.tree-component .tree-version { font: 8px var(--mono); color: var(--muted-2); white-space: nowrap; }
+.tree-component.version-conflict { border-color: rgba(255, 107, 127, .28); background: rgba(255, 107, 127, .065); color: #ffd8de; }
+.tree-component.version-conflict .tree-version { color: var(--red); }
+.tree-component.version-conflict::before, .tree-component.version-conflict::after { background: rgba(255, 107, 127, .3); }
+.tree-component .conflict-mark { width: 11px; height: 11px; color: var(--red); flex: 0 0 auto; }
+.tree-component.added-flash { animation: rowFlash 1.1s ease; }
+.add-zone {
+  width: 100%;
+  height: 25px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px dashed rgba(153, 195, 207, .18);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted-2);
+  font-size: 8.6px;
+  transition: .16s ease;
+}
+.add-zone:hover, .micro-card.drop-active .add-zone {
+  border-color: rgba(85, 224, 214, .42);
+  background: rgba(85, 224, 214, .055);
+  color: var(--cyan);
+}
+.add-zone.has-selection { border-color: rgba(85, 224, 214, .3); color: #a3f5ed; background: rgba(85, 224, 214, .035); }
+.add-zone svg { width: 11px; height: 11px; }
+.micro-mini-state { display: flex; align-items: center; gap: 4px; color: var(--muted-2); font-size: 8px; margin-top: 5px; }
+.micro-mini-state svg { width: 10px; height: 10px; }
+.micro-mini-state .warn-text { color: var(--red); }
+.micro-mini-state .ok-text { color: var(--green); }
+
+/* Application structure */
+.app-panel { background: rgba(9, 22, 29, .8); }
+.app-hero {
+  position: relative;
+  z-index: 1;
+  margin: 9px 9px 0;
+  padding: 11px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(109, 150, 255, .18);
+  border-radius: 10px;
+  background:
+    radial-gradient(220px 90px at 100% 0%, rgba(109, 150, 255, .13), transparent 70%),
+    linear-gradient(145deg, rgba(109, 150, 255, .075), rgba(255, 255, 255, .012));
+  overflow: hidden;
+}
+.app-hero::after {
+  content: "";
+  position: absolute;
+  right: -16px;
+  top: -18px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 1px solid rgba(109, 150, 255, .15);
+  box-shadow: 0 0 0 14px rgba(109, 150, 255, .025), 0 0 0 28px rgba(109, 150, 255, .018);
+  pointer-events: none;
+}
+.app-hero-top { display: flex; align-items: flex-start; gap: 9px; position: relative; z-index: 1; }
+.app-icon {
+  width: 33px;
+  height: 33px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 9px;
+  color: #cdd9ff;
+  border: 1px solid rgba(109, 150, 255, .32);
+  background: rgba(109, 150, 255, .13);
+  box-shadow: 0 0 22px rgba(109, 150, 255, .09);
+}
+.app-icon svg { width: 17px; height: 17px; }
+.app-hero-name { font-size: 12.5px; font-weight: 680; letter-spacing: -.01em; }
+.app-hero-meta { display: flex; align-items: center; gap: 5px; margin-top: 3px; }
+.app-hero-desc { margin-top: 7px; color: var(--muted-2); font-size: 9px; line-height: 1.4; position: relative; z-index: 1; }
+.app-metrics { margin-top: 9px; display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid rgba(153, 195, 207, .09); border-radius: 6px; overflow: hidden; position: relative; z-index: 1; }
+.app-metric { padding: 5px 6px; border-right: 1px solid rgba(153, 195, 207, .08); }
+.app-metric:last-child { border-right: 0; }
+.app-metric strong { display: block; color: #dae9ec; font: 11px var(--mono); }
+.app-metric span { display: block; margin-top: 1px; color: var(--muted-2); font-size: 7.5px; white-space: nowrap; }
+.app-metric.alert strong { color: var(--red); }
+.app-metric.ok strong { color: var(--green); }
+.app-structure-wrap { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 9px 9px; }
+.app-section-label { display: flex; align-items: center; gap: 6px; padding: 1px 2px 6px; color: var(--muted-2); font-size: 8px; letter-spacing: .1em; text-transform: uppercase; }
+.app-section-label .line { flex: 1; height: 1px; background: var(--line); }
+.app-micro { border-bottom: 1px solid rgba(153, 195, 207, .065); }
+.app-micro:last-child { border-bottom: 0; }
+.app-micro-head {
+  width: 100%;
+  min-width: 0;
+  height: 33px;
+  padding: 0 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  border-radius: 5px;
+  transition: .16s ease;
+}
+.app-micro-head:hover { background: rgba(255, 255, 255, .025); }
+.app-micro-head .branch {
+  width: 11px;
+  height: 11px;
+  flex: 0 0 auto;
+  border-left: 1px solid rgba(153, 195, 207, .22);
+  border-bottom: 1px solid rgba(153, 195, 207, .22);
+  margin-left: 3px;
+  margin-bottom: 7px;
+}
+.app-micro-head .node-dot { width: 6px; height: 6px; border-radius: 2px; background: var(--cyan); flex: 0 0 auto; }
+.app-micro-name { flex: 1; min-width: 0; font-size: 9.8px; color: #cfdee2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.app-micro-ver { font: 8px var(--mono); color: var(--muted-2); }
+.app-micro-count { height: 15px; min-width: 15px; padding: 0 4px; display: grid; place-items: center; border-radius: 4px; background: rgba(255, 255, 255, .04); color: var(--muted-2); font: 7.5px var(--mono); }
+.app-micro-chevron { width: 10px; height: 10px; color: var(--muted-2); transition: transform .2s ease; }
+.app-micro.expanded .app-micro-chevron { transform: rotate(90deg); color: var(--cyan); }
+.app-micro.conflict-focus .app-micro-head { background: rgba(255, 107, 127, .08); box-shadow: 0 0 0 1px rgba(255, 107, 127, .15) inset; }
+.app-micro.conflict-focus .app-micro-name { color: #ffd4da; }
+.app-children { position: relative; margin-left: 16px; padding-left: 11px; padding-bottom: 5px; display: none; }
+.app-micro.expanded .app-children { display: block; }
+.app-children::before { content: ""; position: absolute; left: 0; top: 0; bottom: 11px; width: 1px; background: rgba(153, 195, 207, .13); }
+.app-child {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  padding: 0 3px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  border-radius: 5px;
+  transition: .15s ease;
+}
+.app-child::before { content: ""; position: absolute; left: -11px; top: 12px; width: 7px; height: 1px; background: rgba(153, 195, 207, .13); }
+.app-child:hover { background: rgba(255, 255, 255, .025); }
+.app-child-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent, var(--cyan)); flex: 0 0 auto; }
+.app-child-name { flex: 1; min-width: 0; font-size: 8.8px; color: #aebfc4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.app-child-version { font: 7.5px var(--mono); color: var(--muted-2); }
+.app-child.conflict .app-child-name, .app-child.conflict .app-child-version { color: var(--red); }
+.app-child.conflict .app-child-dot { background: var(--red); }
+.app-platform-row { padding: 6px 3px 5px 16px; color: var(--muted-2); font-size: 7.5px; display: flex; align-items: center; gap: 4px; }
+.app-platform-row svg { width: 8px; height: 8px; color: var(--blue); }
+.app-note {
+  flex: 0 0 auto;
+  margin: 0 9px 8px;
+  padding: 7px 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  border: 1px solid rgba(109, 150, 255, .12);
+  border-radius: 7px;
+  background: rgba(109, 150, 255, .035);
+  color: #829bb6;
+  font-size: 8px;
+  line-height: 1.4;
+}
+.app-note svg { width: 10px; height: 10px; flex: 0 0 auto; margin-top: 1px; color: var(--blue); }
+.app-drop-deny { animation: denyShake .5s ease, denyFlash 1s ease; }
+
+
+/* Bottom dock */
+.bottom-dock {
+  position: relative;
+  z-index: 3;
+  flex: 0 0 312px;
+  min-height: 238px;
+  margin: 0 14px 12px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .018), transparent 18%),
+    rgba(9, 22, 29, .91);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, .2);
+  overflow: hidden;
+}
+.bottom-dock::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(85, 224, 214, .4), transparent);
+  opacity: .4;
+}
+.dock-head {
+  flex: 0 0 auto;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(4, 13, 18, .3);
+}
+.dock-brand { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
+.dock-brand .dock-signal { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 0 4px rgba(85, 224, 214, .06); }
+.dock-tabs { display: flex; align-items: center; gap: 1px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.dock-tabs::-webkit-scrollbar { display: none; }
+.dock-tab {
+  position: relative;
+  height: 40px;
+  padding: 0 11px;
+  border: 0;
+  background: transparent;
+  color: var(--muted-2);
+  font-size: 9.8px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: .16s ease;
+}
+.dock-tab::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: 0; height: 2px; background: transparent; border-radius: 2px 2px 0 0; }
+.dock-tab:hover { color: var(--muted); background: rgba(255, 255, 255, .018); }
+.dock-tab.active { color: #e4f7f6; background: rgba(85, 224, 214, .035); }
+.dock-tab.active::after { background: var(--cyan); box-shadow: 0 0 10px rgba(85, 224, 214, .35); }
+.tab-badge { min-width: 14px; height: 14px; padding: 0 4px; display: inline-grid; place-items: center; border-radius: 4px; background: rgba(255, 255, 255, .055); color: var(--muted); font: 7.5px var(--mono); }
+.tab-badge.alert { color: var(--red); background: rgba(255, 107, 127, .12); }
+.tab-badge.ok { color: var(--green); background: rgba(83, 217, 154, .1); }
+.tab-badge.lock { color: var(--blue); background: rgba(109, 150, 255, .11); }
+.dock-head-right { display: flex; align-items: center; gap: 7px; flex: 0 0 auto; color: var(--muted-2); font-size: 8.5px; white-space: nowrap; }
+.dock-head-right .dock-state { height: 20px; padding: 0 7px; display: inline-flex; align-items: center; gap: 5px; border-radius: 5px; border: 1px solid var(--line); background: rgba(255, 255, 255, .02); color: var(--muted); }
+.dock-head-right .dock-state .status-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--muted-2); }
+.dock-head-right .dock-state.ok { color: var(--green); border-color: rgba(83, 217, 154, .18); background: rgba(83, 217, 154, .04); }
+.dock-head-right .dock-state.ok .status-dot { background: var(--green); }
+.dock-head-right .dock-state.warn { color: var(--amber); border-color: rgba(246, 191, 91, .18); background: rgba(246, 191, 91, .04); }
+.dock-head-right .dock-state.warn .status-dot { background: var(--amber); }
+.dock-head-right .dock-state.alert { color: var(--red); border-color: rgba(255, 107, 127, .2); background: rgba(255, 107, 127, .05); }
+.dock-head-right .dock-state.alert .status-dot { background: var(--red); animation: pulse 1.3s infinite; }
+.dock-content { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+.tab-pane { height: 100%; overflow: auto; padding: 10px 12px; animation: fadeIn .24s ease; }
+.dock-empty {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+.dock-empty-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: linear-gradient(130deg, rgba(255, 255, 255, .022), rgba(255, 255, 255, .005));
+}
+.empty-orb {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--cyan);
+  border: 1px solid rgba(85, 224, 214, .2);
+  background: radial-gradient(circle at 38% 32%, rgba(85, 224, 214, .14), rgba(85, 224, 214, .015));
+  box-shadow: 0 0 0 8px rgba(85, 224, 214, .018);
+}
+.empty-orb svg { width: 21px; height: 21px; }
+.empty-copy { flex: 1; min-width: 0; }
+.empty-copy .eyebrow { color: var(--cyan); font: 8px var(--mono); letter-spacing: .13em; }
+.empty-copy h3 { margin: 4px 0 5px; font-size: 14px; letter-spacing: -.01em; }
+.empty-copy p { margin: 0; color: var(--muted-2); font-size: 9.5px; line-height: 1.55; max-width: 500px; }
+.empty-actions { display: flex; align-items: center; gap: 7px; margin-top: 9px; }
+.ghost-btn {
+  height: 28px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 9.5px;
+  transition: .16s ease;
+}
+.ghost-btn:hover { color: var(--text); border-color: var(--line-strong); background: rgba(255, 255, 255, .025); }
+.ghost-btn svg { width: 11px; height: 11px; }
+.empty-scope { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; padding: 8px 0; }
+.scope-card { padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255, 255, 255, .017); display: flex; align-items: center; gap: 9px; }
+.scope-card .scope-num { font: 18px var(--mono); color: #d8ecee; min-width: 28px; }
+.scope-card .scope-label { color: var(--muted-2); font-size: 8.5px; line-height: 1.4; }
+.scope-card .scope-label b { display: block; color: var(--muted); font-size: 9.3px; font-weight: 500; }
+.scope-card.alert .scope-num { color: var(--red); }
+.dock-preview {
+  position: relative;
+  border: 1px solid rgba(85, 224, 214, .11);
+  border-radius: 10px;
+  overflow: hidden;
+  min-height: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(85, 224, 214, .055), transparent 60%), rgba(4, 13, 18, .55);
+}
+.preview-grid {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(85, 224, 214, .035) 1px, transparent 1px), linear-gradient(90deg, rgba(85, 224, 214, .035) 1px, transparent 1px);
+  background-size: 20px 20px;
+  mask-image: radial-gradient(circle at 50% 50%, black, transparent 75%);
+}
+.preview-flow {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+}
+.preview-node { width: 72px; height: 38px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 7px; background: rgba(7, 18, 24, .82); color: var(--muted); font-size: 8px; text-align: center; }
+.preview-node.active { color: var(--cyan); border-color: rgba(85, 224, 214, .28); background: rgba(85, 224, 214, .06); }
+.preview-link { width: 28px; height: 1px; background: linear-gradient(90deg, rgba(85, 224, 214, .25), transparent); position: relative; }
+.preview-link::after { content: ""; position: absolute; right: 0; top: -2px; border-left: 4px solid rgba(85, 224, 214, .35); border-top: 2.5px solid transparent; border-bottom: 2.5px solid transparent; }
+.preview-watermark { position: absolute; left: 10px; bottom: 8px; color: var(--muted-2); font: 7.5px var(--mono); letter-spacing: .08em; }
+.dock-empty .dock-preview { display: flex; align-items: center; justify-content: center; }
+.dock-empty .preview-flow { position: relative; inset: auto; }
+
+/* Overview resolved */
+.overview-grid { height: 100%; display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 9px; }
+.resolution-card {
+  min-width: 0;
+  padding: 11px 12px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 107, 127, .2);
+  border-radius: 9px;
+  background: linear-gradient(140deg, rgba(255, 107, 127, .065), rgba(255, 255, 255, .008));
+}
+.resolution-card.clean { border-color: rgba(83, 217, 154, .2); background: linear-gradient(140deg, rgba(83, 217, 154, .06), rgba(255, 255, 255, .008)); }
+.resolution-card.locked { border-color: rgba(109, 150, 255, .2); background: linear-gradient(140deg, rgba(109, 150, 255, .06), rgba(255, 255, 255, .008)); }
+.res-head { display: flex; align-items: flex-start; gap: 9px; }
+.res-orb { width: 30px; height: 30px; flex: 0 0 auto; border-radius: 8px; display: grid; place-items: center; color: var(--red); border: 1px solid rgba(255, 107, 127, .26); background: rgba(255, 107, 127, .08); }
+.res-orb svg { width: 15px; height: 15px; }
+.resolution-card.clean .res-orb { color: var(--green); border-color: rgba(83, 217, 154, .24); background: rgba(83, 217, 154, .07); }
+.resolution-card.locked .res-orb { color: var(--blue); border-color: rgba(109, 150, 255, .25); background: rgba(109, 150, 255, .08); }
+.res-copy { flex: 1; min-width: 0; }
+.res-eyebrow { color: var(--red); font: 7.5px var(--mono); letter-spacing: .12em; }
+.resolution-card.clean .res-eyebrow { color: var(--green); }
+.resolution-card.locked .res-eyebrow { color: var(--blue); }
+.res-title { margin: 3px 0 3px; font-size: 12.5px; font-weight: 650; }
+.res-sub { color: var(--muted-2); font-size: 8.8px; line-height: 1.4; }
+.res-stats { margin-top: 9px; display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid rgba(153, 195, 207, .09); border-radius: 6px; overflow: hidden; }
+.res-stat { padding: 5px 6px; border-right: 1px solid rgba(153, 195, 207, .08); }
+.res-stat:last-child { border-right: 0; }
+.res-stat strong { display: block; font: 12px var(--mono); color: #d9ecee; }
+.res-stat span { display: block; margin-top: 1px; color: var(--muted-2); font-size: 7.3px; white-space: nowrap; }
+.res-stat.alert strong { color: var(--red); }
+.res-stat.ok strong { color: var(--green); }
+.res-footer { margin-top: auto; padding-top: 8px; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.res-footer .mini-note { color: var(--muted-2); font-size: 8px; display: flex; align-items: center; gap: 4px; }
+.res-footer .mini-note svg { width: 10px; height: 10px; color: var(--cyan); }
+.link-btn { border: 0; background: transparent; color: var(--cyan); font-size: 8.5px; padding: 0; display: inline-flex; align-items: center; gap: 4px; }
+.link-btn:hover { text-decoration: underline; text-underline-offset: 3px; }
+.link-btn svg { width: 10px; height: 10px; }
+
+/* Conflict panel */
+.conflict-panel {
+  min-width: 0;
+  padding: 10px 11px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 107, 127, .27);
+  border-radius: 9px;
+  background:
+    radial-gradient(400px 120px at 100% 0%, rgba(255, 107, 127, .075), transparent 65%),
+    rgba(255, 107, 127, .025);
+  overflow: auto;
+}
+.conflict-top { display: flex; align-items: flex-start; gap: 8px; }
+.conflict-badge { width: 24px; height: 24px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 6px; color: var(--red); border: 1px solid rgba(255, 107, 127, .26); background: rgba(255, 107, 127, .09); }
+.conflict-badge svg { width: 12px; height: 12px; }
+.conflict-copy { flex: 1; min-width: 0; }
+.conflict-copy .eyebrow { color: var(--red); font: 7.5px var(--mono); letter-spacing: .1em; }
+.conflict-copy h3 { margin: 3px 0 2px; font-size: 12px; font-weight: 650; }
+.conflict-copy p { margin: 0; color: var(--muted-2); font-size: 8.4px; line-height: 1.4; }
+.conflict-sources { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 8px; }
+.source-item {
+  min-width: 0;
+  padding: 6px 7px;
+  text-align: left;
+  border: 1px solid rgba(255, 107, 127, .17);
+  border-radius: 6px;
+  background: rgba(255, 107, 127, .045);
+  transition: .16s ease;
+}
+.source-item:hover { border-color: rgba(255, 107, 127, .36); background: rgba(255, 107, 127, .08); }
+.source-item.good { border-color: rgba(83, 217, 154, .15); background: rgba(83, 217, 154, .04); }
+.source-item.good:hover { border-color: rgba(83, 217, 154, .3); background: rgba(83, 217, 154, .07); }
+.source-micro { display: flex; align-items: center; gap: 4px; color: #c7d7db; font-size: 8.4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.source-micro .source-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--red); flex: 0 0 auto; }
+.source-item.good .source-dot { background: var(--green); }
+.source-version { margin-top: 3px; display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+.source-version span { font: 8px var(--mono); color: var(--red); }
+.source-item.good .source-version span { color: var(--green); }
+.source-version svg { width: 9px; height: 9px; color: var(--muted-2); }
+.conflict-resolve { margin-top: auto; padding-top: 8px; display: flex; align-items: flex-end; gap: 8px; }
+.version-options { flex: 1; min-width: 0; display: flex; gap: 4px; flex-wrap: wrap; }
+.version-option { position: relative; display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 7px; border: 1px solid var(--line); border-radius: 5px; background: rgba(255, 255, 255, .02); color: var(--muted); font: 8.5px var(--mono); cursor: pointer; transition: .15s ease; }
+.version-option:hover { border-color: var(--line-strong); }
+.version-option input { position: absolute; opacity: 0; pointer-events: none; }
+.version-option.active { color: var(--cyan); border-color: rgba(85, 224, 214, .4); background: rgba(85, 224, 214, .07); }
+.version-option .rec { color: var(--green); font: 7px var(--sans); }
+.version-option .downgrade { color: var(--amber); font: 7px var(--sans); }
+.resolve-btn { height: 27px; padding: 0 10px; border-radius: 6px; border: 1px solid rgba(255, 107, 127, .36); background: rgba(255, 107, 127, .1); color: #ffd5db; font-size: 8.8px; font-weight: 600; white-space: nowrap; transition: .16s ease; }
+.resolve-btn:hover { background: rgba(255, 107, 127, .18); border-color: rgba(255, 107, 127, .5); }
+.resolve-hint { margin-top: 4px; color: var(--muted-2); font-size: 7.5px; text-align: right; }
+.clean-action-row { margin-top: auto; padding-top: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.clean-dedupe { margin-top: 7px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+.dedupe-mini { padding: 5px 6px; border: 1px solid var(--line); border-radius: 5px; background: rgba(255, 255, 255, .018); }
+.dedupe-mini .dedupe-name { color: var(--muted); font-size: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dedupe-mini .dedupe-nums { margin-top: 3px; color: var(--muted-2); font: 8px var(--mono); }
+.dedupe-mini .dedupe-nums b { color: var(--green); font-weight: 500; }
+.btn-sm { height: 28px; padding: 0 10px; font-size: 9.3px; border-radius: 6px; }
+
+/* Resolving console */
+.resolve-console { height: 100%; display: grid; grid-template-columns: .8fr 1.2fr; gap: 10px; }
+.resolve-radar { position: relative; border: 1px solid rgba(85, 224, 214, .14); border-radius: 9px; overflow: hidden; background: radial-gradient(circle at 50% 50%, rgba(85, 224, 214, .09), transparent 60%), rgba(4, 13, 18, .55); display: grid; place-items: center; }
+.radar { width: 88px; height: 88px; border-radius: 50%; border: 1px solid rgba(85, 224, 214, .28); position: relative; box-shadow: 0 0 0 15px rgba(85, 224, 214, .025), 0 0 0 30px rgba(85, 224, 214, .015); }
+.radar::before { content: ""; position: absolute; inset: 50% 50% 0 0; background: conic-gradient(from 0deg, rgba(85, 224, 214, .35), transparent 70%); transform-origin: 100% 0; animation: radarSweep 1.4s linear infinite; border-radius: 100% 0 0 0; }
+.radar::after { content: ""; position: absolute; inset: 43%; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 18px var(--cyan); }
+.radar-cross { position: absolute; inset: 0; background: linear-gradient(transparent calc(50% - .5px), rgba(85, 224, 214, .12) 50%, transparent calc(50% + .5px)), linear-gradient(90deg, transparent calc(50% - .5px), rgba(85, 224, 214, .12) 50%, transparent calc(50% + .5px)); border-radius: 50%; }
+.radar-state { position: absolute; bottom: 9px; left: 0; right: 0; text-align: center; color: var(--cyan); font: 8px var(--mono); letter-spacing: .08em; }
+.scan-steps { padding: 6px 0; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
+.scan-step { height: 25px; padding: 0 9px; display: flex; align-items: center; gap: 8px; border: 1px solid transparent; border-radius: 5px; color: var(--muted-2); font-size: 9px; transition: .2s ease; }
+.scan-step.active { color: var(--cyan); border-color: rgba(85, 224, 214, .16); background: rgba(85, 224, 214, .045); }
+.scan-step.done { color: var(--green); }
+.scan-step .scan-index { width: 15px; height: 15px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--line); font: 7.5px var(--mono); }
+.scan-step.active .scan-index { border-color: rgba(85, 224, 214, .35); }
+.scan-step.done .scan-index { border-color: rgba(83, 217, 154, .25); background: rgba(83, 217, 154, .06); }
+.scan-step .scan-label { flex: 1; }
+.scan-step .scan-status { font: 7.5px var(--mono); }
+.scan-progress { margin-left: 23px; margin-right: 3px; height: 2px; border-radius: 2px; background: rgba(255, 255, 255, .05); overflow: hidden; }
+.scan-progress span { display: block; height: 100%; background: linear-gradient(90deg, var(--cyan), #a2fff6); border-radius: inherit; transition: width .25s ease; }
+
+/* Dependency graph */
+.graph-toolbar { height: 26px; display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.graph-legend { display: flex; align-items: center; gap: 12px; color: var(--muted-2); font-size: 8px; }
+.legend-item { display: flex; align-items: center; gap: 5px; }
+.legend-line { width: 17px; height: 1px; background: rgba(85, 224, 214, .4); }
+.legend-line.dashed { background: repeating-linear-gradient(90deg, rgba(140, 166, 175, .55) 0 3px, transparent 3px 5px); }
+.legend-line.conflict { background: var(--red); }
+.legend-dot { width: 6px; height: 6px; border-radius: 2px; background: var(--cyan); }
+.legend-dot.red { background: var(--red); }
+.graph-toolbar .spacer { flex: 1; }
+.graph-btn { height: 22px; padding: 0 7px; border: 1px solid var(--line); border-radius: 5px; background: rgba(255, 255, 255, .02); color: var(--muted-2); font-size: 8px; display: inline-flex; align-items: center; gap: 4px; }
+.graph-btn:hover { color: var(--text); border-color: var(--line-strong); }
+.graph-btn.active { color: var(--red); border-color: rgba(255, 107, 127, .26); background: rgba(255, 107, 127, .06); }
+.graph-btn svg { width: 9px; height: 9px; }
+.graph-viewport { position: relative; width: 100%; height: calc(100% - 31px); min-height: 170px; overflow: auto; border: 1px solid rgba(153, 195, 207, .08); border-radius: 8px; background: radial-gradient(circle at 50% 0%, rgba(85, 224, 214, .035), transparent 55%), rgba(3, 11, 15, .25); }
+.graph-svg { width: 100%; min-width: 990px; display: block; }
+.graph-svg text { font-family: var(--sans); }
+.graph-node { cursor: pointer; transition: opacity .18s ease; }
+.graph-node:hover .node-bg { filter: brightness(1.2); }
+.node-bg { transition: .18s ease; }
+.graph-node.dimmed { opacity: .18; }
+.graph-node.focus-conflict .node-bg { stroke: var(--red); stroke-width: 1.5; }
+.graph-edge { fill: none; transition: opacity .18s ease; }
+.graph-edge.dimmed { opacity: .07 !important; }
+.graph-edge.conflict-edge { stroke: var(--red) !important; opacity: .82 !important; stroke-dasharray: 4 4; }
+.graph-edge.shared-edge { opacity: .22; }
+.graph-empty-ghost { opacity: .3; }
+.graph-overlay-note { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; pointer-events: none; }
+.graph-overlay-note .ghost-card { padding: 14px 20px; border: 1px solid var(--line); border-radius: 9px; background: rgba(7, 18, 24, .78); backdrop-filter: blur(5px); }
+.graph-overlay-note h4 { margin: 0 0 5px; font-size: 11px; }
+.graph-overlay-note p { margin: 0; color: var(--muted-2); font-size: 8.5px; }
+
+/* Shared dependencies */
+.shared-layout { height: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(220px, .78fr); gap: 8px; }
+.shared-card { min-width: 0; padding: 9px 10px; border: 1px solid rgba(85, 224, 214, .14); border-radius: 8px; background: linear-gradient(145deg, rgba(85, 224, 214, .05), rgba(255, 255, 255, .008)); display: flex; flex-direction: column; transition: .16s ease; }
+.shared-card:hover { border-color: rgba(85, 224, 214, .28); background: linear-gradient(145deg, rgba(85, 224, 214, .075), rgba(255, 255, 255, .012)); }
+.shared-top { display: flex; align-items: flex-start; gap: 7px; }
+.shared-icon { width: 25px; height: 25px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 6px; color: var(--cyan); border: 1px solid rgba(85, 224, 214, .2); background: rgba(85, 224, 214, .06); }
+.shared-icon svg { width: 13px; height: 13px; }
+.shared-title { flex: 1; min-width: 0; }
+.shared-name { font-size: 9.7px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.shared-meta { margin-top: 2px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.shared-usage { margin-top: 7px; display: flex; align-items: baseline; gap: 4px; }
+.shared-usage strong { font: 20px var(--mono); color: var(--cyan); line-height: 1; }
+.shared-usage span { color: var(--muted-2); font-size: 8px; }
+.shared-refs { margin-top: 6px; display: flex; flex-direction: column; gap: 3px; }
+.shared-ref { height: 20px; display: flex; align-items: center; gap: 5px; color: #aabfc5; font-size: 8.2px; border: 0; background: transparent; padding: 0; text-align: left; border-radius: 3px; }
+.shared-ref:hover { background: rgba(255, 255, 255, .028); color: var(--text); }
+.shared-ref .ref-arrow { width: 10px; height: 1px; background: rgba(85, 224, 214, .3); position: relative; }
+.shared-ref .ref-arrow::after { content: ""; position: absolute; right: 0; top: -1.5px; border-left: 3px solid rgba(85, 224, 214, .4); border-top: 2px solid transparent; border-bottom: 2px solid transparent; }
+.shared-ref .ref-version { margin-left: auto; font: 7.2px var(--mono); color: var(--muted-2); }
+.shared-ref.conflict .ref-version { color: var(--red); }
+.shared-dedupe-foot { margin-top: auto; padding-top: 6px; display: flex; align-items: center; justify-content: space-between; gap: 5px; border-top: 1px solid rgba(153, 195, 207, .08); }
+.shared-dedupe-foot .before { color: var(--muted-2); font: 7.5px var(--mono); }
+.shared-dedupe-foot .after { color: var(--green); font: 8px var(--mono); display: flex; align-items: center; gap: 3px; }
+.shared-dedupe-foot .after svg { width: 9px; height: 9px; }
+.dedupe-panel { min-width: 0; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255, 255, 255, .016); display: flex; flex-direction: column; }
+.dedupe-panel-head { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 9px; font-weight: 600; }
+.dedupe-panel-head svg { width: 12px; height: 12px; color: var(--cyan); }
+.dedupe-panel-sub { margin-top: 3px; color: var(--muted-2); font-size: 7.7px; line-height: 1.4; }
+.dedupe-rows { margin-top: 6px; display: flex; flex-direction: column; gap: 3px; }
+.dedupe-row { display: flex; align-items: center; gap: 5px; font-size: 7.8px; color: var(--muted); }
+.dedupe-row .dedupe-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dedupe-row .dedupe-value { font: 7.3px var(--mono); color: var(--muted-2); }
+.dedupe-row .dedupe-value b { color: var(--green); font-weight: 500; }
+.dedupe-total { margin-top: auto; padding-top: 7px; border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+.dedupe-total span { color: var(--muted-2); font-size: 7.7px; }
+.dedupe-total strong { color: var(--green); font: 9px var(--mono); }
+.dedupe-visual { margin: 6px 0 2px; height: 42px; position: relative; }
+.dedupe-line { position: absolute; height: 1px; background: rgba(85, 224, 214, .2); transform-origin: left center; }
+.dedupe-l-node { position: absolute; width: 5px; height: 5px; border-radius: 2px; background: var(--cyan); }
+.dedupe-target { position: absolute; right: 3px; top: 14px; width: 54px; height: 20px; border: 1px solid rgba(85, 224, 214, .25); border-radius: 4px; background: rgba(85, 224, 214, .06); color: var(--cyan); font-size: 7px; display: grid; place-items: center; }
+
+/* Lock */
+.lock-layout { height: 100%; display: flex; flex-direction: column; gap: 7px; }
+.lock-meta { flex: 0 0 auto; display: flex; align-items: center; gap: 9px; padding: 7px 9px; border: 1px solid rgba(109, 150, 255, .16); border-radius: 7px; background: rgba(109, 150, 255, .035); }
+.lock-meta-icon { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 6px; color: var(--blue); border: 1px solid rgba(109, 150, 255, .22); background: rgba(109, 150, 255, .08); }
+.lock-meta-icon svg { width: 12px; height: 12px; }
+.lock-meta-copy { flex: 1; min-width: 0; }
+.lock-meta-copy strong { font-size: 9.5px; font-weight: 600; }
+.lock-meta-copy span { display: block; margin-top: 2px; color: var(--muted-2); font: 7.5px var(--mono); }
+.lock-meta .lock-count { color: var(--blue); font: 7.8px var(--mono); }
+.lock-columns { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; overflow: auto; }
+.lock-col { min-width: 0; padding: 7px 8px; border: 1px solid var(--line); border-radius: 7px; background: rgba(255, 255, 255, .015); }
+.lock-col-head { display: flex; align-items: center; gap: 5px; padding-bottom: 5px; border-bottom: 1px solid rgba(153, 195, 207, .08); }
+.lock-col-head .lock-col-dot { width: 5px; height: 5px; border-radius: 2px; background: var(--cyan); }
+.lock-col-name { flex: 1; min-width: 0; font-size: 8.8px; color: #cfdee2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lock-col-version { font: 7px var(--mono); color: var(--muted-2); }
+.lock-row { height: 22px; display: flex; align-items: center; gap: 4px; border-bottom: 1px dashed rgba(153, 195, 207, .06); }
+.lock-row:last-child { border-bottom: 0; }
+.lock-row .lock-branch { width: 3px; height: 3px; border-radius: 50%; background: var(--muted-2); }
+.lock-row .lock-name { flex: 1; min-width: 0; color: #a9bcc2; font-size: 7.9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lock-row .lock-ver { color: var(--blue); font: 7.2px var(--mono); }
+.lock-row.platform .lock-name { color: #8ea7ca; }
+.lock-note { flex: 0 0 auto; display: flex; align-items: center; gap: 6px; color: var(--muted-2); font-size: 8px; line-height: 1.3; padding-top: 1px; }
+.lock-note svg { width: 11px; height: 11px; color: var(--blue); flex: 0 0 auto; }
+.lock-note b { color: var(--blue); font-weight: 500; }
+.lock-empty { height: 100%; display: grid; grid-template-columns: 1.05fr 1fr; gap: 16px; align-items: stretch; }
+.lock-empty-main { display: flex; align-items: center; gap: 16px; padding: 8px 16px; border: 1px solid rgba(109, 150, 255, .15); border-radius: 10px; background: linear-gradient(130deg, rgba(109, 150, 255, .055), rgba(255, 255, 255, .008)); }
+.lock-empty .empty-orb { color: var(--blue); border-color: rgba(109, 150, 255, .22); background: radial-gradient(circle at 38% 32%, rgba(109, 150, 255, .14), rgba(109, 150, 255, .015)); box-shadow: 0 0 0 8px rgba(109, 150, 255, .018); }
+.lock-empty .empty-copy .eyebrow { color: var(--blue); }
+.lock-preview { position: relative; border: 1px solid rgba(109, 150, 255, .12); border-radius: 10px; background: radial-gradient(circle at 50% 50%, rgba(109, 150, 255, .05), transparent 65%), rgba(4, 13, 18, .55); overflow: hidden; padding: 13px; }
+.lock-preview-title { color: var(--muted-2); font-size: 8px; letter-spacing: .08em; margin-bottom: 8px; }
+.lock-preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.lock-preview-item { height: 40px; display: flex; align-items: center; gap: 7px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: rgba(255, 255, 255, .018); color: var(--muted); font-size: 8px; }
+.lock-preview-item svg { width: 11px; height: 11px; color: var(--blue); }
+.lock-preview-item span { display: block; color: var(--muted-2); font: 7px var(--mono); margin-top: 2px; }
+
+/* Build */
+.build-layout { height: 100%; display: flex; flex-direction: column; gap: 8px; }
+.build-pipeline { flex: 0 0 auto; display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 0; padding: 8px 7px 9px; border: 1px solid var(--line); border-radius: 8px; background: rgba(4, 13, 18, .35); overflow: auto; }
+.build-step { position: relative; min-width: 0; padding: 0 3px; text-align: center; }
+.build-step::before { content: ""; position: absolute; left: -50%; top: 11px; width: 100%; height: 1px; background: rgba(153, 195, 207, .12); z-index: 0; }
+.build-step:first-child::before { display: none; }
+.build-step.done::before, .build-step.active::before { background: rgba(83, 217, 154, .34); }
+.build-step-index { position: relative; z-index: 1; width: 22px; height: 22px; margin: 0 auto 5px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--line); background: #0a171e; color: var(--muted-2); font: 7.5px var(--mono); transition: .2s ease; }
+.build-step.done .build-step-index { color: #071116; border-color: var(--green); background: var(--green); box-shadow: 0 0 12px rgba(83, 217, 154, .2); }
+.build-step.active .build-step-index { color: var(--cyan); border-color: var(--cyan); background: rgba(85, 224, 214, .1); box-shadow: 0 0 15px rgba(85, 224, 214, .24); animation: pulse 1.1s infinite; }
+.build-step-label { color: var(--muted-2); font-size: 7.5px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.build-step.done .build-step-label { color: var(--green); }
+.build-step.active .build-step-label { color: var(--cyan); }
+.build-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 1.15fr .85fr; gap: 8px; }
+.build-gate-card { min-width: 0; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255, 255, 255, .015); display: flex; flex-direction: column; }
+.build-gate-title { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 9px; font-weight: 600; }
+.build-gate-title svg { width: 11px; height: 11px; color: var(--amber); }
+.build-gate-list { margin-top: 6px; display: flex; flex-direction: column; gap: 3px; }
+.gate-row { min-height: 23px; display: flex; align-items: center; gap: 6px; font-size: 8.2px; color: var(--muted-2); }
+.gate-row .gate-check { width: 14px; height: 14px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--line); flex: 0 0 auto; }
+.gate-row .gate-check svg { width: 8px; height: 8px; }
+.gate-row.done { color: var(--green); }
+.gate-row.done .gate-check { border-color: rgba(83, 217, 154, .3); background: rgba(83, 217, 154, .07); }
+.gate-row.blocked { color: var(--amber); }
+.gate-row.blocked .gate-check { border-color: rgba(246, 191, 91, .3); background: rgba(246, 191, 91, .07); }
+.gate-row .gate-row-action { margin-left: auto; }
+.build-gate-footer { margin-top: auto; padding-top: 6px; display: flex; align-items: center; gap: 7px; }
+.build-gate-footer span { color: var(--muted-2); font-size: 7.5px; }
+.build-summary-card { min-width: 0; padding: 9px 10px; border: 1px solid rgba(83, 217, 154, .17); border-radius: 8px; background: linear-gradient(140deg, rgba(83, 217, 154, .055), rgba(255, 255, 255, .008)); display: flex; flex-direction: column; }
+.build-summary-head { display: flex; align-items: center; gap: 7px; }
+.build-success-badge { height: 19px; padding: 0 6px; display: inline-flex; align-items: center; gap: 4px; border-radius: 4px; border: 1px solid rgba(83, 217, 154, .26); background: rgba(83, 217, 154, .08); color: var(--green); font: 7.5px var(--mono); }
+.build-success-badge svg { width: 8px; height: 8px; }
+.build-app-name { font-size: 9.5px; font-weight: 600; }
+.build-app-version { color: var(--muted-2); font: 7.5px var(--mono); margin-left: auto; }
+.build-metrics { margin-top: 7px; display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid rgba(153, 195, 207, .08); border-radius: 5px; overflow: hidden; }
+.build-metric { padding: 5px 4px; border-right: 1px solid rgba(153, 195, 207, .07); text-align: center; }
+.build-metric:last-child { border-right: 0; }
+.build-metric strong { display: block; color: #d8ebed; font: 10px var(--mono); }
+.build-metric span { display: block; margin-top: 2px; color: var(--muted-2); font-size: 6.8px; white-space: nowrap; }
+.build-summary-foot { margin-top: auto; padding-top: 6px; display: flex; align-items: center; gap: 5px; color: var(--muted-2); font-size: 7.5px; }
+.build-summary-foot svg { width: 9px; height: 9px; color: var(--green); }
+.build-log { margin-top: 6px; flex: 1; min-height: 34px; padding: 5px 6px; border-radius: 5px; background: rgba(0, 0, 0, .2); font: 7px/1.5 var(--mono); color: #6e8b93; overflow: hidden; }
+.build-log .log-ok { color: var(--green); }
+.build-log .log-cursor { color: var(--cyan); animation: blink 1s steps(2) infinite; }
+.build-progress { height: 2px; border-radius: 2px; background: rgba(255, 255, 255, .05); overflow: hidden; margin-top: 6px; }
+.build-progress span { display: block; height: 100%; background: linear-gradient(90deg, var(--green), var(--cyan)); transition: width .28s ease; }
+
+
+/* Drawer + toast */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(2, 8, 11, .62);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .22s ease, visibility .22s ease;
+}
+.drawer-overlay.open { opacity: 1; visibility: visible; }
+.drawer {
+  width: min(460px, 94vw);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid rgba(153, 195, 207, .18);
+  background:
+    radial-gradient(500px 250px at 100% 0%, rgba(85, 224, 214, .07), transparent 65%),
+    #0a171e;
+  box-shadow: -26px 0 80px rgba(0, 0, 0, .4);
+  transform: translateX(28px);
+  transition: transform .28s cubic-bezier(.2, .8, .2, 1);
+}
+.drawer-overlay.open .drawer { transform: translateX(0); }
+.drawer-head { flex: 0 0 auto; padding: 18px 18px 14px; display: flex; align-items: flex-start; gap: 11px; border-bottom: 1px solid var(--line); }
+.drawer-icon { width: 39px; height: 39px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 10px; color: var(--accent, var(--cyan)); border: 1px solid color-mix(in srgb, var(--accent, #55e0d6) 28%, transparent); background: color-mix(in srgb, var(--accent, #55e0d6) 9%, transparent); }
+.drawer-icon svg { width: 19px; height: 19px; }
+.drawer-head-copy { flex: 1; min-width: 0; }
+.drawer-eyebrow { color: var(--muted-2); font: 8px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+.drawer-title { margin: 4px 0 4px; font-size: 17px; letter-spacing: -.02em; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.drawer-meta { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.drawer-close { width: 30px; height: 30px; flex: 0 0 auto; border: 1px solid var(--line); border-radius: 7px; background: rgba(255, 255, 255, .02); color: var(--muted); display: grid; place-items: center; }
+.drawer-close:hover { color: var(--text); border-color: var(--line-strong); }
+.drawer-close svg { width: 13px; height: 13px; }
+.drawer-body { flex: 1; min-height: 0; overflow-y: auto; padding: 15px 18px 18px; }
+.drawer-section { margin-bottom: 16px; }
+.drawer-section:last-child { margin-bottom: 0; }
+.drawer-section-title { display: flex; align-items: center; gap: 6px; margin-bottom: 7px; color: var(--muted); font-size: 8.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.drawer-section-title .line { flex: 1; height: 1px; background: var(--line); }
+.drawer-desc { color: var(--muted); font-size: 10.5px; line-height: 1.7; padding: 10px 11px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255, 255, 255, .018); }
+.detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+.detail-cell { padding: 9px 10px; border: 1px solid var(--line); border-radius: 7px; background: rgba(255, 255, 255, .015); }
+.detail-cell span { display: block; color: var(--muted-2); font-size: 7.8px; }
+.detail-cell strong { display: block; margin-top: 4px; color: #d3e5e8; font-size: 9.5px; font-weight: 500; }
+.detail-cell strong.mono { font-family: var(--mono); font-size: 8.5px; }
+.detail-list { display: flex; flex-direction: column; gap: 4px; }
+.detail-row { min-height: 31px; padding: 5px 8px; display: flex; align-items: center; gap: 7px; border: 1px solid var(--line); border-radius: 6px; background: rgba(255, 255, 255, .016); }
+.detail-row:hover { border-color: var(--line-strong); background: rgba(255, 255, 255, .025); }
+.detail-row .row-icon { width: 19px; height: 19px; display: grid; place-items: center; border-radius: 5px; color: var(--accent, var(--cyan)); border: 1px solid color-mix(in srgb, var(--accent, #55e0d6) 20%, transparent); background: color-mix(in srgb, var(--accent, #55e0d6) 6%, transparent); }
+.detail-row .row-icon svg { width: 10px; height: 10px; }
+.detail-row .row-main { flex: 1; min-width: 0; }
+.detail-row .row-name { color: #c8dadd; font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.detail-row .row-sub { margin-top: 2px; color: var(--muted-2); font-size: 7.5px; }
+.detail-row .row-version { color: var(--muted); font: 8px var(--mono); }
+.detail-row .row-status { height: 15px; padding: 0 5px; display: inline-flex; align-items: center; border-radius: 3px; color: var(--green); background: rgba(83, 217, 154, .08); font-size: 7px; }
+.detail-row .row-status.warn { color: var(--red); background: rgba(255, 107, 127, .08); }
+.detail-row .row-status.platform { color: var(--blue); background: rgba(109, 150, 255, .08); }
+.detail-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.detail-chip { height: 23px; padding: 0 8px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 5px; background: rgba(255, 255, 255, .02); color: var(--muted); font-size: 8.5px; }
+.detail-chip svg { width: 9px; height: 9px; color: var(--cyan); }
+.detail-note { display: flex; align-items: flex-start; gap: 6px; padding: 8px 9px; border-radius: 6px; border: 1px solid rgba(246, 191, 91, .17); background: rgba(246, 191, 91, .045); color: #c6aa72; font-size: 8.5px; line-height: 1.5; }
+.detail-note svg { width: 11px; height: 11px; flex: 0 0 auto; margin-top: 1px; color: var(--amber); }
+.detail-tree { padding: 9px 10px; border: 1px solid var(--line); border-radius: 7px; background: rgba(255, 255, 255, .015); }
+.detail-tree-row { position: relative; min-height: 24px; padding-left: 15px; display: flex; align-items: center; gap: 6px; color: #b3c8cd; font-size: 8.8px; }
+.detail-tree-row::before { content: ""; position: absolute; left: 3px; top: 0; bottom: 12px; width: 1px; background: rgba(153, 195, 207, .16); }
+.detail-tree-row::after { content: ""; position: absolute; left: 3px; top: 12px; width: 6px; height: 1px; background: rgba(153, 195, 207, .16); }
+.detail-tree-row:last-child::before { bottom: 12px; }
+.detail-tree-row .mini-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--cyan); }
+.detail-tree-row .tree-ver { margin-left: auto; font: 7.5px var(--mono); color: var(--muted-2); }
+.drawer-actions { flex: 0 0 auto; padding: 12px 18px; display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--line); background: rgba(4, 13, 18, .35); }
+.drawer-actions .btn { flex: 1; }
+.drawer-actions .btn:only-child { flex: 0 0 auto; margin-left: auto; }
+
+.toast-wrap { position: fixed; z-index: 80; top: 78px; right: 20px; width: min(360px, calc(100vw - 40px)); display: flex; flex-direction: column; gap: 7px; pointer-events: none; }
+.toast {
+  pointer-events: auto;
+  padding: 10px 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: rgba(11, 27, 35, .96);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, .32);
+  backdrop-filter: blur(12px);
+  transform: translateX(12px);
+  opacity: 0;
+  animation: toastIn .25s ease forwards;
+}
+.toast.leaving { animation: toastOut .22s ease forwards; }
+.toast-icon { width: 20px; height: 20px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 5px; color: var(--cyan); background: rgba(85, 224, 214, .08); }
+.toast-icon svg { width: 11px; height: 11px; }
+.toast.warn .toast-icon { color: var(--amber); background: rgba(246, 191, 91, .08); }
+.toast.error .toast-icon { color: var(--red); background: rgba(255, 107, 127, .08); }
+.toast.success .toast-icon { color: var(--green); background: rgba(83, 217, 154, .08); }
+.toast-copy { flex: 1; min-width: 0; }
+.toast-title { font-size: 9.8px; font-weight: 600; color: #dcebed; }
+.toast-msg { margin-top: 2px; color: var(--muted-2); font-size: 8.3px; line-height: 1.45; }
+.toast-close { border: 0; background: transparent; color: var(--muted-2); padding: 0; margin-top: 1px; }
+.toast-close svg { width: 10px; height: 10px; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 0%, 100% { opacity: .55; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.15); } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes toastIn { to { opacity: 1; transform: translateX(0); } }
+@keyframes toastOut { to { opacity: 0; transform: translateX(12px); } }
+@keyframes radarSweep { to { transform: rotate(360deg); } }
+@keyframes blink { 50% { opacity: 0; } }
+@keyframes locatePulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 127, 0); } 22% { box-shadow: 0 0 0 2px rgba(255, 107, 127, .7), 0 0 30px rgba(255, 107, 127, .2); } 48% { box-shadow: 0 0 0 1px rgba(255, 107, 127, .2); } 75% { box-shadow: 0 0 0 2px rgba(255, 107, 127, .45); } }
+@keyframes cardFlash { 0% { box-shadow: 0 0 0 0 rgba(85, 224, 214, .5); } 100% { box-shadow: 0 0 0 10px rgba(85, 224, 214, 0); } }
+@keyframes rowFlash { 0% { background: rgba(85, 224, 214, .22); border-color: rgba(85, 224, 214, .5); } 100% { background: rgba(255, 255, 255, .021); border-color: rgba(153, 195, 207, .075); } }
+@keyframes denyShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+@keyframes denyFlash { 0% { box-shadow: 0 0 0 2px rgba(255, 107, 127, .55) inset; } 100% { box-shadow: none; } }
+@keyframes skeleton { 0% { opacity: .32; } 50% { opacity: .65; } 100% { opacity: .32; } }
+
+@media (max-width: 1320px) {
+  .assembly-pipeline { display: none; }
+  .brand { min-width: 0; }
+  .workspace { grid-template-columns: minmax(236px, .8fr) minmax(470px, 1.55fr) minmax(272px, .9fr); }
+  .app-context { min-width: 286px; }
+  .key-hint { display: none; }
+}
+@media (max-width: 1160px) {
+  .app-shell { min-width: 1080px; }
+  body { overflow: auto; }
+  .app-shell { height: 100vh; }
+  .brand-sub { display: none; }
+  .app-context { min-width: 250px; }
+  .gate-strip { gap: 4px; }
+  .gate-chip { padding: 0 6px; }
+  .dock-head { gap: 8px; }
+  .dock-brand { display: none; }
+  .dock-tab { padding: 0 8px; }
+}
+@media (max-height: 860px) {
+  .topbar { height: 60px; }
+  .status-rail { height: 40px; }
+  .bottom-dock { flex-basis: 292px; min-height: 224px; }
+  .micro-desc { display: none; }
+  .component-card { padding-top: 7px; padding-bottom: 7px; }
+  .comp-desc { -webkit-line-clamp: 1; margin: 4px 0 5px; }
+  .app-hero { padding: 9px; }
+  .app-hero-desc { display: none; }
+  .app-metrics { margin-top: 7px; }
+  .micro-grid { gap: 7px; padding: 7px; }
+  .micro-tree { margin-top: 6px; gap: 2px; }
+  .tree-component { height: 22px; }
+  .add-zone { height: 23px; }
+}
+@media (max-height: 780px) {
+  .app-shell { min-height: 600px; }
+  .topbar { height: 56px; }
+  .status-rail { height: 38px; }
+  .bottom-dock { flex-basis: 262px; min-height: 210px; }
+  .workspace { padding-top: 8px; }
+  .panel-head { padding-top: 10px; padding-bottom: 8px; }
+  .component-list { gap: 5px; }
+  .comp-desc { display: none; }
+  .micro-card { padding: 8px; }
+  .app-note { display: none; }
+  .app-hero { margin-top: 7px; }
+  .res-stats { margin-top: 6px; }
+  .empty-scope { padding: 4px 0; gap: 4px; }
+}
+@media (max-width: 1270px) {
+  .shared-layout { grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(190px, .7fr); }
+  .conflict-sources { grid-template-columns: 1fr 1fr; }
+  .conflict-sources .source-item:last-child { grid-column: span 2; }
+}
+
+</style>
+</head>
+<body>
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+  <defs>
+    <symbol id="i-logo" viewBox="0 0 24 24"><path d="M12 2l8.5 4.9v10.2L12 22l-8.5-4.9V6.9L12 2z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M13.3 6.2L8.5 13h3.1l-1 4.8 5-7.1h-3.2l.9-4.5z" fill="currentColor"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15.5 15.5L21 21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 10V7a4 4 0 018 0v3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 14v2.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-unlock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 10V7a4 4 0 017.5-2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5l11 6.5-11 6.5v-13z" fill="currentColor"/></symbol>
+    <symbol id="i-build" viewBox="0 0 24 24"><path d="M4 8.5l8-4.5 8 4.5v7.2l-8 4.3-8-4.3V8.5z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M4.3 8.7L12 12.8l7.7-4.1M12 12.8V20" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M15.7 3.2l4.5 2.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19.5 9A8 8 0 106 19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 20v-5h5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 11v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 3.5L21.4 20H2.6L12 3.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 9v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="currentColor"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M4.5 12.5l5 5L20 6.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-cube" viewBox="0 0 24 24"><path d="M12 2.8l8 4.6v9.2l-8 4.6-8-4.6V7.4l8-4.6z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M4.3 7.6L12 12l7.7-4.4M12 12v9" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="i-data" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 6v6c0 1.66 3.13 3 7 3s7-1.34 7-3V6M5 12v6c0 1.66 3.13 3 7 3s7-1.34 7-3v-6" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4 17a8 8 0 1116 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 17l4.2-5.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="17" r="1.5" fill="currentColor"/><path d="M4 20h16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
+    <symbol id="i-device" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 21h8M12 18v3M7 9h5M7 12h8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="17.5" cy="8.5" r="1" fill="currentColor"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 17h12l-1.5-2.3V10a4.5 4.5 0 00-9 0v4.7L6 17z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 20a2.2 2.2 0 004 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 3V2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M7 16l4-5 3 3 5-7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.8l7.5 3v5.4c0 4.6-3 7.8-7.5 10-4.5-2.2-7.5-5.4-7.5-10V5.8l7.5-3z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 12l2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="6" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7.5 7h.1M7.5 17h.1M11 7h5M11 17h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6V3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 3v5h4M9 13h6M9 17h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3l9 4.5-9 4.5-9-4.5L12 3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M3 12l9 4.5 9-4.5M3 16.5L12 21l9-4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-shared" viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.4" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="18" cy="6" r="2.4" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="18" cy="18" r="2.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8.2 10.9l7.6-3.8M8.2 13.1l7.6 3.8" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="i-graph" viewBox="0 0 24 24"><rect x="3" y="4" width="6" height="5" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="15" y="4" width="6" height="5" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="15" width="6" height="5" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 9v3h12V9M12 12v3" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+    <symbol id="i-package" viewBox="0 0 24 24"><path d="M4 7l8-4 8 4v10l-8 4-8-4V7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M4.4 7.2L12 11l7.6-3.8M12 11v10M8 5l8 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 9l3 3-3 3M12 15h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark"><svg width="21" height="21"><use href="#i-logo"/></svg></div>
+      <div>
+        <div class="brand-title">工厂 EMS <span>·</span> <span class="brand-sub">可视化组装与依赖解析</span></div>
+        <div class="brand-crumb">APPLICATION FACTORY / ASSEMBLY WORKBENCH</div>
+      </div>
+    </div>
+    <div class="assembly-pipeline" aria-label="组装层级">
+      <div class="pipeline-step active"><i>01</i><span>后端组件</span></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-step active"><i>02</i><span>微应用</span></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-step active"><i>03</i><span>应用</span></div>
+    </div>
+    <div class="top-actions">
+      <button class="btn btn-secondary" id="parseBtn"><svg><use href="#i-target"/></svg><span>解析依赖</span></button>
+      <button class="btn btn-secondary" id="lockBtn"><svg><use href="#i-lock"/></svg><span>锁定版本</span></button>
+      <button class="btn btn-primary" id="buildBtn"><svg><use href="#i-build"/></svg><span>构建应用</span></button>
+      <button class="btn-icon" id="resetBtn" title="重置原型演示" aria-label="重置原型演示"><svg width="14" height="14"><use href="#i-refresh"/></svg></button>
+    </div>
+  </header>
+
+  <div class="status-rail">
+    <div class="app-context">
+      <span class="eyebrow">当前应用</span>
+      <strong>工厂能源管理平台</strong>
+      <span class="version-pill">v1.0.0</span>
+      <span class="lifecycle state-ready" id="lifecycleBadge"><span class="status-dot"></span><span id="lifecycleText">已组装 · 待解析</span></span>
+    </div>
+    <div class="rail-divider"></div>
+    <div class="gate-strip">
+      <button class="gate-chip" id="gateParse" data-gate="parse"><span class="gate-dot"></span><span class="gate-index">01</span><span>依赖解析</span><span class="gate-value">待执行</span></button>
+      <button class="gate-chip" id="gateConflict" data-gate="conflict"><span class="gate-dot"></span><span class="gate-index">02</span><span>版本冲突</span><span class="gate-value">未检测</span></button>
+      <button class="gate-chip" id="gateLock" data-gate="lock"><span class="gate-dot"></span><span class="gate-index">03</span><span>版本锁定</span><span class="gate-value">未锁定</span></button>
+    </div>
+    <div class="rail-divider"></div>
+    <div class="rail-readiness" id="readiness"><span>构建就绪</span><span class="readiness-value">未就绪</span></div>
+    <div class="key-hint">拖拽或点选组件进行组装</div>
+  </div>
+
+  <main class="workspace">
+    <section class="panel library-panel">
+      <div class="panel-head">
+        <div class="panel-step">01</div>
+        <div class="panel-heading">
+          <div class="panel-title">后端组件 <span class="count-badge" id="componentCount">06</span></div>
+          <div class="panel-desc">资源库 · 可拖拽到微应用，或选中后组装</div>
+        </div>
+        <div class="panel-tools"><svg width="13" height="13" style="color:var(--muted-2)"><use href="#i-layers"/></svg></div>
+      </div>
+      <div class="library-tools">
+        <div class="search-box" id="searchBox">
+          <svg><use href="#i-search"/></svg>
+          <input id="componentSearch" type="text" placeholder="搜索组件、能力或依赖…" autocomplete="off" />
+          <button class="search-clear" id="searchClear" aria-label="清空搜索"><svg width="11" height="11"><use href="#i-x"/></svg></button>
+        </div>
+        <div class="category-row" id="categoryRow">
+          <button class="category-chip active" data-category="all">全部</button>
+          <button class="category-chip" data-category="data">数据服务</button>
+          <button class="category-chip" data-category="device">设备</button>
+          <button class="category-chip" data-category="alert">告警</button>
+          <button class="category-chip" data-category="security">安全</button>
+        </div>
+      </div>
+      <div class="component-list" id="componentList"></div>
+      <div class="panel-foot" id="libraryFoot">
+        <svg><use href="#i-info"/></svg>
+        <span>点击选中组件，再点击微应用中的「组装组件」</span>
+      </div>
+    </section>
+
+    <section class="panel canvas-panel">
+      <div class="panel-head">
+        <div class="panel-step">02</div>
+        <div class="panel-heading">
+          <div class="panel-title">微应用组装区 <span class="count-badge">04</span></div>
+          <div class="panel-desc">将后端组件装入微应用，组件版本随组装关系冻结</div>
+        </div>
+        <div class="canvas-head-extra"><span class="pulse-dot"></span><span>ASSEMBLY CANVAS</span></div>
+      </div>
+      <div class="micro-grid" id="microGrid"></div>
+      <div class="panel-foot">
+        <svg><use href="#i-cube"/></svg>
+        <span>后端组件 → 微应用 · 拖拽组件卡片到任意微应用即可组装</span>
+      </div>
+    </section>
+
+    <section class="panel app-panel" id="appPanel">
+      <div class="panel-head">
+        <div class="panel-step">03</div>
+        <div class="panel-heading">
+          <div class="panel-title">应用组装区 <span class="count-badge">01</span></div>
+          <div class="panel-desc">应用仅由微应用组成，不直接挂载后端组件</div>
+        </div>
+        <div class="panel-tools"><svg width="13" height="13" style="color:var(--muted-2)"><use href="#i-layers"/></svg></div>
+      </div>
+      <div class="app-hero">
+        <div class="app-hero-top">
+          <div class="app-icon"><svg><use href="#i-package"/></svg></div>
+          <div style="flex:1;min-width:0">
+            <div class="app-hero-name">工厂能源管理平台</div>
+            <div class="app-hero-meta"><span class="version-pill" style="color:#b7c8ff;border-color:rgba(109,150,255,.2)">v1.0.0</span><span class="platform-pill">生产环境</span></div>
+          </div>
+          <span class="lifecycle state-ready" style="height:18px;font-size:8px" id="appStateMini"><span class="status-dot"></span>已组装</span>
+        </div>
+        <div class="app-hero-desc">面向工厂能源运营的一体化应用，由 4 个业务微应用组合而成。</div>
+        <div class="app-metrics">
+          <div class="app-metric"><strong id="appMetricMicro">4</strong><span>微应用</span></div>
+          <div class="app-metric"><strong id="appMetricComponents">9</strong><span>组件装配</span></div>
+          <div class="app-metric" id="appMetricConflictWrap"><strong id="appMetricConflict">0</strong><span>版本冲突</span></div>
+        </div>
+      </div>
+      <div class="app-structure-wrap">
+        <div class="app-section-label"><span>APPLICATION TREE</span><span class="line"></span><span id="appTreeCount">4 微应用</span></div>
+        <div id="appStructure"></div>
+      </div>
+      <div class="app-note" id="appDropNote">
+        <svg><use href="#i-info"/></svg>
+        <span>应用层只接受微应用。后端组件不可直接挂载到应用，必须先在微应用中完成组装。</span>
+      </div>
+    </section>
+  </main>
+
+  <section class="bottom-dock">
+    <div class="dock-head">
+      <div class="dock-brand"><span class="dock-signal"></span>DEPENDENCY CONTROL</div>
+      <nav class="dock-tabs" id="dockTabs" aria-label="依赖分析视图">
+        <button class="dock-tab active" data-tab="overview">解析结果 <span class="tab-badge" id="tabBadgeOverview">—</span></button>
+        <button class="dock-tab" data-tab="graph">依赖关系 <span class="tab-badge" id="tabBadgeGraph">—</span></button>
+        <button class="dock-tab" data-tab="shared">共享依赖 <span class="tab-badge" id="tabBadgeShared">—</span></button>
+        <button class="dock-tab" data-tab="lock">版本锁定 <span class="tab-badge" id="tabBadgeLock">—</span></button>
+        <button class="dock-tab" data-tab="build">构建交付 <span class="tab-badge" id="tabBadgeBuild">—</span></button>
+      </nav>
+      <div class="dock-head-right" id="dockHeadRight">
+        <span class="dock-state" id="dockState"><span class="status-dot"></span>待解析</span>
+      </div>
+    </div>
+    <div class="dock-content" id="dockContent"></div>
+  </section>
+</div>
+
+<div class="drawer-overlay" id="drawerOverlay" aria-hidden="true">
+  <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" id="drawer"></aside>
+</div>
+<div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
+
+<script>
+const COMPONENTS = {
+  'energy-data': {
+    name: '能源数据服务', version: 'v2.0.0', category: 'data', categoryLabel: '数据服务',
+    icon: 'data', accent: '#55e0d6', code: 'EMS-DATA',
+    description: '提供能源实时数据、历史数据、数据查询和数据聚合能力。',
+    depIds: ['storage', 'auth']
+  },
+  metrics: {
+    name: '能源指标服务', version: 'v1.6.0', category: 'data', categoryLabel: '指标服务',
+    icon: 'chart', accent: '#7fe8a8', code: 'EMS-METRIC',
+    description: '负责能耗指标计算、同环比分析与指标口径统一。',
+    depIds: ['energy-data']
+  },
+  device: {
+    name: '设备管理服务', version: 'v1.4.0', category: 'device', categoryLabel: '设备服务',
+    icon: 'device', accent: '#6d96ff', code: 'EMS-DEVICE',
+    description: '维护设备台账、运行状态与能源设备拓扑关系。',
+    depIds: ['device-master', 'auth']
+  },
+  alarm: {
+    name: '告警服务', version: 'v1.3.0', category: 'alert', categoryLabel: '告警服务',
+    icon: 'bell', accent: '#f6bf5b', code: 'EMS-ALARM',
+    description: '提供阈值告警、事件通知与异常处置闭环能力。',
+    depIds: ['energy-data', 'auth']
+  },
+  report: {
+    name: '报表服务', version: 'v1.2.0', category: 'data', categoryLabel: '报表服务',
+    icon: 'file', accent: '#c3a8ff', code: 'EMS-REPORT',
+    description: '生成能源日报、月报及自定义分析报表。',
+    depIds: ['metrics', 'file']
+  },
+  permission: {
+    name: '权限服务', version: 'v2.1.0', category: 'security', categoryLabel: '安全服务',
+    icon: 'shield', accent: '#8fb3ff', code: 'EMS-PERM',
+    description: '统一管理业务权限、数据范围与角色授权策略。',
+    depIds: ['auth'], platform: true
+  }
+};
+
+const INFRA = {
+  storage: { name: '数据存储', version: 'v3.2.1', type: 'infra', icon: 'server', accent: '#77d7ff', categoryLabel: '基础设施', description: '统一时序数据与业务数据存储。', depIds: [] },
+  auth: { name: '统一认证', version: 'v4.8.0', type: 'infra', icon: 'shield', accent: '#96a9ff', categoryLabel: '基础设施', description: '平台级身份认证与单点登录能力。', depIds: [] },
+  'device-master': { name: '设备主数据', version: 'v1.1.2', type: 'infra', icon: 'device', accent: '#7ea3ff', categoryLabel: '基础设施', description: '设备主数据标准与唯一编码服务。', depIds: [] },
+  file: { name: '文件服务', version: 'v2.4.0', type: 'infra', icon: 'file', accent: '#b6a0ff', categoryLabel: '基础设施', description: '报表文件生成、对象存储与下载能力。', depIds: [] }
+};
+
+const NODES = { ...COMPONENTS, ...INFRA };
+
+const MICRO_APPS = [
+  {
+    id: 'monitor', name: '能源监测', version: 'v2.3.0', icon: 'gauge', accent: '#55e0d6',
+    description: '实时查看能源消耗、设备运行状态、能源趋势和异常情况。',
+    components: [
+      { id: 'energy-data', version: 'v2.0.0' },
+      { id: 'device', version: 'v1.4.0' },
+      { id: 'metrics', version: 'v1.6.0' }
+    ]
+  },
+  {
+    id: 'analysis', name: '能源分析', version: 'v1.8.0', icon: 'chart', accent: '#7fe8a8',
+    description: '能耗趋势分析、同环比与能源成本洞察。',
+    components: [
+      { id: 'energy-data', version: 'v1.5.0' },
+      { id: 'metrics', version: 'v1.6.0' }
+    ]
+  },
+  {
+    id: 'alarm', name: '告警管理', version: 'v1.5.0', icon: 'bell', accent: '#f6bf5b',
+    description: '能源异常识别、告警分派与闭环处置。',
+    components: [
+      { id: 'alarm', version: 'v1.3.0' },
+      { id: 'energy-data', version: 'v2.0.0' }
+    ]
+  },
+  {
+    id: 'report', name: '能源报表', version: 'v1.4.0', icon: 'file', accent: '#c3a8ff',
+    description: '周期性能源报表与自定义报表输出。',
+    components: [
+      { id: 'report', version: 'v1.2.0' },
+      { id: 'metrics', version: 'v1.6.0' }
+    ]
+  }
+];
+
+const PARSE_STEPS = [
+  '扫描应用结构', '扫描微应用装配关系', '扫描后端组件', '展开传递依赖', '识别共享依赖', '检测版本冲突'
+];
+
+const BUILD_STEPS = [
+  { label: '应用结构解析', short: '结构' },
+  { label: '微应用解析', short: '微应用' },
+  { label: '组件依赖解析', short: '组件' },
+  { label: '传递依赖展开', short: '传递' },
+  { label: '版本冲突处理', short: '冲突' },
+  { label: '共享依赖去重', short: '去重' },
+  { label: '配置合并', short: '配置' },
+  { label: '版本锁定', short: '锁版' },
+  { label: '生成构建清单', short: '清单' },
+  { label: '生成应用制品', short: '制品' }
+];
+
+const PLATFORM_INJECTED = new Set(['permission']);
+const PLATFORM_PROVIDED = new Set(['permission', 'auth']);
+
+function createInitialAssembly() {
+  const result = {};
+  for (const app of MICRO_APPS) {
+    result[app.id] = app.components.map(c => ({ id: c.id, version: c.version }));
+  }
+  return result;
+}
+
+const state = {
+  assembly: createInitialAssembly(),
+  selectedComponentId: null,
+  search: '',
+  category: 'all',
+  parseState: 'idle',
+  parseProgress: 0,
+  parseTimer: null,
+  conflicts: [],
+  selectedConflictVersion: 'v2.0.0',
+  lock: null,
+  buildState: 'idle',
+  buildStep: 0,
+  buildTimer: null,
+  builtAt: null,
+  activeTab: 'overview',
+  expandedMicroapps: new Set(['monitor']),
+  focusConflict: false,
+  highlightMicro: null,
+  highlightTimer: null,
+  lastAdded: null,
+  dragId: null,
+  details: null,
+  toastSeq: 0
+};
+
+function getMicro(id) { return MICRO_APPS.find(m => m.id === id); }
+function getCompRef(microId, compId) { return (state.assembly[microId] || []).find(c => c.id === compId); }
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s]));
+}
+function icon(name, size = 14) {
+  return `<svg width="${size}" height="${size}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+}
+function formatTime(date = new Date()) {
+  const h = String(date.getHours()).padStart(2, '0');
+  const m = String(date.getMinutes()).padStart(2, '0');
+  const s = String(date.getSeconds()).padStart(2, '0');
+  return `${h}:${m}:${s}`;
+}
+
+function getAllDirectComponentIds() {
+  const set = new Set();
+  for (const app of MICRO_APPS) {
+    for (const c of state.assembly[app.id] || []) set.add(c.id);
+  }
+  for (const id of PLATFORM_INJECTED) set.add(id);
+  return set;
+}
+
+function getComponentRefs(compId) {
+  const refs = [];
+  for (const app of MICRO_APPS) {
+    const ref = (state.assembly[app.id] || []).find(c => c.id === compId);
+    if (ref) refs.push({ microId: app.id, version: ref.version, platform: false });
+  }
+  if (PLATFORM_INJECTED.has(compId)) {
+    for (const app of MICRO_APPS) {
+      if (!refs.some(r => r.microId === app.id)) {
+        refs.push({ microId: app.id, version: COMPONENTS[compId].version, platform: true });
+      }
+    }
+  }
+  return refs;
+}
+
+function compareVersion(a, b) {
+  const pa = String(a).replace(/^v/, '').split('.').map(Number);
+  const pb = String(b).replace(/^v/, '').split('.').map(Number);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    if ((pa[i] || 0) !== (pb[i] || 0)) return (pa[i] || 0) - (pb[i] || 0);
+  }
+  return 0;
+}
+
+function detectConflicts() {
+  const grouped = {};
+  for (const app of MICRO_APPS) {
+    for (const ref of state.assembly[app.id] || []) {
+      if (!grouped[ref.id]) grouped[ref.id] = {};
+      if (!grouped[ref.id][ref.version]) grouped[ref.id][ref.version] = [];
+      grouped[ref.id][ref.version].push(app.id);
+    }
+  }
+  return Object.entries(grouped)
+    .filter(([, versions]) => Object.keys(versions).length > 1)
+    .map(([componentId, versions]) => {
+      const sorted = Object.keys(versions).sort(compareVersion);
+      const recommended = sorted[sorted.length - 1];
+      return {
+        componentId,
+        versions: sorted.map(version => ({ version, microapps: versions[version] })),
+        recommended
+      };
+    });
+}
+
+function traverseDeps(componentId, excludeSet, seen, out) {
+  const node = NODES[componentId];
+  if (!node) return;
+  for (const depId of node.depIds || []) {
+    if (seen.has(depId)) continue;
+    seen.add(depId);
+    if (!excludeSet.has(depId)) out.push(depId);
+    traverseDeps(depId, excludeSet, seen, out);
+  }
+}
+
+function getMicroTransitiveIds(microId) {
+  const direct = new Set((state.assembly[microId] || []).map(c => c.id));
+  const out = [];
+  const seen = new Set(direct);
+  for (const id of direct) traverseDeps(id, direct, seen, out);
+  return out;
+}
+
+function getAppTransitiveIds() {
+  const direct = getAllDirectComponentIds();
+  const out = [];
+  const seen = new Set(direct);
+  for (const id of direct) traverseDeps(id, direct, seen, out);
+  return out;
+}
+
+function getSharedDependencies() {
+  const result = [];
+  for (const compId of Object.keys(COMPONENTS)) {
+    const refs = getComponentRefs(compId);
+    if (refs.length > 1) {
+      const versions = [...new Set(refs.map(r => r.version))];
+      result.push({
+        id: compId,
+        name: COMPONENTS[compId].name,
+        version: versions.length > 1 ? versions.join(' / ') : versions[0],
+        versions,
+        refs,
+        platform: !!COMPONENTS[compId].platform,
+        conflict: versions.length > 1
+      });
+    }
+  }
+  const order = { 'energy-data': 1, permission: 2, metrics: 3 };
+  return result.sort((a, b) => (order[a.id] || 99) - (order[b.id] || 99));
+}
+
+function getInfraUsage(nodeId) {
+  const apps = [];
+  for (const app of MICRO_APPS) {
+    const closure = getMicroTransitiveIds(app.id);
+    if (closure.includes(nodeId)) apps.push(app.id);
+  }
+  return apps;
+}
+
+function getBuildMetrics() {
+  const directSet = getAllDirectComponentIds();
+  const transitive = getAppTransitiveIds();
+  const shared = getSharedDependencies();
+  const allRuntime = new Set([...directSet, ...transitive]);
+  let finalInstances = 0;
+  for (const id of allRuntime) {
+    if (!PLATFORM_PROVIDED.has(id)) finalInstances++;
+  }
+  return {
+    microapps: MICRO_APPS.length,
+    direct: directSet.size,
+    transitive: transitive.length,
+    shared: shared.length,
+    finalInstances,
+    totalRefs: MICRO_APPS.reduce((sum, app) => sum + (state.assembly[app.id] || []).length, 0),
+    componentTypes: new Set([...directSet, ...transitive]).size
+  };
+}
+
+function getLockedDirectCount() {
+  return MICRO_APPS.reduce((sum, app) => sum + (state.assembly[app.id] || []).length, 0);
+}
+
+function getSignature() {
+  return MICRO_APPS.map(app => app.id + ':' + (state.assembly[app.id] || []).map(c => c.id + '@' + c.version).sort().join(',')).join('|');
+}
+
+function getActiveConflict() {
+  return state.conflicts[0] || null;
+}
+
+function isRefConflict(microId, compId, version) {
+  const conflict = state.conflicts.find(c => c.componentId === compId);
+  if (!conflict) return false;
+  return version !== conflict.recommended;
+}
+
+function isMicroConflict(microId) {
+  return (state.assembly[microId] || []).some(ref => isRefConflict(microId, ref.id, ref.version));
+}
+
+function isBusy() {
+  return state.parseState === 'resolving' || state.buildState === 'building';
+}
+
+function getLifecycle() {
+  if (state.buildState === 'building') return { text: '构建中', cls: 'state-busy' };
+  if (state.buildState === 'built') return { text: '构建成功', cls: 'state-built' };
+  if (state.lock) return { text: '版本已锁定', cls: 'state-locked' };
+  if (state.parseState === 'resolving') return { text: '依赖解析中', cls: 'state-busy' };
+  if (state.parseState === 'resolved' && state.conflicts.length) return { text: `发现 ${state.conflicts.length} 个冲突`, cls: 'state-conflict' };
+  if (state.parseState === 'resolved') return { text: '依赖解析完成', cls: 'state-resolved' };
+  if (state.parseState === 'dirty') return { text: '组装已变更 · 待解析', cls: 'state-warn' };
+  return { text: '已组装 · 待解析', cls: 'state-ready' };
+}
+
+function canLock() {
+  return state.parseState === 'resolved' && state.conflicts.length === 0 && !state.lock && state.buildState !== 'building';
+}
+
+function canBuild() {
+  return state.parseState === 'resolved' &&
+    state.conflicts.length === 0 &&
+    !!state.lock &&
+    state.lock.signature === getSignature() &&
+    state.buildState !== 'building';
+}
+
+function getGateReasons() {
+  const reasons = [];
+  if (state.parseState !== 'resolved' || state.parseState === 'resolving') reasons.push('依赖尚未解析完成');
+  if (state.conflicts.length) reasons.push('存在未处理的版本冲突');
+  if (!state.lock) reasons.push('尚未锁定版本');
+  if (state.lock && state.lock.signature !== getSignature()) reasons.push('组装已变更，版本锁定已失效');
+  return reasons;
+}
+
+function markAssemblyDirty(message) {
+  const hadParsed = state.parseState !== 'idle';
+  state.parseState = hadParsed ? 'dirty' : 'idle';
+  state.parseProgress = 0;
+  state.conflicts = [];
+  state.lock = null;
+  state.buildState = 'idle';
+  state.buildStep = 0;
+  state.builtAt = null;
+  state.focusConflict = false;
+  state.selectedConflictVersion = 'v2.0.0';
+  if (hadParsed && message) showToast('组装已变更', message, 'warn');
+}
+
+function selectComponent(compId) {
+  if (isBusy()) return;
+  state.selectedComponentId = compId;
+  renderLibrary();
+  renderMicroApps();
+  renderLibraryFoot();
+}
+
+function addComponentToMicro(microId, compId, source = 'click') {
+  if (isBusy()) {
+    showToast('当前操作进行中', '请等待依赖解析或构建完成后再调整组装。', 'warn');
+    return false;
+  }
+  const comp = COMPONENTS[compId];
+  const app = getMicro(microId);
+  if (!comp || !app) return false;
+  if (comp.platform) {
+    showToast('平台级共享依赖', `${comp.name} 已作为平台能力自动注入全部微应用，无需重复组装。`, 'warn');
+    return false;
+  }
+  if ((state.assembly[microId] || []).some(c => c.id === compId)) {
+    showToast('无需重复添加', '该组件已经在此微应用中，无需重复添加。', 'warn');
+    return false;
+  }
+  state.assembly[microId].push({ id: compId, version: comp.version });
+  state.lastAdded = { microId, compId };
+  markAssemblyDirty('请重新解析依赖，之前生成的锁定与构建结果已失效。');
+  renderAll();
+  showToast('组装成功', `${comp.name} ${comp.version} 已组装到「${app.name}」。${source === 'drag' ? '拖拽' : '点击'}组装已完成。`, 'success');
+  setTimeout(() => {
+    if (state.lastAdded && state.lastAdded.microId === microId && state.lastAdded.compId === compId) {
+      state.lastAdded = null;
+      renderMicroApps();
+    }
+  }, 1400);
+  return true;
+}
+
+function parseDependencies() {
+  if (isBusy()) return;
+  if (state.parseTimer) clearInterval(state.parseTimer);
+  state.parseState = 'resolving';
+  state.parseProgress = 0;
+  state.conflicts = [];
+  state.lock = null;
+  state.buildState = 'idle';
+  state.buildStep = 0;
+  state.builtAt = null;
+  state.focusConflict = false;
+  state.activeTab = 'overview';
+  renderAll();
+  showToast('依赖解析已启动', '正在扫描应用、微应用与组件的完整依赖链路。', 'info');
+  state.parseTimer = setInterval(() => {
+    state.parseProgress++;
+    if (state.parseProgress >= PARSE_STEPS.length) {
+      clearInterval(state.parseTimer);
+      state.parseTimer = null;
+      state.parseState = 'resolved';
+      state.conflicts = detectConflicts();
+      if (state.conflicts.length) {
+        state.selectedConflictVersion = state.conflicts[0].recommended;
+        state.focusConflict = false;
+      }
+      renderAll();
+      if (state.conflicts.length) {
+        showToast('发现版本冲突', `${NODES[state.conflicts[0].componentId].name} 存在 ${state.conflicts[0].versions.length} 个版本引用，请处理后再锁定版本。`, 'error');
+      } else {
+        showToast('依赖解析完成', '依赖关系与共享依赖已识别，未发现版本冲突。', 'success');
+      }
+    } else {
+      renderDock();
+      renderTopState();
+    }
+  }, 180);
+}
+
+function resolveConflict(version) {
+  const conflict = getActiveConflict();
+  if (!conflict) return;
+  for (const app of MICRO_APPS) {
+    for (const ref of state.assembly[app.id] || []) {
+      if (ref.id === conflict.componentId) ref.version = version;
+    }
+  }
+  state.conflicts = detectConflicts();
+  state.focusConflict = false;
+  state.lock = null;
+  state.buildState = 'idle';
+  state.buildStep = 0;
+  state.builtAt = null;
+  state.highlightMicro = 'analysis';
+  if (state.highlightTimer) clearTimeout(state.highlightTimer);
+  renderAll();
+  showToast('版本冲突已处理', `${NODES[conflict.componentId].name} 已统一为 ${version}，依赖关系已重新计算。`, 'success');
+  state.highlightTimer = setTimeout(() => {
+    state.highlightMicro = null;
+    renderMicroApps();
+    renderAppPanel();
+  }, 2200);
+}
+
+function lockVersions() {
+  if (isBusy()) return;
+  if (state.parseState !== 'resolved') {
+    showToast('无法锁定版本', '请先完成依赖解析。', 'warn');
+    return;
+  }
+  if (state.conflicts.length) {
+    showToast('无法锁定版本', '存在未处理的版本冲突，请先统一版本。', 'error');
+    state.activeTab = 'overview';
+    renderAll();
+    return;
+  }
+  if (state.lock) return;
+  state.lock = {
+    lockedAt: new Date(),
+    signature: getSignature(),
+    directCount: getLockedDirectCount(),
+    transitive: getAppTransitiveIds(),
+    shared: getSharedDependencies().map(item => item.id),
+    hash: 'sha256:' + Array.from({ length: 12 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('')
+  };
+  state.buildState = 'idle';
+  state.builtAt = null;
+  state.activeTab = 'lock';
+  renderAll();
+  showToast('版本已锁定', `已固化 ${state.lock.directCount} 个直接依赖版本。应用发布后，组件库升级不会自动影响当前应用。`, 'success');
+}
+
+function startBuild() {
+  if (isBusy()) return;
+  if (!canBuild()) {
+    showToast('当前无法构建', getGateReasons().join('；') || '请检查构建门禁。', 'warn');
+    return;
+  }
+  state.buildState = 'building';
+  state.buildStep = 0;
+  state.builtAt = null;
+  state.activeTab = 'build';
+  renderAll();
+  showToast('构建已启动', '正在生成应用制品，构建过程将实时反馈。', 'info');
+  if (state.buildTimer) clearInterval(state.buildTimer);
+  state.buildTimer = setInterval(() => {
+    state.buildStep++;
+    if (state.buildStep >= BUILD_STEPS.length) {
+      clearInterval(state.buildTimer);
+      state.buildTimer = null;
+      state.buildState = 'built';
+      state.builtAt = new Date();
+      renderAll();
+      showToast('构建成功', '工厂能源管理平台 v1.0.0 已生成应用制品。', 'success');
+    } else {
+      renderTopState();
+      renderDock();
+    }
+  }, 330);
+}
+
+function resetDemo() {
+  if (state.parseTimer) clearInterval(state.parseTimer);
+  if (state.buildTimer) clearInterval(state.buildTimer);
+  if (state.highlightTimer) clearTimeout(state.highlightTimer);
+  state.parseTimer = null;
+  state.buildTimer = null;
+  state.highlightTimer = null;
+  state.assembly = createInitialAssembly();
+  state.selectedComponentId = null;
+  state.search = '';
+  state.category = 'all';
+  state.parseState = 'idle';
+  state.parseProgress = 0;
+  state.conflicts = [];
+  state.selectedConflictVersion = 'v2.0.0';
+  state.lock = null;
+  state.buildState = 'idle';
+  state.buildStep = 0;
+  state.builtAt = null;
+  state.activeTab = 'overview';
+  state.expandedMicroapps = new Set(['monitor']);
+  state.focusConflict = false;
+  state.highlightMicro = null;
+  state.lastAdded = null;
+  state.details = null;
+  const input = document.getElementById('componentSearch');
+  if (input) input.value = '';
+  const searchBox = document.getElementById('searchBox');
+  if (searchBox) searchBox.classList.remove('has-value');
+  document.querySelectorAll('.category-chip').forEach(chip => chip.classList.toggle('active', chip.dataset.category === 'all'));
+  closeDrawer();
+  renderAll();
+  showToast('演示已重置', '已恢复初始组装关系和未解析状态。', 'info');
+}
+
+function setTab(tab) {
+  state.activeTab = tab;
+  state.focusConflict = false;
+  renderTabs();
+  renderDock();
+}
+
+function locateMicro(microId) {
+  state.highlightMicro = microId;
+  state.expandedMicroapps.add(microId);
+  if (state.highlightTimer) clearTimeout(state.highlightTimer);
+  renderMicroApps();
+  renderAppPanel();
+  const card = document.querySelector(`[data-micro-card="${microId}"]`);
+  if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  showToast('已定位引用方', `已高亮微应用「${getMicro(microId).name}」及其组件引用。`, 'info');
+  state.highlightTimer = setTimeout(() => {
+    state.highlightMicro = null;
+    renderMicroApps();
+    renderAppPanel();
+  }, 2200);
+}
+
+function focusConflictInGraph() {
+  if (!state.conflicts.length) {
+    showToast('当前没有冲突', '依赖解析完成后才可定位版本冲突。', 'info');
+    return;
+  }
+  state.activeTab = 'graph';
+  state.focusConflict = true;
+  renderTabs();
+  renderDock();
+  showToast('冲突路径已高亮', '红色节点与虚线表示版本冲突及其依赖传播路径。', 'warn');
+}
+
+function showToast(title, message, type = 'info') {
+  const wrap = document.getElementById('toastWrap');
+  if (!wrap) return;
+  const id = ++state.toastSeq;
+  const icons = { info: 'info', success: 'check', warn: 'warn', error: 'warn' };
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.dataset.toastId = id;
+  el.innerHTML = `
+    <div class="toast-icon">${icon(icons[type] || 'info', 11)}</div>
+    <div class="toast-copy"><div class="toast-title">${escapeHtml(title)}</div><div class="toast-msg">${escapeHtml(message)}</div></div>
+    <button class="toast-close" aria-label="关闭提示">${icon('x', 10)}</button>`;
+  el.querySelector('.toast-close').addEventListener('click', () => dismissToast(el));
+  wrap.appendChild(el);
+  setTimeout(() => dismissToast(el), 4200);
+}
+
+function dismissToast(el) {
+  if (!el || !el.parentNode) return;
+  el.classList.add('leaving');
+  setTimeout(() => el.remove(), 230);
+}
+
+function openDrawer(html) {
+  const overlay = document.getElementById('drawerOverlay');
+  const drawer = document.getElementById('drawer');
+  drawer.innerHTML = html;
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+  const closeBtn = drawer.querySelector('[data-close-drawer]');
+  if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+  drawer.querySelectorAll('[data-open-component]').forEach(btn => {
+    btn.addEventListener('click', () => openComponentDetail(btn.dataset.openComponent, btn.dataset.version, btn.dataset.microId));
+  });
+  drawer.querySelectorAll('[data-locate-micro]').forEach(btn => {
+    btn.addEventListener('click', () => { closeDrawer(); locateMicro(btn.dataset.locateMicro); });
+  });
+  drawer.querySelectorAll('[data-select-assemble]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      closeDrawer();
+      selectComponent(btn.dataset.selectAssemble);
+      showToast('已选中组件', '请选择目标微应用并点击「组装组件」。', 'info');
+    });
+  });
+  drawer.querySelectorAll('[data-open-micro]').forEach(btn => {
+    btn.addEventListener('click', () => openMicroappDetail(btn.dataset.openMicro));
+  });
+}
+
+function closeDrawer() {
+  const overlay = document.getElementById('drawerOverlay');
+  if (!overlay) return;
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+function renderAll() {
+  renderTopState();
+  renderLibrary();
+  renderLibraryFoot();
+  renderMicroApps();
+  renderAppPanel();
+  renderTabs();
+  renderDock();
+}
+
+function renderTopState() {
+  const life = getLifecycle();
+  const badge = document.getElementById('lifecycleBadge');
+  const text = document.getElementById('lifecycleText');
+  if (badge && text) {
+    badge.className = `lifecycle ${life.cls}`;
+    text.textContent = life.text;
+    badge.querySelector('.status-dot');
+  }
+  const mini = document.getElementById('appStateMini');
+  if (mini) {
+    mini.className = `lifecycle ${life.cls}`;
+    mini.innerHTML = `<span class="status-dot"></span>${escapeHtml(life.text)}`;
+  }
+
+  const parseBtn = document.getElementById('parseBtn');
+  const lockBtn = document.getElementById('lockBtn');
+  const buildBtn = document.getElementById('buildBtn');
+  const busy = isBusy();
+
+  if (parseBtn) {
+    parseBtn.disabled = busy;
+    parseBtn.classList.toggle('is-busy', state.parseState === 'resolving');
+    parseBtn.innerHTML = `${icon(state.parseState === 'resolving' ? 'refresh' : 'target', 14)}<span>${state.parseState === 'resolving' ? '解析中…' : state.parseState === 'resolved' || state.parseState === 'dirty' ? '重新解析' : '解析依赖'}</span>`;
+    parseBtn.title = state.parseState === 'resolving' ? '正在解析依赖' : '扫描应用、微应用与组件的完整依赖关系';
+  }
+  if (lockBtn) {
+    lockBtn.disabled = busy || !!state.lock || state.parseState !== 'resolved' || state.conflicts.length > 0;
+    lockBtn.innerHTML = `${icon(state.lock ? 'lock' : 'unlock', 14)}<span>${state.lock ? '版本已锁定' : '锁定版本'}</span>`;
+    lockBtn.title = state.lock ? '版本已锁定' : state.conflicts.length ? '存在未处理版本冲突，无法锁定' : state.parseState !== 'resolved' ? '请先完成依赖解析' : '生成完整版本锁定清单';
+  }
+  if (buildBtn) {
+    const buildable = canBuild();
+    buildBtn.disabled = !buildable;
+    buildBtn.classList.toggle('is-busy', state.buildState === 'building');
+    buildBtn.innerHTML = `${icon(state.buildState === 'building' ? 'refresh' : state.buildState === 'built' ? 'check' : 'build', 14)}<span>${state.buildState === 'building' ? '构建中…' : state.buildState === 'built' ? '重新构建' : '构建应用'}</span>`;
+    buildBtn.title = buildable ? '开始生成应用制品' : `无法构建：${getGateReasons().join('；')}`;
+  }
+
+  const parseGate = document.getElementById('gateParse');
+  if (parseGate) {
+    let cls = '';
+    let value = '待执行';
+    if (state.parseState === 'resolving') { cls = 'warn'; value = '解析中'; }
+    else if (state.parseState === 'resolved') { cls = 'done'; value = '已解析'; }
+    else if (state.parseState === 'dirty') { cls = 'warn'; value = '待重新解析'; }
+    parseGate.className = `gate-chip ${cls}`;
+    parseGate.querySelector('.gate-value').textContent = value;
+  }
+  const conflictGate = document.getElementById('gateConflict');
+  if (conflictGate) {
+    let cls = '';
+    let value = '未检测';
+    if (state.parseState === 'resolving') { cls = 'warn'; value = '检测中'; }
+    else if (state.parseState === 'resolved' && state.conflicts.length) { cls = 'attention'; value = `${state.conflicts.length} 个`; }
+    else if (state.parseState === 'resolved') { cls = 'done'; value = '无冲突'; }
+    else if (state.parseState === 'dirty') { cls = 'warn'; value = '待复检'; }
+    conflictGate.className = `gate-chip ${cls}`;
+    conflictGate.querySelector('.gate-value').textContent = value;
+  }
+  const lockGate = document.getElementById('gateLock');
+  if (lockGate) {
+    const cls = state.lock ? 'done' : state.parseState === 'resolved' && !state.conflicts.length ? 'warn' : '';
+    lockGate.className = `gate-chip ${cls}`;
+    lockGate.querySelector('.gate-value').textContent = state.lock ? '已锁定' : '未锁定';
+  }
+  const readiness = document.getElementById('readiness');
+  if (readiness) {
+    const ready = canBuild();
+    readiness.className = `rail-readiness ${ready ? 'is-ready' : 'is-blocked'}`;
+    readiness.querySelector('.readiness-value').textContent = ready ? '可构建' : state.buildState === 'built' ? '已交付' : '未就绪';
+    readiness.title = ready ? '所有构建门禁均已通过' : getGateReasons().join('；');
+  }
+}
+
+function getFilteredComponents() {
+  const keyword = state.search.trim().toLowerCase();
+  return Object.entries(COMPONENTS).filter(([id, comp]) => {
+    if (state.category !== 'all' && comp.category !== state.category) return false;
+    if (!keyword) return true;
+    const deps = (comp.depIds || []).map(d => NODES[d]?.name || '').join(' ');
+    return `${comp.name} ${comp.version} ${comp.description} ${comp.categoryLabel} ${deps}`.toLowerCase().includes(keyword);
+  });
+}
+
+function renderLibrary() {
+  const list = document.getElementById('componentList');
+  if (!list) return;
+  const items = getFilteredComponents();
+  const count = document.getElementById('componentCount');
+  if (count) count.textContent = String(Object.keys(COMPONENTS).length).padStart(2, '0');
+  if (!items.length) {
+    list.innerHTML = `<div class="empty-filter">${icon('search', 18)}<br/>没有匹配的后端组件<br/><span style="color:var(--muted-2)">尝试更换关键词或分类</span></div>`;
+    return;
+  }
+  list.innerHTML = items.map(([id, comp]) => {
+    const deps = (comp.depIds || []).map(depId => NODES[depId]?.name || depId);
+    const depTags = deps.slice(0, 2).map(name => `<span class="dep-tag">${escapeHtml(name)}</span>`).join('');
+    const more = deps.length > 2 ? `<span class="dep-tag more">+${deps.length - 2}</span>` : '';
+    return `
+      <article class="component-card ${state.selectedComponentId === id ? 'selected' : ''} ${state.dragId === id ? 'is-dragging' : ''}"
+        data-component-card="${id}" draggable="true" style="--accent:${comp.accent}" tabindex="0" role="button" aria-label="选择组件 ${escapeHtml(comp.name)}">
+        <div class="comp-top">
+          <span class="drag-grip" aria-hidden="true"><i></i><i></i><i></i></span>
+          <div class="comp-icon">${icon(comp.icon, 14)}</div>
+          <div class="comp-main">
+            <div class="comp-name-row">
+              <span class="comp-name">${escapeHtml(comp.name)}</span>
+              <span class="version-pill">${escapeHtml(comp.version)}</span>
+              ${comp.platform ? `<span class="platform-pill">${icon('shield', 8)}平台级</span>` : ''}
+            </div>
+          </div>
+        </div>
+        <button class="comp-detail-btn" data-detail-component="${id}" title="查看组件详情" aria-label="查看 ${escapeHtml(comp.name)} 详情">${icon('info', 11)}</button>
+        <div class="comp-desc">${escapeHtml(comp.description)}</div>
+        <div class="comp-dep-row">
+          <span class="dep-count">${deps.length} 个直接依赖</span>
+          <div class="dep-tags">${depTags}${more}</div>
+        </div>
+      </article>`;
+  }).join('');
+}
+
+function renderLibraryFoot() {
+  const foot = document.getElementById('libraryFoot');
+  if (!foot) return;
+  if (state.selectedComponentId && COMPONENTS[state.selectedComponentId]) {
+    const comp = COMPONENTS[state.selectedComponentId];
+    foot.innerHTML = `<svg style="color:var(--cyan)"><use href="#i-target"/></svg><span class="selection-note">已选择 ${escapeHtml(comp.name)} ${escapeHtml(comp.version)}</span><span>· 点击微应用「组装组件」</span>`;
+  } else {
+    foot.innerHTML = `<svg><use href="#i-info"/></svg><span>点击选中组件，再点击微应用中的「组装组件」</span>`;
+  }
+}
+
+function renderMicroApps() {
+  const grid = document.getElementById('microGrid');
+  if (!grid) return;
+  grid.innerHTML = MICRO_APPS.map(app => {
+    const refs = state.assembly[app.id] || [];
+    const conflict = state.parseState === 'resolved' && isMicroConflict(app.id);
+    const selected = state.selectedComponentId && COMPONENTS[state.selectedComponentId];
+    const hasSelected = selected && refs.some(r => r.id === selected.id);
+    const addLabel = selected ? (hasSelected ? '已组装 · 选择其他组件' : `＋ 组装 ${selected.name}`) : '＋ 组装组件';
+    const rows = refs.map(ref => {
+      const comp = COMPONENTS[ref.id];
+      const isConflict = state.parseState === 'resolved' && isRefConflict(app.id, ref.id, ref.version);
+      const isAdded = state.lastAdded && state.lastAdded.microId === app.id && state.lastAdded.compId === ref.id;
+      return `<button class="tree-component ${isConflict ? 'version-conflict' : ''} ${isAdded ? 'added-flash' : ''}" data-open-component="${ref.id}" data-version="${ref.version}" data-micro-id="${app.id}" style="--accent:${comp.accent}" title="查看 ${escapeHtml(comp.name)} ${ref.version} 详情">
+        <span class="comp-dot"></span>
+        <span class="tree-name">${escapeHtml(comp.name)}</span>
+        <span class="tree-version">${escapeHtml(ref.version)}</span>
+        ${isConflict ? `<span class="conflict-mark">${icon('warn', 11)}</span>` : ''}
+      </button>`;
+    }).join('');
+    return `
+      <article class="micro-card ${conflict ? 'has-conflict' : ''} ${state.highlightMicro === app.id ? 'locate-pulse' : ''} ${state.lastAdded && state.lastAdded.microId === app.id ? 'is-new-target' : ''}"
+        data-micro-card="${app.id}" data-drop-target="${app.id}" style="--accent:${app.accent}">
+        <div class="micro-head">
+          <div class="micro-icon">${icon(app.icon, 15)}</div>
+          <div class="micro-title-wrap">
+            <div class="micro-title-row"><span class="micro-title">${escapeHtml(app.name)}</span><span class="micro-version">${escapeHtml(app.version)}</span></div>
+            <div class="micro-desc">${escapeHtml(app.description)}</div>
+          </div>
+          <div class="micro-head-right">
+            <span class="micro-count">${refs.length} 组件</span>
+            <button class="micro-expand-btn" data-micro-detail="${app.id}" title="查看微应用依赖详情" aria-label="查看 ${escapeHtml(app.name)} 依赖详情">${icon('chevron', 11)}</button>
+          </div>
+        </div>
+        <div class="micro-tree">${rows}</div>
+        <button class="add-zone ${state.selectedComponentId ? 'has-selection' : ''}" data-add-to="${app.id}">${icon('plus', 11)}<span>${escapeHtml(addLabel)}</span></button>
+      </article>`;
+  }).join('');
+}
+
+function renderAppPanel() {
+  const structure = document.getElementById('appStructure');
+  if (!structure) return;
+  const totalRefs = MICRO_APPS.reduce((sum, app) => sum + (state.assembly[app.id] || []).length, 0);
+  const conflictCount = state.parseState === 'resolved' ? state.conflicts.length : 0;
+  const mMicro = document.getElementById('appMetricMicro');
+  const mComp = document.getElementById('appMetricComponents');
+  const mConflict = document.getElementById('appMetricConflict');
+  const mWrap = document.getElementById('appMetricConflictWrap');
+  if (mMicro) mMicro.textContent = String(MICRO_APPS.length);
+  if (mComp) mComp.textContent = String(totalRefs);
+  if (mConflict) mConflict.textContent = String(conflictCount);
+  if (mWrap) mWrap.className = `app-metric ${conflictCount ? 'alert' : 'ok'}`;
+  const treeCount = document.getElementById('appTreeCount');
+  if (treeCount) treeCount.textContent = `${MICRO_APPS.length} 微应用`;
+
+  structure.innerHTML = MICRO_APPS.map(app => {
+    const refs = state.assembly[app.id] || [];
+    const expanded = state.expandedMicroapps.has(app.id);
+    const focus = state.highlightMicro === app.id || (state.parseState === 'resolved' && isMicroConflict(app.id));
+    const children = refs.map(ref => {
+      const comp = COMPONENTS[ref.id];
+      const conflict = state.parseState === 'resolved' && isRefConflict(app.id, ref.id, ref.version);
+      return `<button class="app-child ${conflict ? 'conflict' : ''}" data-open-component="${ref.id}" data-version="${ref.version}" data-micro-id="${app.id}" style="--accent:${comp.accent}">
+        <span class="app-child-dot"></span>
+        <span class="app-child-name">${escapeHtml(comp.name)}</span>
+        <span class="app-child-version">${escapeHtml(ref.version)}</span>
+        ${conflict ? icon('warn', 9) : ''}
+      </button>`;
+    }).join('');
+    return `
+      <div class="app-micro ${expanded ? 'expanded' : ''} ${focus ? 'conflict-focus' : ''}">
+        <button class="app-micro-head" data-app-toggle="${app.id}" aria-expanded="${expanded}">
+          <span class="branch"></span>
+          <span class="node-dot" style="background:${app.accent}"></span>
+          <span class="app-micro-name">${escapeHtml(app.name)}</span>
+          <span class="app-micro-ver">${escapeHtml(app.version)}</span>
+          <span class="app-micro-count">${refs.length}</span>
+          <svg class="app-micro-chevron"><use href="#i-chevron"/></svg>
+        </button>
+        <div class="app-children">
+          ${children}
+          <div class="app-platform-row">${icon('shield', 8)}平台注入 · 权限服务 v2.1.0</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderTabs() {
+  document.querySelectorAll('.dock-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.tab === state.activeTab);
+  });
+  const overview = document.getElementById('tabBadgeOverview');
+  const graph = document.getElementById('tabBadgeGraph');
+  const shared = document.getElementById('tabBadgeShared');
+  const lock = document.getElementById('tabBadgeLock');
+  const build = document.getElementById('tabBadgeBuild');
+  if (overview) {
+    overview.textContent = state.parseState === 'resolved' ? (state.conflicts.length ? String(state.conflicts.length) : '✓') : '—';
+    overview.className = `tab-badge ${state.conflicts.length ? 'alert' : state.parseState === 'resolved' ? 'ok' : ''}`;
+  }
+  if (graph) {
+    graph.textContent = state.parseState === 'resolved' ? String(getAppTransitiveIds().length + getAllDirectComponentIds().size) : '—';
+    graph.className = 'tab-badge';
+  }
+  if (shared) {
+    shared.textContent = state.parseState === 'resolved' ? String(getSharedDependencies().length) : '—';
+    shared.className = 'tab-badge';
+  }
+  if (lock) {
+    lock.textContent = state.lock ? '✓' : '—';
+    lock.className = `tab-badge ${state.lock ? 'lock' : ''}`;
+  }
+  if (build) {
+    build.textContent = state.buildState === 'built' ? '✓' : state.buildState === 'building' ? '…' : '—';
+    build.className = `tab-badge ${state.buildState === 'built' ? 'ok' : ''}`;
+  }
+  const dockState = document.getElementById('dockState');
+  if (dockState) {
+    let cls = '';
+    let label = '待解析';
+    if (state.buildState === 'building') { cls = 'warn'; label = '构建中'; }
+    else if (state.buildState === 'built') { cls = 'ok'; label = '构建成功'; }
+    else if (state.lock) { cls = 'ok'; label = '版本已锁定'; }
+    else if (state.parseState === 'resolving') { cls = 'warn'; label = '解析中'; }
+    else if (state.parseState === 'resolved' && state.conflicts.length) { cls = 'alert'; label = `${state.conflicts.length} 个冲突`; }
+    else if (state.parseState === 'resolved') { cls = 'ok'; label = '解析完成'; }
+    else if (state.parseState === 'dirty') { cls = 'warn'; label = '待重新解析'; }
+    dockState.className = `dock-state ${cls}`;
+    dockState.innerHTML = `<span class="status-dot"></span>${escapeHtml(label)}`;
+  }
+}
+
+function renderDock() {
+  const content = document.getElementById('dockContent');
+  if (!content) return;
+  let html = '';
+  switch (state.activeTab) {
+    case 'overview': html = renderOverviewTab(); break;
+    case 'graph': html = renderGraphTab(); break;
+    case 'shared': html = renderSharedTab(); break;
+    case 'lock': html = renderLockTab(); break;
+    case 'build': html = renderBuildTab(); break;
+    default: html = renderOverviewTab();
+  }
+  content.innerHTML = `<div class="tab-pane" data-pane="${state.activeTab}">${html}</div>`;
+  content.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', () => handleDockAction(btn.dataset.action, btn));
+  });
+  content.querySelectorAll('[data-locate-micro]').forEach(btn => {
+    btn.addEventListener('click', () => locateMicro(btn.dataset.locateMicro));
+  });
+  content.querySelectorAll('[data-conflict-version]').forEach(el => {
+    el.addEventListener('click', () => {
+      state.selectedConflictVersion = el.dataset.conflictVersion;
+      renderDock();
+    });
+  });
+  content.querySelectorAll('[data-open-component]').forEach(el => {
+    el.addEventListener('click', () => openComponentDetail(el.dataset.openComponent, el.dataset.version, el.dataset.microId));
+  });
+  content.querySelectorAll('[data-open-infra]').forEach(el => {
+    el.addEventListener('click', () => openInfraDetail(el.dataset.openInfra));
+  });
+  content.querySelectorAll('[data-open-micro]').forEach(el => {
+    el.addEventListener('click', () => openMicroappDetail(el.dataset.openMicro));
+  });
+  content.querySelectorAll('[data-node-component]').forEach(el => {
+    el.addEventListener('click', (event) => {
+      event.stopPropagation();
+      openComponentDetail(el.dataset.nodeComponent, el.dataset.version, el.dataset.microId);
+    });
+  });
+  content.querySelectorAll('[data-node-infra]').forEach(el => {
+    el.addEventListener('click', (event) => {
+      event.stopPropagation();
+      openInfraDetail(el.dataset.nodeInfra);
+    });
+  });
+  content.querySelectorAll('[data-node-micro]').forEach(el => {
+    el.addEventListener('click', (event) => {
+      event.stopPropagation();
+      openMicroappDetail(el.dataset.nodeMicro);
+    });
+  });
+}
+
+function handleDockAction(action, el) {
+  if (action === 'parse') parseDependencies();
+  else if (action === 'lock') lockVersions();
+  else if (action === 'build') startBuild();
+  else if (action === 'resolve-conflict') resolveConflict(state.selectedConflictVersion);
+  else if (action === 'focus-conflict') focusConflictInGraph();
+  else if (action === 'goto-graph') { state.activeTab = 'graph'; renderTabs(); renderDock(); }
+  else if (action === 'goto-overview') { state.activeTab = 'overview'; renderTabs(); renderDock(); }
+  else if (action === 'goto-lock') { state.activeTab = 'lock'; renderTabs(); renderDock(); }
+  else if (action === 'goto-build') { state.activeTab = 'build'; renderTabs(); renderDock(); }
+  else if (action === 'locate-micro' && el?.dataset.micro) locateMicro(el.dataset.micro);
+}
+
+function renderOverviewEmpty() {
+  const count = MICRO_APPS.reduce((sum, app) => sum + (state.assembly[app.id] || []).length, 0);
+  const isDirty = state.parseState === 'dirty';
+  return `
+    <div class="dock-empty">
+      <div class="dock-empty-main">
+        <div class="empty-orb">${icon(isDirty ? 'refresh' : 'target', 21)}</div>
+        <div class="empty-copy">
+          <div class="eyebrow">${isDirty ? 'ASSEMBLY CHANGED' : 'DEPENDENCY RESOLUTION'}</div>
+          <h3>${isDirty ? '组装已变更，需要重新解析依赖' : '尚未解析依赖'}</h3>
+          <p>${isDirty ? '组件组装关系已更新，之前的解析结果、版本锁定和构建结果已失效。重新解析以生成最新依赖链路。' : '平台将扫描应用、所有微应用与后端组件，展开传递依赖，识别共享依赖和版本冲突，形成可锁定的依赖解析结果。'}</p>
+          <div class="empty-actions">
+            <button class="btn btn-primary btn-sm" data-action="parse">${icon('target', 12)} ${isDirty ? '重新解析依赖' : '开始解析依赖'}</button>
+            <button class="ghost-btn" data-action="goto-graph">${icon('graph', 11)} 查看关系图</button>
+          </div>
+        </div>
+      </div>
+      <div class="dock-empty">
+        <div class="empty-scope">
+          <div class="scope-card"><span class="scope-num">4</span><span class="scope-label"><b>微应用</b>待扫描装配关系</span></div>
+          <div class="scope-card"><span class="scope-num">${count}</span><span class="scope-label"><b>组件引用</b>直接依赖实例</span></div>
+          <div class="scope-card"><span class="scope-num">4</span><span class="scope-label"><b>传递依赖</b>待展开基础设施</span></div>
+          <div class="scope-card alert"><span class="scope-num">?</span><span class="scope-label"><b>版本一致性</b>解析时自动检测</span></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderResolving() {
+  return `
+    <div class="resolve-console">
+      <div class="resolve-radar">
+        <div class="radar"><div class="radar-cross"></div></div>
+        <div class="radar-state">SCANNING DEPENDENCY GRAPH · ${String(Math.min(state.parseProgress, PARSE_STEPS.length)).padStart(2, '0')}/${String(PARSE_STEPS.length).padStart(2, '0')}</div>
+      </div>
+      <div class="scan-steps">
+        ${PARSE_STEPS.map((step, i) => {
+          const done = i < state.parseProgress;
+          const active = i === state.parseProgress;
+          return `<div class="scan-step ${done ? 'done' : ''} ${active ? 'active' : ''}">
+            <span class="scan-index">${done ? '✓' : String(i + 1).padStart(2, '0')}</span>
+            <span class="scan-label">${escapeHtml(step)}</span>
+            <span class="scan-status">${done ? 'DONE' : active ? 'SCANNING' : 'WAITING'}</span>
+          </div>${active ? `<div class="scan-progress"><span style="width:${Math.max(18, (state.parseProgress / PARSE_STEPS.length) * 100)}%"></span></div>` : ''}`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+function renderOverviewTab() {
+  if (state.parseState === 'idle' || state.parseState === 'dirty') return renderOverviewEmpty();
+  if (state.parseState === 'resolving') return renderResolving();
+  if (state.conflicts.length) return renderConflictOverview();
+  return renderCleanOverview();
+}
+
+function renderConflictOverview() {
+  const metrics = getBuildMetrics();
+  const conflict = state.conflicts[0];
+  const comp = COMPONENTS[conflict.componentId];
+  const selected = conflict.versions.some(v => v.version === state.selectedConflictVersion) ? state.selectedConflictVersion : conflict.recommended;
+  const selectedIsDowngrade = compareVersion(selected, conflict.recommended) < 0;
+  const sourceItems = conflict.versions.map(v => {
+    const isBad = v.version !== conflict.recommended;
+    return `<button class="source-item ${isBad ? '' : 'good'}" data-locate-micro="${v.microapps[0]}">
+      <span class="source-micro"><span class="source-dot"></span>${escapeHtml(getMicro(v.microapps[0]).name)}${v.microapps.length > 1 ? ` +${v.microapps.length - 1}` : ''}</span>
+      <span class="source-version"><span>${escapeHtml(v.version)}</span>${icon('arrow', 9)}</span>
+    </button>`;
+  }).join('');
+  return `
+    <div class="overview-grid">
+      <div class="resolution-card">
+        <div class="res-head">
+          <div class="res-orb">${icon('warn', 15)}</div>
+          <div class="res-copy">
+            <div class="res-eyebrow">RESOLUTION REPORT · CONFLICT</div>
+            <div class="res-title">依赖解析完成，发现 ${state.conflicts.length} 个版本冲突</div>
+            <div class="res-sub">同一应用内引用同一组件的不同版本，需统一版本后才能锁定与构建。</div>
+          </div>
+        </div>
+        <div class="res-stats">
+          <div class="res-stat"><strong>${metrics.microapps}</strong><span>微应用</span></div>
+          <div class="res-stat"><strong>${metrics.direct}</strong><span>直接组件</span></div>
+          <div class="res-stat"><strong>${metrics.transitive}</strong><span>传递依赖</span></div>
+          <div class="res-stat alert"><strong>${state.conflicts.length}</strong><span>版本冲突</span></div>
+        </div>
+        <div class="res-footer">
+          <span class="mini-note">${icon('shared', 10)}${metrics.shared} 个共享依赖 · 已识别去重关系</span>
+          <button class="link-btn" data-action="focus-conflict">${icon('target', 10)}在关系图中定位冲突</button>
+        </div>
+      </div>
+      <div class="conflict-panel">
+        <div class="conflict-top">
+          <div class="conflict-badge">${icon('warn', 12)}</div>
+          <div class="conflict-copy">
+            <div class="eyebrow">VERSION CONFLICT</div>
+            <h3>${escapeHtml(comp.name)} · 存在两个版本</h3>
+            <p>当前引用：${conflict.versions.map(v => `<b style="color:${v.version === conflict.recommended ? 'var(--green)' : 'var(--red)'}">${v.version}</b>`).join(' / ')} · 建议统一升级至 ${escapeHtml(conflict.recommended)}</p>
+          </div>
+        </div>
+        <div class="conflict-sources">${sourceItems}</div>
+        <div class="conflict-resolve">
+          <div class="version-options">
+            ${conflict.versions.map(v => `<label class="version-option ${selected === v.version ? 'active' : ''}" data-conflict-version="${v.version}">
+              <input type="radio" name="conflictVersion" ${selected === v.version ? 'checked' : ''} />
+              <span>${escapeHtml(v.version)}</span>
+              ${v.version === conflict.recommended ? '<span class="rec">推荐</span>' : (compareVersion(v.version, conflict.recommended) < 0 ? '<span class="downgrade">降级</span>' : '')}
+            </label>`).join('')}
+          </div>
+          <button class="resolve-btn" data-action="resolve-conflict">${selectedIsDowngrade ? '统一降级至 ' : '统一使用 '}${escapeHtml(selected)}</button>
+        </div>
+        <div class="resolve-hint">将更新 1 个微应用中的引用，并重新计算依赖关系</div>
+      </div>
+    </div>`;
+}
+
+function renderCleanOverview() {
+  const metrics = getBuildMetrics();
+  const shared = getSharedDependencies();
+  const authUsage = getInfraUsage('auth').length;
+  const statusEyebrow = state.lock ? 'VERSION LOCKED · READY TO BUILD' : 'RESOLUTION PASSED';
+  const statusTitle = state.lock ? '版本已锁定，应用可以构建' : '依赖解析完成，版本一致性检查通过';
+  const statusSub = state.lock ? '发布后组件库版本升级不会自动影响当前应用。' : '可生成版本锁定清单，固化所有直接依赖与传递依赖版本。';
+  const dedupeItems = [
+    { name: (COMPONENTS['energy-data'] || {}).name, before: getComponentRefs('energy-data').length },
+    { name: '能源指标服务', before: getComponentRefs('metrics').length },
+    { name: '统一认证', before: authUsage }
+  ];
+  return `
+    <div class="overview-grid">
+      <div class="resolution-card ${state.lock ? 'locked' : 'clean'}">
+        <div class="res-head">
+          <div class="res-orb">${icon(state.lock ? 'lock' : 'check', 15)}</div>
+          <div class="res-copy">
+            <div class="res-eyebrow">${statusEyebrow}</div>
+            <div class="res-title">${statusTitle}</div>
+            <div class="res-sub">${statusSub}</div>
+          </div>
+        </div>
+        <div class="res-stats">
+          <div class="res-stat"><strong>${metrics.microapps}</strong><span>微应用</span></div>
+          <div class="res-stat"><strong>${metrics.direct}</strong><span>直接组件</span></div>
+          <div class="res-stat"><strong>${metrics.transitive}</strong><span>传递依赖</span></div>
+          <div class="res-stat ok"><strong>0</strong><span>版本冲突</span></div>
+        </div>
+        <div class="res-footer">
+          <span class="mini-note">${icon('shared', 10)}${shared.length} 个共享依赖 · ${metrics.shared} 组去重</span>
+          <button class="link-btn" data-action="goto-graph">${icon('graph', 10)}查看依赖关系</button>
+          ${state.lock ? `<button class="link-btn" data-action="goto-lock">${icon('lock', 10)}查看锁定清单</button>` : ''}
+        </div>
+      </div>
+      <div class="conflict-panel" style="${state.lock ? 'border-color:rgba(109,150,255,.22);background:rgba(109,150,255,.025)' : 'border-color:rgba(83,217,154,.22);background:rgba(83,217,154,.025)'}">
+        <div class="conflict-top">
+          <div class="conflict-badge" style="${state.lock ? 'color:var(--blue);border-color:rgba(109,150,255,.25);background:rgba(109,150,255,.08)' : 'color:var(--green);border-color:rgba(83,217,154,.25);background:rgba(83,217,154,.08)'}">${icon(state.lock ? 'lock' : 'check', 12)}</div>
+          <div class="conflict-copy">
+            <div class="eyebrow" style="color:${state.lock ? 'var(--blue)' : 'var(--green)'}">DEPENDENCY DEDUPLICATION</div>
+            <h3>${shared.length} 个共享依赖已完成去重</h3>
+            <p>多个微应用引用同一组件时，构建阶段只保留一个共享实例。</p>
+          </div>
+        </div>
+        <div class="clean-dedupe">
+          ${dedupeItems.map(item => `<div class="dedupe-mini"><div class="dedupe-name">${escapeHtml(item.name)}</div><div class="dedupe-nums">${item.before} 引用 → <b>1 实例</b></div></div>`).join('')}
+        </div>
+        <div class="clean-action-row">
+          ${!state.lock
+            ? `<button class="btn btn-primary btn-sm" data-action="lock">${icon('lock', 11)} 锁定版本</button><span class="mini-note">锁定后将生成完整版本清单</span>`
+            : `<button class="btn btn-primary btn-sm" data-action="build" ${canBuild() ? '' : 'disabled'}>${icon('build', 11)} 构建应用</button><span class="mini-note">${canBuild() ? '所有门禁已通过' : getGateReasons().join('；')}</span>`}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderGraphTab() {
+  if (state.parseState !== 'resolved') {
+    return `
+      <div class="dock-empty">
+        <div class="dock-empty-main">
+          <div class="empty-orb">${icon('graph', 21)}</div>
+          <div class="empty-copy">
+            <div class="eyebrow">DEPENDENCY GRAPH</div>
+            <h3>关系图将在依赖解析后生成</h3>
+            <p>关系图会展示应用、微应用、直接组件与传递依赖之间的完整引用链路，并标记共享依赖和版本冲突。</p>
+            <div class="empty-actions"><button class="btn btn-primary btn-sm" data-action="parse">${icon('target', 12)} 解析依赖</button></div>
+          </div>
+        </div>
+        <div class="dock-preview" style="position:relative">
+          <div class="preview-grid"></div>
+          <div class="preview-flow">
+            <div class="preview-node active">应用</div><div class="preview-link"></div>
+            <div class="preview-node">微应用</div><div class="preview-link"></div>
+            <div class="preview-node">组件</div><div class="preview-link"></div>
+            <div class="preview-node">依赖</div>
+          </div>
+          <div class="preview-watermark">GRAPH PREVIEW · WAITING FOR RESOLUTION</div>
+        </div>
+      </div>`;
+  }
+  return renderDependencyGraph();
+}
+
+function renderDependencyGraph() {
+  const width = 1100;
+  const centers = [130, 410, 690, 970];
+  const colWidth = 192;
+  const microY = 48;
+  const microH = 32;
+  const compStart = 96;
+  const compH = 21;
+  const compGap = 4;
+  const maxComponents = Math.max(...MICRO_APPS.map(app => (state.assembly[app.id] || []).length), 1);
+  const sharedY = compStart + maxComponents * (compH + compGap) + 23;
+  const sharedH = 22;
+  const height = sharedY + sharedH + 14;
+  const appX = width / 2 - 116;
+  const appY = 8;
+  const appW = 232;
+  const appH = 30;
+  const conflict = getActiveConflict();
+  const conflictMicro = conflict ? conflict.versions.find(v => v.version !== conflict.recommended)?.microapps[0] : null;
+  const focus = state.focusConflict && conflict;
+  const focusInfra = new Set(conflict ? ['storage', 'auth'] : []);
+  const focusNodes = new Set(['app']);
+  if (focus) {
+    focusNodes.add(`micro:${conflictMicro}`);
+    focusNodes.add(`comp:${conflictMicro}:${conflict.componentId}:${conflict.versions.find(v => v.version !== conflict.recommended)?.version}`);
+    focusInfra.forEach(id => focusNodes.add(`infra:${id}`));
+  }
+
+  let edges = '';
+  let nodes = '';
+  const arrow = (x1, y1, x2, y2, cls = '') => {
+    const mid = (y1 + y2) / 2;
+    return `<path d="M ${x1} ${y1} C ${x1} ${mid}, ${x2} ${mid}, ${x2} ${y2}" fill="none" stroke="rgba(111,158,168,.2)" stroke-width="1" marker-end="url(#graphArrow)" class="graph-edge ${cls}"/>`;
+  };
+  const edgeMeta = [];
+  const addEdge = (path, key, conflictEdge = false, extra = '') => {
+    const dim = focus && !conflictEdge && !(focusNodes.has(key[0]) && focusNodes.has(key[1]));
+    edges += `<path d="${path}" fill="none" stroke="${conflictEdge ? 'rgba(255,107,127,.9)' : extra === 'shared' ? 'rgba(85,224,214,.24)' : 'rgba(111,158,168,.24)'}" stroke-width="${conflictEdge ? 1.3 : 1}" ${extra === 'shared' ? 'stroke-dasharray="3 4"' : ''} marker-end="url(#graphArrow)" class="graph-edge ${dim ? 'dimmed' : ''} ${conflictEdge ? 'conflict-edge' : ''} ${extra === 'shared' ? 'shared-edge' : ''}"/>`;
+  };
+
+  // Application node
+  const appDim = focus && !focusNodes.has('app');
+  nodes += `<g class="graph-node ${appDim ? 'dimmed' : ''}" data-app-node="1">
+    <rect x="${appX}" y="${appY}" width="${appW}" height="${appH}" rx="7" fill="rgba(109,150,255,.1)" stroke="rgba(109,150,255,.38)" class="node-bg"/>
+    <rect x="${appX + 9}" y="${appY + 9}" width="12" height="12" rx="3" fill="rgba(109,150,255,.22)" stroke="rgba(109,150,255,.45)"/>
+    <text x="${appX + 27}" y="${appY + 18.5}" fill="#dce8ff" font-size="10.5" font-weight="600">工厂能源管理平台</text>
+    <text x="${appX + appW - 10}" y="${appY + 18.5}" fill="#7f96c8" font-size="8" text-anchor="end" font-family="monospace">v1.0.0</text>
+    <title>工厂能源管理平台 · v1.0.0</title>
+  </g>`;
+
+  MICRO_APPS.forEach((app, ai) => {
+    const cx = centers[ai];
+    const microKey = `micro:${app.id}`;
+    const microDim = focus && !focusNodes.has(microKey);
+    const appPath = `M ${width / 2} ${appY + appH} C ${width / 2} ${appY + 44}, ${cx} ${microY - 14}, ${cx} ${microY}`;
+    const appDimmed = focus && !(focusNodes.has('app') && focusNodes.has(microKey));
+    edges += `<path d="${appPath}" fill="none" stroke="rgba(85,224,214,.2)" stroke-width="1" marker-end="url(#graphArrow)" class="graph-edge ${appDimmed ? 'dimmed' : ''}"/>`;
+    const microConflict = conflict && conflictMicro === app.id;
+    nodes += `<g class="graph-node ${microDim ? 'dimmed' : ''} ${focus && microConflict ? 'focus-conflict' : ''}" data-node-micro="${app.id}">
+      <rect x="${cx - colWidth / 2}" y="${microY}" width="${colWidth}" height="${microH}" rx="6" fill="${microConflict ? 'rgba(255,107,127,.08)' : 'rgba(15,32,42,.94)'}" stroke="${microConflict ? 'rgba(255,107,127,.45)' : 'rgba(153,195,207,.24)'}" class="node-bg"/>
+      <circle cx="${cx - colWidth / 2 + 10}" cy="${microY + 16}" r="2.4" fill="${app.accent}"/>
+      <text x="${cx - colWidth / 2 + 19}" y="${microY + 19}" fill="${microConflict ? '#ffd2d9' : '#d2e3e6'}" font-size="9.5" font-weight="600">${escapeHtml(app.name)}</text>
+      <text x="${cx + colWidth / 2 - 8}" y="${microY + 19}" fill="#6e8790" font-size="7.5" text-anchor="end" font-family="monospace">${app.version}</text>
+      <title>${escapeHtml(app.name)} ${app.version}</title>
+    </g>`;
+    const refs = state.assembly[app.id] || [];
+    refs.forEach((ref, ri) => {
+      const comp = COMPONENTS[ref.id];
+      const y = compStart + ri * (compH + compGap);
+      const compKey = `comp:${app.id}:${ref.id}:${ref.version}`;
+      const isConflictRef = !!conflict && ref.id === conflict.componentId && ref.version !== conflict.recommended;
+      const dim = focus && !focusNodes.has(compKey);
+      const microPath = `M ${cx} ${microY + microH} L ${cx} ${y}`;
+      const microEdgeDim = focus && !(focusNodes.has(microKey) && focusNodes.has(compKey));
+      edges += `<path d="${microPath}" fill="none" stroke="${isConflictRef ? 'rgba(255,107,127,.9)' : 'rgba(111,158,168,.3)'}" stroke-width="${isConflictRef ? 1.3 : 1}" marker-end="url(#graphArrow)" class="graph-edge ${microEdgeDim ? 'dimmed' : ''} ${isConflictRef ? 'conflict-edge' : ''}"/>`;
+      nodes += `<g class="graph-node ${dim ? 'dimmed' : ''} ${focus && isConflictRef ? 'focus-conflict' : ''}" data-node-component="${ref.id}" data-version="${ref.version}" data-micro-id="${app.id}">
+        <rect x="${cx - colWidth / 2 + 7}" y="${y}" width="${colWidth - 14}" height="${compH}" rx="4" fill="${isConflictRef ? 'rgba(255,107,127,.075)' : 'rgba(255,255,255,.027)'}" stroke="${isConflictRef ? 'rgba(255,107,127,.36)' : 'rgba(153,195,207,.11)'}" class="node-bg"/>
+        <rect x="${cx - colWidth / 2 + 13}" y="${y + 8}" width="4" height="4" rx="1" fill="${comp.accent}"/>
+        <text x="${cx - colWidth / 2 + 22}" y="${y + 13.8}" fill="${isConflictRef ? '#ffcbd3' : '#b9ccd1'}" font-size="8">${escapeHtml(comp.name)}</text>
+        <text x="${cx + colWidth / 2 - 13}" y="${y + 13.8}" fill="${isConflictRef ? '#ff8e9e' : '#637c85'}" font-size="7" text-anchor="end" font-family="monospace">${ref.version}</text>
+        <title>${escapeHtml(comp.name)} ${ref.version} · ${escapeHtml(app.name)}</title>
+      </g>`;
+      const closure = [];
+      traverseDeps(ref.id, new Set([ref.id]), new Set([ref.id]), closure);
+      const infraDeps = closure.filter(id => INFRA[id]);
+      infraDeps.forEach(depId => {
+        const targetIndex = ['storage', 'auth', 'device-master', 'file'].indexOf(depId);
+        if (targetIndex < 0) return;
+        const tx = centers[targetIndex];
+        const path = `M ${cx} ${y + compH} C ${cx} ${y + compH + 20}, ${tx} ${sharedY - 18}, ${tx} ${sharedY}`;
+        const conflictEdge = focus && isConflictRef && focusInfra.has(depId);
+        const compDim = focus && !(focusNodes.has(compKey) && focusNodes.has(`infra:${depId}`));
+        edges += `<path d="${path}" fill="none" stroke="${conflictEdge ? 'rgba(255,107,127,.75)' : 'rgba(85,224,214,.18)'}" stroke-width="${conflictEdge ? 1.2 : .8}" stroke-dasharray="3 4" marker-end="url(#graphArrow)" class="graph-edge ${compDim ? 'dimmed' : ''} ${conflictEdge ? 'conflict-edge' : ''} shared-edge"/>`;
+      });
+    });
+  });
+
+  const infraPositions = [
+    { id: 'storage', name: '数据存储', version: INFRA.storage.version },
+    { id: 'auth', name: '统一认证', version: INFRA.auth.version },
+    { id: 'device-master', name: '设备主数据', version: INFRA['device-master'].version },
+    { id: 'file', name: '文件服务', version: INFRA.file.version }
+  ];
+  infraPositions.forEach((infra, i) => {
+    const cx = centers[i];
+    const usage = getInfraUsage(infra.id).length;
+    const isFocus = focus && focusInfra.has(infra.id);
+    const dim = focus && !focusNodes.has(`infra:${infra.id}`);
+    nodes += `<g class="graph-node ${dim ? 'dimmed' : ''} ${isFocus ? 'focus-conflict' : ''}" data-node-infra="${infra.id}">
+      <rect x="${cx - 84}" y="${sharedY}" width="168" height="${sharedH}" rx="5" fill="${isFocus ? 'rgba(255,107,127,.075)' : 'rgba(85,224,214,.035)'}" stroke="${isFocus ? 'rgba(255,107,127,.45)' : 'rgba(85,224,214,.18)'}" class="node-bg"/>
+      <circle cx="${cx - 71}" cy="${sharedY + 11}" r="2" fill="#71ddd4"/>
+      <text x="${cx - 63}" y="${sharedY + 14.5}" fill="${isFocus ? '#ffcbd3' : '#a8c8cc'}" font-size="8.5">${infra.name}</text>
+      <text x="${cx + 73}" y="${sharedY + 14.5}" fill="#627d86" font-size="7" text-anchor="end" font-family="monospace">${infra.version} · ${usage}引用</text>
+      <title>${infra.name} ${infra.version} · ${usage} 个微应用引用</title>
+    </g>`;
+  });
+
+  return `
+    <div class="graph-toolbar">
+      <div class="graph-legend">
+        <span class="legend-item"><span class="legend-dot"></span>节点</span>
+        <span class="legend-item"><span class="legend-line"></span>直接依赖</span>
+        <span class="legend-item"><span class="legend-line dashed"></span>传递/共享</span>
+        ${conflict ? `<span class="legend-item"><span class="legend-line conflict"></span>冲突路径</span>` : ''}
+      </div>
+      <span class="spacer"></span>
+      <span class="key-hint">点击节点查看详情</span>
+      ${conflict ? `<button class="graph-btn ${state.focusConflict ? 'active' : ''}" data-action="${state.focusConflict ? 'goto-graph' : 'focus-conflict'}">${icon('target', 9)} ${state.focusConflict ? '退出冲突聚焦' : '聚焦冲突'}</button>` : ''}
+    </div>
+    <div class="graph-viewport">
+      <svg class="graph-svg" viewBox="0 0 ${width} ${height}" style="height:${height}px" role="img" aria-label="应用依赖关系图">
+        <defs>
+          <marker id="graphArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(150,185,193,.48)"/>
+          </marker>
+        </defs>
+        ${edges}
+        ${nodes}
+      </svg>
+    </div>`;
+}
+
+function renderSharedTab() {
+  if (state.parseState !== 'resolved') {
+    return `
+      <div class="dock-empty">
+        <div class="dock-empty-main">
+          <div class="empty-orb">${icon('shared', 21)}</div>
+          <div class="empty-copy">
+            <div class="eyebrow">SHARED DEPENDENCIES</div>
+            <h3>解析后查看共享依赖</h3>
+            <p>同一后端组件被多个微应用引用时，会被识别为共享依赖；最终构建只保留一个运行时实例。</p>
+            <div class="empty-actions"><button class="btn btn-primary btn-sm" data-action="parse">${icon('target', 12)} 解析依赖</button></div>
+          </div>
+        </div>
+        <div class="dock-preview">
+          <div class="preview-grid"></div>
+          <div class="preview-flow">
+            <div class="preview-node">能源监测</div><div class="preview-link"></div>
+            <div class="preview-node active">共享实例</div><div class="preview-link"></div>
+            <div class="preview-node">能源分析</div>
+          </div>
+          <div class="preview-watermark">SHARED INSTANCE DEDUPLICATION</div>
+        </div>
+      </div>`;
+  }
+  const shared = getSharedDependencies();
+  const authUsage = getInfraUsage('auth').length;
+  const dedupeRows = [
+    ...shared.slice(0, 3).map(item => ({ name: item.name, before: item.refs.length })),
+    { name: '统一认证', before: authUsage }
+  ];
+  const totalRefs = shared.reduce((sum, item) => sum + item.refs.length, 0);
+  return `
+    <div class="shared-layout" style="grid-template-columns:repeat(${Math.max(shared.length, 1)},minmax(188px,1fr)) minmax(210px,.78fr); overflow-x:auto;">
+      ${shared.map(item => {
+        const comp = COMPONENTS[item.id];
+        return `<div class="shared-card" style="--accent:${comp.accent}">
+          <div class="shared-top">
+            <div class="shared-icon" style="color:${comp.accent};border-color:${comp.accent}33;background:${comp.accent}10">${icon(comp.icon, 13)}</div>
+            <div class="shared-title">
+              <div class="shared-name">${escapeHtml(item.name)}</div>
+              <div class="shared-meta">
+                <span class="version-pill">${escapeHtml(item.version)}</span>
+                ${item.platform ? `<span class="platform-pill">${icon('shield', 8)}平台注入</span>` : ''}
+                ${item.conflict ? `<span class="platform-pill" style="color:var(--red);border-color:rgba(255,107,127,.28);background:rgba(255,107,127,.07)">待统一版本</span>` : ''}
+              </div>
+            </div>
+          </div>
+          <div class="shared-usage"><strong>${item.refs.length}</strong><span>个微应用引用</span></div>
+          <div class="shared-refs">
+            ${item.refs.slice(0, 4).map(ref => `<button class="shared-ref ${ref.version !== (item.versions.length > 1 ? conflictRecommended(item) : ref.version) ? 'conflict' : ''}" data-locate-micro="${ref.microId}">
+              <span class="ref-arrow"></span>
+              <span>${escapeHtml(getMicro(ref.microId).name)}</span>
+              <span class="ref-version">${escapeHtml(ref.version)}</span>
+            </button>`).join('')}
+          </div>
+          <div class="shared-dedupe-foot">
+            <span class="before">原始引用 ${item.refs.length}</span>
+            <span class="after">${icon('check', 9)} 最终实例 1</span>
+          </div>
+        </div>`;
+      }).join('')}
+      <div class="dedupe-panel">
+        <div class="dedupe-panel-head">${icon('shared', 12)}依赖去重</div>
+        <div class="dedupe-panel-sub">同一组件的多份引用在构建阶段合并为单一共享运行时。</div>
+        <div class="dedupe-rows">
+          ${dedupeRows.map(row => `<div class="dedupe-row"><span class="dedupe-label">${escapeHtml(row.name)}</span><span class="dedupe-value">${row.before} → <b>1</b></span></div>`).join('')}
+        </div>
+        <div class="dedupe-visual">
+          <span class="dedupe-l-node" style="left:2px;top:6px"></span>
+          <span class="dedupe-l-node" style="left:2px;top:18px"></span>
+          <span class="dedupe-l-node" style="left:2px;top:30px"></span>
+          <span class="dedupe-line" style="left:7px;top:8px;width:68px;transform:rotate(-8deg)"></span>
+          <span class="dedupe-line" style="left:7px;top:18px;width:68px"></span>
+          <span class="dedupe-line" style="left:7px;top:28px;width:68px;transform:rotate(8deg)"></span>
+          <span class="dedupe-target">运行时实例</span>
+        </div>
+        <div class="dedupe-total"><span>${shared.length} 个共享组件 · ${totalRefs} 处引用</span><strong>→ ${shared.length} 个实例</strong></div>
+      </div>
+    </div>`;
+}
+
+function conflictRecommended(item) {
+  const conflict = state.conflicts.find(c => c.componentId === item.id);
+  return conflict ? conflict.recommended : item.versions[item.versions.length - 1];
+}
+
+function renderLockTab() {
+  if (!state.lock) {
+    let title = '尚未生成版本锁定清单';
+    let desc = '完成依赖解析并处理所有版本冲突后，即可锁定每个微应用与组件的精确版本。';
+    let eyebrow = 'VERSION LOCK';
+    let action = `<button class="btn btn-primary btn-sm" data-action="parse">${icon('target', 12)} 先解析依赖</button>`;
+    let blocked = false;
+    if (state.parseState === 'dirty') {
+      title = '组装已变更，需要重新解析';
+      desc = '组件装配关系已更新，请重新解析依赖并生成新的版本锁定清单。';
+    } else if (state.parseState === 'resolved' && state.conflicts.length) {
+      title = '存在未处理版本冲突';
+      desc = '版本锁定要求同一组件在应用内只使用一个版本。请先统一冲突版本。';
+      eyebrow = 'LOCK BLOCKED · CONFLICT';
+      action = `<button class="btn btn-primary btn-sm" data-action="goto-overview">${icon('warn', 12)} 处理版本冲突</button>`;
+      blocked = true;
+    } else if (state.parseState === 'resolved' && !state.conflicts.length) {
+      title = '依赖解析已通过，可以锁定版本';
+      desc = `将固化 ${getLockedDirectCount()} 个直接依赖版本和 ${getAppTransitiveIds().length} 个传递依赖版本。锁定后组件库升级不会自动影响当前应用。`;
+      eyebrow = 'READY TO LOCK';
+      action = `<button class="btn btn-primary btn-sm" data-action="lock">${icon('lock', 12)} 锁定版本</button>`;
+    }
+    return `
+      <div class="lock-empty">
+        <div class="lock-empty-main">
+          <div class="empty-orb">${icon(blocked ? 'warn' : 'lock', 21)}</div>
+          <div class="empty-copy">
+            <div class="eyebrow">${eyebrow}</div>
+            <h3>${title}</h3>
+            <p>${desc}</p>
+            <div class="empty-actions">${action}</div>
+          </div>
+        </div>
+        <div class="lock-preview">
+          <div class="lock-preview-title">VERSION SNAPSHOT · 锁定内容预览</div>
+          <div class="lock-preview-grid">
+            <div class="lock-preview-item">${icon('layers', 11)}<div>应用版本<span>工厂能源管理平台 v1.0.0</span></div></div>
+            <div class="lock-preview-item">${icon('cube', 11)}<div>微应用版本<span>4 个微应用</span></div></div>
+            <div class="lock-preview-item">${icon('data', 11)}<div>组件版本<span>直接 + 传递依赖</span></div></div>
+            <div class="lock-preview-item">${icon('lock', 11)}<div>不可变快照<span>SHA256 校验摘要</span></div></div>
+          </div>
+        </div>
+      </div>`;
+  }
+  const lock = state.lock;
+  const total = lock.directCount;
+  return `
+    <div class="lock-layout">
+      <div class="lock-meta">
+        <div class="lock-meta-icon">${icon('lock', 12)}</div>
+        <div class="lock-meta-copy"><strong>工厂能源管理平台 v1.0.0 · 版本锁定清单</strong><span>${lock.hash} · 锁定于 ${formatTime(lock.lockedAt)}</span></div>
+        <span class="lock-count">已锁定 ${total} 个依赖版本</span>
+        <button class="ghost-btn" data-action="build" ${canBuild() ? '' : 'disabled'}>${icon('build', 11)} 构建应用</button>
+      </div>
+      <div class="lock-columns">
+        ${MICRO_APPS.map(app => {
+          const refs = state.assembly[app.id] || [];
+          return `<div class="lock-col">
+            <div class="lock-col-head"><span class="lock-col-dot" style="background:${app.accent}"></span><span class="lock-col-name">${escapeHtml(app.name)}</span><span class="lock-col-version">${app.version}</span></div>
+            ${refs.map(ref => {
+              const comp = COMPONENTS[ref.id];
+              return `<div class="lock-row"><span class="lock-branch"></span><span class="lock-name">${escapeHtml(comp.name)}</span><span class="lock-ver">${ref.version}</span></div>`;
+            }).join('')}
+            <div class="lock-row platform"><span class="lock-branch"></span><span class="lock-name">权限服务 · 平台注入</span><span class="lock-ver">v2.1.0</span></div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="lock-note">${icon('lock', 11)}已锁定 ${total} 个直接依赖版本与 ${lock.transitive.length} 个传递依赖版本。当前应用发布后，<b>组件库版本升级不会自动影响该应用</b>。</div>
+    </div>`;
+}
+
+function renderBuildTab() {
+  const metrics = getBuildMetrics();
+  const building = state.buildState === 'building';
+  const built = state.buildState === 'built';
+  const reasons = getGateReasons();
+  const ready = canBuild();
+  const pid = building ? state.buildStep : built ? BUILD_STEPS.length : 0;
+  const gateRows = [
+    { label: '依赖解析完成', done: state.parseState === 'resolved', blocked: state.parseState !== 'resolved', action: state.parseState !== 'resolved' ? 'parse' : '', actionText: '去解析' },
+    { label: '无未处理版本冲突', done: state.parseState === 'resolved' && state.conflicts.length === 0, blocked: state.conflicts.length > 0, action: state.conflicts.length ? 'goto-overview' : '', actionText: '去处理' },
+    { label: '版本已锁定', done: !!state.lock, blocked: !state.lock, action: !state.lock ? 'lock' : '', actionText: '去锁定' }
+  ];
+  let body = '';
+  if (building || built) {
+    const logLines = BUILD_STEPS.slice(0, pid).map(step => `<div><span class="log-ok">✓</span> ${escapeHtml(step.label)}</div>`).join('');
+    body = `
+      <div class="build-body">
+        <div class="build-gate-card">
+          <div class="build-gate-title">${icon('terminal', 11)} 构建执行日志</div>
+          <div class="build-log">${logLines}${building ? '<div><span class="log-cursor">▌</span> 正在执行 ' + escapeHtml(BUILD_STEPS[Math.min(pid, BUILD_STEPS.length - 1)].label) + ' ...</div>' : '<div><span class="log-ok">✓</span> BUILD SUCCESS · 应用制品已生成</div>'}</div>
+          <div class="build-progress"><span style="width:${(pid / BUILD_STEPS.length) * 100}%"></span></div>
+          <div class="build-summary-foot">${building ? `${icon('refresh', 9)} 构建进行中 · ${pid}/${BUILD_STEPS.length}` : `${icon('check', 9)} 构建完成 · ${formatTime(state.builtAt || new Date())}`}</div>
+        </div>
+        <div class="build-summary-card">
+          <div class="build-summary-head">
+            <span class="build-success-badge">${icon(built ? 'check' : 'refresh', 8)} ${built ? 'SUCCESS' : 'BUILDING'}</span>
+            <span class="build-app-name">工厂能源管理平台</span><span class="build-app-version">v1.0.0</span>
+          </div>
+          <div class="build-metrics">
+            <div class="build-metric"><strong>${metrics.microapps}</strong><span>微应用</span></div>
+            <div class="build-metric"><strong>${metrics.direct}</strong><span>直接组件</span></div>
+            <div class="build-metric"><strong>${metrics.transitive}</strong><span>传递依赖</span></div>
+            <div class="build-metric"><strong>${metrics.shared}</strong><span>共享依赖</span></div>
+            <div class="build-metric"><strong>${metrics.finalInstances}</strong><span>最终实例</span></div>
+          </div>
+          <div class="build-summary-foot">${icon(built ? 'check' : 'refresh', 9)} ${built ? '应用制品已生成，可进入发布流程' : `正在生成构建清单 · ${pid}/${BUILD_STEPS.length} 步完成`}</div>
+        </div>
+      </div>`;
+  } else {
+    body = `
+      <div class="build-body">
+        <div class="build-gate-card">
+          <div class="build-gate-title">${icon(ready ? 'check' : 'warn', 11)} 构建门禁</div>
+          <div class="build-gate-list">
+            ${gateRows.map(row => `<div class="gate-row ${row.done ? 'done' : row.blocked ? 'blocked' : ''}">
+              <span class="gate-check">${row.done ? icon('check', 8) : row.blocked ? icon('warn', 8) : icon('minus', 8)}</span>
+              <span>${row.label}</span>
+              ${!row.done && row.action ? `<button class="link-btn gate-row-action" data-action="${row.action}">${row.actionText} →</button>` : ''}
+            </div>`).join('')}
+          </div>
+          <div class="build-gate-footer">
+            ${ready ? `<button class="btn btn-primary btn-sm" data-action="build">${icon('build', 11)} 开始构建</button><span>所有门禁已通过</span>` : `<span>${escapeHtml(reasons.join('；'))}</span>`}
+          </div>
+        </div>
+        <div class="build-summary-card" style="border-color:rgba(246,191,91,.16);background:linear-gradient(140deg,rgba(246,191,91,.045),rgba(255,255,255,.008))">
+          <div class="build-summary-head">
+            <span class="build-success-badge" style="color:var(--amber);border-color:rgba(246,191,91,.24);background:rgba(246,191,91,.07)">${icon('warn', 8)} ${ready ? 'READY' : 'BLOCKED'}</span>
+            <span class="build-app-name">构建制品预览</span><span class="build-app-version">v1.0.0</span>
+          </div>
+          <div class="build-metrics">
+            <div class="build-metric"><strong>${metrics.microapps}</strong><span>微应用</span></div>
+            <div class="build-metric"><strong>${metrics.direct}</strong><span>直接组件</span></div>
+            <div class="build-metric"><strong>${metrics.transitive}</strong><span>传递依赖</span></div>
+            <div class="build-metric"><strong>${metrics.shared}</strong><span>共享依赖</span></div>
+            <div class="build-metric"><strong>${metrics.finalInstances}</strong><span>最终实例</span></div>
+          </div>
+          <div class="build-summary-foot">${icon(ready ? 'check' : 'warn', 9)} ${ready ? '构建所需条件已满足，点击开始构建' : '完成上方门禁后即可构建应用'}</div>
+        </div>
+      </div>`;
+  }
+  return `
+    <div class="build-layout">
+      <div class="build-pipeline">
+        ${BUILD_STEPS.map((step, i) => {
+          const done = i < pid;
+          const active = building && i === Math.min(pid, BUILD_STEPS.length - 1);
+          return `<div class="build-step ${done ? 'done' : ''} ${active ? 'active' : ''}">
+            <div class="build-step-index">${done ? '✓' : String(i + 1).padStart(2, '0')}</div>
+            <div class="build-step-label">${escapeHtml(step.label)}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      ${body}
+    </div>`;
+}
+
+function openComponentDetail(compId, version, microId) {
+  const comp = COMPONENTS[compId];
+  if (!comp) {
+    if (INFRA[compId]) return openInfraDetail(compId);
+    return;
+  }
+  const displayVersion = version || comp.version;
+  const refs = getComponentRefs(compId);
+  const conflict = state.conflicts.find(c => c.componentId === compId);
+  const isConflict = conflict && displayVersion !== conflict.recommended;
+  const directDeps = (comp.depIds || []).map(depId => ({ id: depId, node: NODES[depId] })).filter(d => d.node);
+  const transitive = [];
+  traverseDeps(compId, new Set([compId]), new Set([compId]), transitive);
+  const transitiveDeps = transitive.filter(id => INFRA[id] || COMPONENTS[id]).map(id => ({ id, node: NODES[id] }));
+  const statusText = isConflict ? '版本冲突引用' : comp.platform ? '平台级共享依赖' : refs.length > 1 ? '共享依赖' : '独立组件';
+  const statusCls = isConflict ? 'warn' : comp.platform ? 'platform' : '';
+  const source = displayVersion !== comp.version ? '组件库 · 历史版本' : '组件库';
+  const refRows = refs.length ? refs.map(ref => {
+    const refConflict = conflict && ref.version !== conflict.recommended;
+    return `<button class="detail-row" data-locate-micro="${ref.microId}">
+      <span class="row-icon" style="--accent:${comp.accent}">${icon('gauge', 10)}</span>
+      <span class="row-main"><span class="row-name">${escapeHtml(getMicro(ref.microId).name)}</span><span class="row-sub">${ref.platform ? '平台运行时自动注入' : '微应用直接组装'}</span></span>
+      <span class="row-version">${escapeHtml(ref.version)}</span>
+      <span class="row-status ${refConflict ? 'warn' : ref.platform ? 'platform' : ''}">${refConflict ? '冲突引用' : ref.platform ? '平台注入' : '已引用'}</span>
+    </button>`;
+  }).join('') : `<div class="drawer-desc">当前没有被任何微应用直接引用。</div>`;
+  const html = `
+    <div class="drawer-head" style="--accent:${comp.accent}">
+      <div class="drawer-icon">${icon(comp.icon, 19)}</div>
+      <div class="drawer-head-copy">
+        <div class="drawer-eyebrow">BACKEND COMPONENT · ${escapeHtml(comp.code || '')}</div>
+        <div class="drawer-title">${escapeHtml(comp.name)} <span class="version-pill">${escapeHtml(displayVersion)}</span>${isConflict ? `<span class="platform-pill" style="color:var(--red);border-color:rgba(255,107,127,.3);background:rgba(255,107,127,.07)">版本冲突</span>` : ''}</div>
+        <div class="drawer-meta"><span class="platform-pill">${icon('cube', 8)}后端组件</span><span class="platform-pill">${icon('layers', 8)}${escapeHtml(comp.categoryLabel)}</span></div>
+      </div>
+      <button class="drawer-close" data-close-drawer aria-label="关闭">${icon('x', 13)}</button>
+    </div>
+    <div class="drawer-body">
+      <div class="drawer-section">
+        <div class="drawer-section-title">组件说明<span class="line"></span></div>
+        <div class="drawer-desc">${escapeHtml(comp.description)}</div>
+      </div>
+      <div class="drawer-section">
+        <div class="drawer-section-title">组件信息<span class="line"></span></div>
+        <div class="detail-grid">
+          <div class="detail-cell"><span>版本</span><strong class="mono">${escapeHtml(displayVersion)}</strong></div>
+          <div class="detail-cell"><span>来源</span><strong>${escapeHtml(source)}</strong></div>
+          <div class="detail-cell"><span>装配引用</span><strong>${refs.length} 个微应用</strong></div>
+          <div class="detail-cell"><span>组件状态</span><strong style="color:${isConflict ? 'var(--red)' : comp.platform ? 'var(--blue)' : refs.length > 1 ? 'var(--green)' : 'var(--muted)'}">${statusText}</strong></div>
+        </div>
+      </div>
+      <div class="drawer-section">
+        <div class="drawer-section-title">被以下微应用使用<span class="line"></span></div>
+        <div class="detail-list">${refRows}</div>
+      </div>
+      <div class="drawer-section">
+        <div class="drawer-section-title">直接依赖<span class="line"></span></div>
+        <div class="detail-list">
+          ${directDeps.length ? directDeps.map(dep => `<button class="detail-row" data-open-component="${dep.id}">
+            <span class="row-icon" style="--accent:${dep.node.accent || '#55e0d6'}">${icon(dep.node.icon || 'cube', 10)}</span>
+            <span class="row-main"><span class="row-name">${escapeHtml(dep.node.name)}</span><span class="row-sub">${dep.id === 'energy-data' ? '后端组件依赖' : '基础设施依赖'}</span></span>
+            <span class="row-version">${escapeHtml(dep.node.version)}</span>${icon('chevron', 9)}
+          </button>`).join('') : `<div class="drawer-desc">无直接依赖。</div>`}
+        </div>
+      </div>
+      ${transitiveDeps.length ? `<div class="drawer-section">
+        <div class="drawer-section-title">传递依赖<span class="line"></span></div>
+        <div class="detail-chips">${transitiveDeps.map(dep => `<span class="detail-chip">${icon('arrow-down', 9)}${escapeHtml(dep.node.name)} <b style="font-family:var(--mono);color:var(--muted-2);font-weight:400">${escapeHtml(dep.node.version)}</b></span>`).join('')}</div>
+      </div>` : ''}
+      ${isConflict ? `<div class="detail-note">${icon('warn', 11)}当前引用版本 ${escapeHtml(displayVersion)} 与应用内推荐版本 ${escapeHtml(conflict.recommended)} 不一致，需要统一版本后才能锁定与构建。</div>` : ''}
+      ${comp.platform ? `<div class="detail-note" style="border-color:rgba(109,150,255,.18);background:rgba(109,150,255,.05);color:#9ab2d8">${icon('shield', 11)}该组件为平台级共享依赖，已自动注入全部微应用，无需手动组装。</div>` : ''}
+    </div>
+    <div class="drawer-actions">
+      ${comp.platform ? `<button class="ghost-btn" data-close-drawer>关闭</button>` : `<button class="btn btn-secondary btn-sm" data-close-drawer>关闭</button><button class="btn btn-primary btn-sm" data-select-assemble="${compId}">${icon('plus', 12)} 选中并组装</button>`}
+    </div>`;
+  openDrawer(html);
+}
+
+function openMicroappDetail(microId) {
+  const app = getMicro(microId);
+  if (!app) return;
+  const refs = state.assembly[microId] || [];
+  const transitive = getMicroTransitiveIds(microId);
+  const compRefs = transitive.filter(id => COMPONENTS[id]);
+  const infraRefs = transitive.filter(id => INFRA[id]);
+  const html = `
+    <div class="drawer-head" style="--accent:${app.accent}">
+      <div class="drawer-icon">${icon(app.icon, 19)}</div>
+      <div class="drawer-head-copy">
+        <div class="drawer-eyebrow">MICRO APPLICATION · ${escapeHtml(app.id.toUpperCase())}</div>
+        <div class="drawer-title">${escapeHtml(app.name)} <span class="version-pill">${app.version}</span></div>
+        <div class="drawer-meta"><span class="platform-pill">${icon('cube', 8)}微应用</span><span class="platform-pill">${icon('layers', 8)}${refs.length} 个直接组件</span></div>
+      </div>
+      <button class="drawer-close" data-close-drawer aria-label="关闭">${icon('x', 13)}</button>
+    </div>
+    <div class="drawer-body">
+      <div class="drawer-section"><div class="drawer-desc">${escapeHtml(app.description)}</div></div>
+      <div class="drawer-section">
+        <div class="drawer-section-title">已组装组件 · 直接依赖<span class="line"></span></div>
+        <div class="detail-tree">
+          ${refs.map(ref => {
+            const comp = COMPONENTS[ref.id];
+            const conflict = state.parseState === 'resolved' && isRefConflict(microId, ref.id, ref.version);
+            return `<button class="detail-tree-row" data-open-component="${ref.id}" data-version="${ref.version}" data-micro-id="${microId}">
+              <span class="mini-dot" style="background:${comp.accent}"></span>
+              <span>${escapeHtml(comp.name)}</span>
+              <span class="tree-ver" style="color:${conflict ? 'var(--red)' : 'var(--muted-2)'}">${ref.version}${conflict ? ' · 冲突' : ''}</span>
+            </button>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="drawer-section">
+        <div class="drawer-section-title">传递依赖<span class="line"></span></div>
+        <div class="detail-chips">
+          ${infraRefs.length ? infraRefs.map(id => `<span class="detail-chip">${icon('arrow-down', 9)}${escapeHtml(INFRA[id].name)} <b style="font-family:var(--mono);color:var(--muted-2);font-weight:400">${INFRA[id].version}</b></span>`).join('') : '<span class="drawer-desc">无传递依赖。</span>'}
+          ${compRefs.length ? compRefs.map(id => `<span class="detail-chip">${icon('cube', 9)}${escapeHtml(COMPONENTS[id].name)}</span>`).join('') : ''}
+        </div>
+      </div>
+      <div class="drawer-section">
+        <div class="drawer-section-title">应用关系<span class="line"></span></div>
+        <div class="detail-grid">
+          <div class="detail-cell"><span>所属应用</span><strong>工厂能源管理平台</strong></div>
+          <div class="detail-cell"><span>应用版本</span><strong class="mono">v1.0.0</strong></div>
+          <div class="detail-cell"><span>共享组件</span><strong>${refs.filter(ref => getComponentRefs(ref.id).length > 1).length} 个</strong></div>
+          <div class="detail-cell"><span>解析状态</span><strong>${state.parseState === 'resolved' ? (isMicroConflict(microId) ? '存在冲突' : '已纳入解析') : '待解析'}</strong></div>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-actions"><button class="btn btn-secondary btn-sm" data-close-drawer>关闭</button></div>`;
+  openDrawer(html);
+}
+
+function openInfraDetail(infraId) {
+  const infra = INFRA[infraId];
+  if (!infra) return;
+  const usage = getInfraUsage(infraId);
+  const html = `
+    <div class="drawer-head" style="--accent:${infra.accent}">
+      <div class="drawer-icon">${icon(infra.icon, 19)}</div>
+      <div class="drawer-head-copy">
+        <div class="drawer-eyebrow">TRANSITIVE DEPENDENCY · INFRASTRUCTURE</div>
+        <div class="drawer-title">${escapeHtml(infra.name)} <span class="version-pill">${infra.version}</span></div>
+        <div class="drawer-meta"><span class="platform-pill">${icon('server', 8)}基础设施依赖</span><span class="platform-pill">${icon('shared', 8)}${usage.length} 个微应用使用</span></div>
+      </div>
+      <button class="drawer-close" data-close-drawer aria-label="关闭">${icon('x', 13)}</button>
+    </div>
+    <div class="drawer-body">
+      <div class="drawer-section"><div class="drawer-desc">${escapeHtml(infra.description)}</div></div>
+      <div class="drawer-section">
+        <div class="drawer-section-title">被以下微应用间接使用<span class="line"></span></div>
+        <div class="detail-list">
+          ${usage.length ? usage.map(id => `<button class="detail-row" data-locate-micro="${id}">
+            <span class="row-icon" style="--accent:${getMicro(id).accent}">${icon('gauge', 10)}</span>
+            <span class="row-main"><span class="row-name">${escapeHtml(getMicro(id).name)}</span><span class="row-sub">通过组件依赖链路间接引用</span></span>
+            <span class="row-status">传递依赖</span>
+          </button>`).join('') : '<div class="drawer-desc">暂无微应用使用。</div>'}
+        </div>
+      </div>
+      <div class="detail-note" style="border-color:rgba(85,224,214,.18);background:rgba(85,224,214,.04);color:#8ebbbd">${icon('check', 11)}该依赖在构建时只保留一个运行时实例，被所有引用链路共享。</div>
+    </div>
+    <div class="drawer-actions"><button class="btn btn-secondary btn-sm" data-close-drawer>关闭</button></div>`;
+  openDrawer(html);
+}
+
+function bindEvents() {
+  document.getElementById('parseBtn').addEventListener('click', parseDependencies);
+  document.getElementById('lockBtn').addEventListener('click', lockVersions);
+  document.getElementById('buildBtn').addEventListener('click', startBuild);
+  document.getElementById('resetBtn').addEventListener('click', resetDemo);
+
+  document.getElementById('gateParse').addEventListener('click', () => {
+    if (state.parseState === 'idle' || state.parseState === 'dirty') parseDependencies();
+    else { state.activeTab = 'overview'; renderTabs(); renderDock(); }
+  });
+  document.getElementById('gateConflict').addEventListener('click', () => {
+    state.activeTab = 'overview'; renderTabs(); renderDock();
+  });
+  document.getElementById('gateLock').addEventListener('click', () => {
+    state.activeTab = 'lock'; renderTabs(); renderDock();
+  });
+
+  const search = document.getElementById('componentSearch');
+  search.addEventListener('input', () => {
+    state.search = search.value;
+    document.getElementById('searchBox').classList.toggle('has-value', !!search.value);
+    renderLibrary();
+  });
+  document.getElementById('searchClear').addEventListener('click', () => {
+    state.search = '';
+    search.value = '';
+    document.getElementById('searchBox').classList.remove('has-value');
+    renderLibrary();
+    search.focus();
+  });
+  document.getElementById('categoryRow').addEventListener('click', (event) => {
+    const chip = event.target.closest('.category-chip');
+    if (!chip) return;
+    state.category = chip.dataset.category;
+    document.querySelectorAll('.category-chip').forEach(el => el.classList.toggle('active', el === chip));
+    renderLibrary();
+  });
+
+  const componentList = document.getElementById('componentList');
+  componentList.addEventListener('click', (event) => {
+    const detailBtn = event.target.closest('[data-detail-component]');
+    if (detailBtn) {
+      event.stopPropagation();
+      openComponentDetail(detailBtn.dataset.detailComponent);
+      return;
+    }
+    const card = event.target.closest('[data-component-card]');
+    if (card) selectComponent(card.dataset.componentCard);
+  });
+  componentList.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    const detailBtn = event.target.closest('[data-detail-component]');
+    if (detailBtn) return;
+    const card = event.target.closest('[data-component-card]');
+    if (card) { event.preventDefault(); selectComponent(card.dataset.componentCard); }
+  });
+  componentList.addEventListener('dragstart', (event) => {
+    const card = event.target.closest('[data-component-card]');
+    if (!card) return;
+    if (isBusy()) { event.preventDefault(); return; }
+    state.dragId = card.dataset.componentCard;
+    card.classList.add('is-dragging');
+    event.dataTransfer.effectAllowed = 'copy';
+    try { event.dataTransfer.setData('text/plain', state.dragId); } catch (e) { /* noop */ }
+  });
+  componentList.addEventListener('dragend', (event) => {
+    const card = event.target.closest('[data-component-card]');
+    if (card) card.classList.remove('is-dragging');
+    state.dragId = null;
+    document.querySelectorAll('.micro-card.drop-active').forEach(el => el.classList.remove('drop-active'));
+  });
+
+  const microGrid = document.getElementById('microGrid');
+  microGrid.addEventListener('click', (event) => {
+    const detailBtn = event.target.closest('[data-micro-detail]');
+    if (detailBtn) { openMicroappDetail(detailBtn.dataset.microDetail); return; }
+    const compBtn = event.target.closest('[data-open-component]');
+    if (compBtn) { openComponentDetail(compBtn.dataset.openComponent, compBtn.dataset.version, compBtn.dataset.microId); return; }
+    const addBtn = event.target.closest('[data-add-to]');
+    if (addBtn) {
+      if (!state.selectedComponentId) {
+        showToast('尚未选择组件', '请先在左侧后端组件库选择一个组件，再点击组装。', 'info');
+        return;
+      }
+      addComponentToMicro(addBtn.dataset.addTo, state.selectedComponentId, 'click');
+    }
+  });
+  microGrid.addEventListener('dragover', (event) => {
+    const card = event.target.closest('[data-drop-target]');
+    if (!card) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+    document.querySelectorAll('.micro-card.drop-active').forEach(el => { if (el !== card) el.classList.remove('drop-active'); });
+    card.classList.add('drop-active');
+  });
+  microGrid.addEventListener('dragleave', (event) => {
+    const card = event.target.closest('[data-drop-target]');
+    if (!card) return;
+    if (!card.contains(event.relatedTarget)) card.classList.remove('drop-active');
+  });
+  microGrid.addEventListener('drop', (event) => {
+    const card = event.target.closest('[data-drop-target]');
+    if (!card) return;
+    event.preventDefault();
+    card.classList.remove('drop-active');
+    let compId = state.dragId;
+    try { compId = event.dataTransfer.getData('text/plain') || compId; } catch (e) { /* noop */ }
+    state.dragId = null;
+    if (compId) addComponentToMicro(card.dataset.dropTarget, compId, 'drag');
+  });
+
+  const appPanel = document.getElementById('appPanel');
+  appPanel.addEventListener('dragover', (event) => {
+    if (!state.dragId && !event.dataTransfer.types.includes('text/plain')) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'none';
+  });
+  appPanel.addEventListener('drop', (event) => {
+    event.preventDefault();
+    appPanel.classList.remove('app-drop-deny');
+    void appPanel.offsetWidth;
+    appPanel.classList.add('app-drop-deny');
+    setTimeout(() => appPanel.classList.remove('app-drop-deny'), 1100);
+    state.dragId = null;
+    document.querySelectorAll('.micro-card.drop-active').forEach(el => el.classList.remove('drop-active'));
+    showToast('应用层不接受后端组件', '微应用必须先完成组件组装，再由微应用组成应用。组件不能直接挂载到应用。', 'error');
+  });
+
+  document.getElementById('appStructure').addEventListener('click', (event) => {
+    const toggle = event.target.closest('[data-app-toggle]');
+    if (toggle) {
+      const id = toggle.dataset.appToggle;
+      if (state.expandedMicroapps.has(id)) state.expandedMicroapps.delete(id);
+      else state.expandedMicroapps.add(id);
+      renderAppPanel();
+      return;
+    }
+    const child = event.target.closest('[data-open-component]');
+    if (child) openComponentDetail(child.dataset.openComponent, child.dataset.version, child.dataset.microId);
+  });
+
+  document.getElementById('dockTabs').addEventListener('click', (event) => {
+    const tab = event.target.closest('.dock-tab');
+    if (tab) setTab(tab.dataset.tab);
+  });
+
+  const overlay = document.getElementById('drawerOverlay');
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) closeDrawer();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && overlay.classList.contains('open')) closeDrawer();
+  });
+}
+
+bindEvents();
+renderAll();
+
+</script>
+</body>
+</html>
