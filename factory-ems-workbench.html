@@ -1972,6 +1972,74 @@ svg { display: block; }
 .app-shell.dock-collapsed .dock-content { display: none; }
 .app-shell.dock-collapsed .dock-collapse svg { transform: rotate(-90deg); }
 
+/* Blocker markers & popup */
+.warn-badge {
+  width: 18px; height: 18px; flex: 0 0 auto; display: inline-grid; place-items: center;
+  padding: 0; border: 1px solid rgba(214, 58, 82, .3); border-radius: 5px;
+  background: rgba(214, 58, 82, .08); color: var(--red); cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, transform .15s ease;
+  vertical-align: middle;
+}
+.warn-badge svg { width: 9px; height: 9px; }
+.warn-badge:hover { background: rgba(214, 58, 82, .16); border-color: rgba(214, 58, 82, .5); transform: translateY(-1px); }
+.warn-badge.tiny { width: 15px; height: 15px; border-radius: 4px; }
+.warn-badge.tiny svg { width: 8px; height: 8px; }
+.warn-badge.head { margin-left: 2px; }
+.dock-tab .warn-badge { margin-left: 1px; }
+
+.blocker-overlay {
+  position: fixed; inset: 0; z-index: 70; display: flex; align-items: center; justify-content: center;
+  padding: 20px; background: rgba(15, 32, 40, .36); backdrop-filter: blur(5px);
+  opacity: 0; visibility: hidden; transition: opacity .2s ease, visibility .2s ease;
+}
+.blocker-overlay.open { opacity: 1; visibility: visible; }
+.blocker-modal {
+  width: min(620px, 94vw); max-height: min(80vh, 740px); display: flex; flex-direction: column;
+  border-radius: 14px; border: 1px solid rgba(20, 52, 64, .16); background: #fff;
+  box-shadow: 0 30px 90px rgba(22, 52, 64, .26);
+  transform: translateY(10px) scale(.99); transition: transform .2s ease;
+}
+.blocker-overlay.open .blocker-modal { transform: none; }
+.blocker-modal-head { flex: 0 0 auto; display: flex; align-items: flex-start; gap: 10px; padding: 16px 18px 12px; border-bottom: 1px solid var(--line); }
+.blocker-modal-head-copy { flex: 1; min-width: 0; }
+.blocker-kicker { color: var(--red); font: 8.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.blocker-modal-head h3 { margin: 4px 0 0; font-size: 16px; letter-spacing: -.02em; line-height: 1.35; }
+.blocker-modal-body { flex: 1; min-height: 0; overflow: auto; padding: 14px 18px; display: flex; flex-direction: column; gap: 9px; }
+.blocker-intro { margin: 0; font-size: 12.5px; line-height: 1.7; color: var(--muted); }
+.blocker-needs-title { font-size: 11.5px; font-weight: 700; color: var(--text); }
+.blocker-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; font-size: 12px; line-height: 1.55; color: #33505b; }
+.blocker-list li::marker { color: var(--cyan); }
+.blocker-outro { padding: 8px 11px; border-left: 2px solid rgba(214, 58, 82, .42); background: rgba(214, 58, 82, .04); border-radius: 0 6px 6px 0; font-size: 11.5px; line-height: 1.6; color: #6b4450; }
+.blocker-modal-foot { flex: 0 0 auto; display: flex; justify-content: flex-end; padding: 10px 18px 14px; border-top: 1px solid var(--line); }
+
+/* Blocker list view */
+.workspace[data-view="blockers"] { grid-template-columns: minmax(0, 1fr); }
+.workspace[data-view="blockers"] .library-panel,
+.workspace[data-view="blockers"] .canvas-panel,
+.workspace[data-view="blockers"] .app-panel { display: none; }
+.blocker-panel { display: none; }
+.workspace[data-view="blockers"] .blocker-panel { display: flex; }
+.blocker-summary { display: flex; align-items: center; gap: 6px; font-size: 9.5px; color: var(--muted-2); }
+.blocker-summary b { color: var(--red); font-weight: 650; }
+.blocker-summary .sep { width: 1px; height: 12px; background: var(--line); }
+.blocker-table-wrap { flex: 1; min-height: 0; overflow: auto; padding: 0 12px 10px; }
+.blocker-table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+.blocker-table th { position: sticky; top: 0; z-index: 1; padding: 8px 12px; text-align: left; background: #f4f9fa; color: var(--muted-2); font-size: 8.6px; font-weight: 650; letter-spacing: .1em; text-transform: uppercase; border-bottom: 1px solid var(--line); }
+.blocker-table th:first-child { width: 132px; }
+.blocker-table th:last-child { width: 128px; text-align: right; }
+.blocker-table td { padding: 11px 12px; border-bottom: 1px solid rgba(20, 52, 64, .07); font-size: 11.5px; vertical-align: middle; }
+.blocker-table tbody tr { transition: background .15s ease; }
+.blocker-table tbody tr:hover { background: rgba(13, 148, 136, .035); }
+.blocker-table tbody tr:last-child td { border-bottom: 0; }
+.blocker-cat { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 9.6px; font-weight: 650; white-space: nowrap; }
+.blocker-cat .idx { font: 7.8px var(--mono); color: var(--muted-2); }
+.blocker-name { color: #17343d; font-weight: 620; font-size: 12px; }
+.blocker-sev { text-align: right; }
+.sev-pill { display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 9px; border-radius: 99px; font-size: 9.6px; font-weight: 650; white-space: nowrap; }
+.sev-pill.high { color: var(--red); background: rgba(214, 58, 82, .08); border: 1px solid rgba(214, 58, 82, .22); }
+.sev-pill.mid { color: #a3660f; background: rgba(183, 121, 31, .09); border: 1px solid rgba(183, 121, 31, .24); }
+.sev-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
 </style>
 </head>
 <body>
@@ -2024,10 +2092,12 @@ svg { display: block; }
       <button class="nav-item" data-view="components">后端组件 <span class="nav-count" id="navCountComponents">6</span></button>
       <button class="nav-item active" data-view="microapps">微应用 <span class="nav-count" id="navCountMicro">5</span></button>
       <button class="nav-item" data-view="app">应用 <span class="nav-count" id="navCountApp">1</span></button>
+      <button class="nav-item" data-view="blockers">卡点清单 <span class="nav-count">12</span></button>
     </nav>
     <div class="top-actions">
       <button class="btn btn-secondary" id="parseBtn"><svg><use href="#i-target"/></svg><span>解析依赖</span></button>
       <button class="btn btn-secondary" id="lockBtn"><svg><use href="#i-lock"/></svg><span>锁定版本</span></button>
+      <button type="button" class="warn-badge" data-blocker="05" title="落地卡点 #05 · 版本锁定对象未定义" aria-label="查看落地卡点 #05"><svg width="9" height="9"><use href="#i-warn"/></svg></button>
       <button class="btn btn-primary" id="buildBtn"><svg><use href="#i-build"/></svg><span>构建应用</span></button>
       <button class="btn-icon" id="resetBtn" title="重置原型演示" aria-label="重置原型演示"><svg width="14" height="14"><use href="#i-refresh"/></svg></button>
     </div>
@@ -2056,7 +2126,7 @@ svg { display: block; }
       <div class="panel-head">
         <div class="panel-step">01</div>
         <div class="panel-heading">
-          <div class="panel-title">后端组件 <span class="count-badge" id="componentCount">06</span></div>
+          <div class="panel-title">后端组件 <span class="count-badge" id="componentCount">06</span> <button type="button" class="warn-badge head" data-blocker="01" title="落地卡点 #01 · 后端组件的技术载体未定义" aria-label="查看落地卡点 #01"><svg width="9" height="9"><use href="#i-warn"/></svg></button></div>
           <div class="panel-desc" id="libraryDesc">资源库 · 选择组件后按向导组装到微应用</div>
         </div>
         <div class="panel-tools"><svg width="13" height="13" style="color:var(--muted-2)"><use href="#i-layers"/></svg></div>
@@ -2137,6 +2207,24 @@ svg { display: block; }
         <span>应用层只接受微应用。后端组件不可直接挂载到应用，必须先在微应用中完成组装。</span>
       </div>
     </section>
+
+  <section class="panel blocker-panel" id="blockerPanel">
+    <div class="panel-head">
+      <div class="panel-step">04</div>
+      <div class="panel-heading">
+        <div class="panel-title">卡点清单 <span class="count-badge">12</span></div>
+        <div class="panel-desc">原型落地前必须定义清楚的技术边界 · 点击页面中的 ⚠ 标记查看详细卡点</div>
+      </div>
+      <div class="panel-tools blocker-summary">
+        <span><b>11</b> 项高</span><span class="sep"></span><span><b style="color:#a3660f">1</b> 项中高</span>
+      </div>
+    </div>
+    <div class="blocker-table-wrap" id="blockerTableWrap"></div>
+    <div class="panel-foot">
+      <svg><use href="#i-info"/></svg>
+      <span>卡点未闭环前，「组件组装 → 依赖解析 → 版本锁定 → 构建交付」仍停留在产品概念层</span>
+    </div>
+  </section>
   </main>
 
   <section class="bottom-dock">
@@ -2144,11 +2232,11 @@ svg { display: block; }
       <div class="dock-brand"><span class="dock-signal"></span>DEPENDENCY CONTROL</div>
       <nav class="dock-tabs" id="dockTabs" aria-label="依赖分析视图">
         <button class="dock-tab active" data-tab="overview">解析结果 <span class="tab-badge" id="tabBadgeOverview">—</span></button>
-        <button class="dock-tab" data-tab="graph">依赖关系 <span class="tab-badge" id="tabBadgeGraph">—</span></button>
-        <button class="dock-tab" data-tab="shared">共享依赖 <span class="tab-badge" id="tabBadgeShared">—</span></button>
+        <button class="dock-tab" data-tab="graph">依赖关系 <span class="tab-badge" id="tabBadgeGraph">—</span><span class="warn-badge tiny" data-blocker="04" role="button" tabindex="0" title="落地卡点 #04 · 依赖关系的权威来源未定义" aria-label="查看落地卡点 #04"><svg width="8" height="8"><use href="#i-warn"/></svg></span></button>
+        <button class="dock-tab" data-tab="shared">共享依赖 <span class="tab-badge" id="tabBadgeShared">—</span><span class="warn-badge tiny" data-blocker="06" role="button" tabindex="0" title="落地卡点 #06 · 共享依赖的注入机制未定义" aria-label="查看落地卡点 #06"><svg width="8" height="8"><use href="#i-warn"/></svg></span></button>
         <button class="dock-tab" data-tab="contract">衔接契约 <span class="tab-badge" id="tabBadgeContract">—</span></button>
         <button class="dock-tab" data-tab="lock">版本锁定 <span class="tab-badge" id="tabBadgeLock">—</span></button>
-        <button class="dock-tab" data-tab="build">构建交付 <span class="tab-badge" id="tabBadgeBuild">—</span></button>
+        <button class="dock-tab" data-tab="build">构建交付 <span class="tab-badge" id="tabBadgeBuild">—</span><span class="warn-badge tiny" data-blocker="09" role="button" tabindex="0" title="落地卡点 #09 · 应用构建产物未定义" aria-label="查看落地卡点 #09"><svg width="8" height="8"><use href="#i-warn"/></svg></span></button>
       </nav>
       <div class="dock-head-right" id="dockHeadRight">
         <span class="dock-state" id="dockState"><span class="status-dot"></span>待解析</span>
@@ -2163,6 +2251,22 @@ svg { display: block; }
 
 <div class="drawer-overlay" id="drawerOverlay" aria-hidden="true">
   <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" id="drawer"></aside>
+</div>
+<div class="blocker-overlay" id="blockerOverlay" aria-hidden="true">
+  <div class="blocker-modal" role="dialog" aria-modal="true" aria-labelledby="blockerModalTitle">
+    <div class="blocker-modal-head">
+      <span class="sev-pill high" id="blockerModalSev"><span class="sev-dot"></span>高</span>
+      <div class="blocker-modal-head-copy">
+        <div class="blocker-kicker" id="blockerModalKicker">落地卡点</div>
+        <h3 id="blockerModalTitle"></h3>
+      </div>
+      <button class="drawer-close" id="blockerModalClose" aria-label="关闭"><svg width="13" height="13"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="blocker-modal-body" id="blockerModalBody"></div>
+    <div class="blocker-modal-foot">
+      <button class="btn btn-secondary btn-sm" id="blockerModalOk">知道了</button>
+    </div>
+  </div>
 </div>
 <div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
 
@@ -2323,6 +2427,121 @@ const APP_CONTRACT = {
   bus: 'EMS EventBus · 全局事件总线'
 };
 
+const BLOCKERS = {
+  '01': {
+    sev: '高',
+    title: '后端组件的技术载体未定义',
+    intro: '当前原型将“后端组件”作为可组装资产，但尚未明确其实际交付形态。',
+    needs: '需要明确：',
+    items: [
+      '组件是否独立部署？',
+      '组件是否对应独立服务？',
+      '组件的代码、运行包、镜像、配置、数据库脚本是否属于组件？',
+      '一个组件是否允许依赖其他组件？',
+      '组件是否允许被多个微应用复用？'
+    ],
+    outro: '否则“组件组装”无法转换成实际构建动作。'
+  },
+  '03': {
+    sev: '高',
+    title: '组件“组装”缺少实际技术动作',
+    intro: '当前原型能够表达“组件属于某微应用”，但没有定义组装后的实际产物。',
+    needs: '需要明确：组件 → 微应用 具体产生的是：',
+    items: ['dependency 声明？', 'API binding？', 'SDK 引用？', '服务注册？', '配置注入？', '运行时依赖？'],
+    outro: '如果无法定义组装动作，当前“拖拽/点击组装”只是产品层概念，无法落到构建系统。'
+  },
+  '04': {
+    sev: '高',
+    title: '依赖关系的权威来源未定义',
+    intro: '当前原型可以解析：组件 A → 组件 B → 基础设施，但尚未明确依赖关系从哪里获得。',
+    needs: '需要明确：',
+    items: ['组件开发者声明？', 'Manifest 声明？', 'Maven/npm/package.json？', '服务注册中心？', '平台人工配置？', '自动扫描？'],
+    extraTitle: '同时需要定义：',
+    extraItems: ['循环依赖如何处理？', '不存在的依赖如何处理？', '依赖版本范围如何表达？'],
+    outro: '没有明确依赖元数据来源，依赖解析无法真正自动化。'
+  },
+  '05': {
+    sev: '高',
+    title: '版本锁定对象未定义',
+    intro: '当前原型支持“版本锁定”，但尚未明确锁定对象。',
+    needs: '需要明确：',
+    items: ['锁定组件版本？', '锁定组件依赖树？', '锁定微应用版本？', '锁定整个应用依赖快照？', '是否生成 lockfile？', 'lockfile 是否作为应用版本的一部分保存？'],
+    outro: '建议最终形成：应用版本 → 微应用版本 → 组件版本 → 传递依赖版本 的完整可追溯关系。'
+  },
+  '06': {
+    sev: '高',
+    title: '共享依赖的注入机制未定义',
+    intro: '当前设计规定平台级组件自动注入全部微应用，但没有定义其技术实现。',
+    needs: '需要明确：',
+    items: ['SDK 注入？', 'Runtime 注入？', 'Gateway？', 'Sidecar？', '服务调用？', '公共运行时？'],
+    extraTitle: '同时需要考虑：',
+    extraItems: ['版本管理', '权限隔离', '多租户', '灰度升级', '单个微应用是否允许覆盖平台版本'],
+    outro: '“平台共享依赖”不能只定义为一个属性，需要定义运行时机制。'
+  },
+  '07': {
+    sev: '高',
+    title: '微应用接入契约缺少校验机制',
+    intro: '当前原型定义了 Route、Mount、Entry、Runtime、Lifecycle、Event，但尚未定义这些契约的来源和验证机制。',
+    needs: '需要明确：',
+    items: ['契约由开发者填写还是平台生成？', '是否通过 Manifest 描述？', '构建时是否校验？', '运行时是否再次校验？', '契约不匹配时如何阻止发布？']
+  },
+  '08': {
+    sev: '高',
+    title: '组件版本与接口兼容性没有建立关系',
+    intro: '当前组件同时存在组件版本、REST API、Event、SPI，但没有定义兼容规则。',
+    needs: '需要明确：',
+    items: ['API Breaking Change 如何识别？', 'Event Schema 如何版本化？', 'SPI 是否兼容？', '组件升级时如何判断已有微应用是否受影响？'],
+    outro: '否则“版本锁定”无法真正保证应用可运行。'
+  },
+  '09': {
+    sev: '高',
+    title: '应用构建产物未定义',
+    intro: '当前原型能够计算“最终实例”，但尚未明确构建最终生成什么。',
+    needs: '应用构建 → ? 是否生成：',
+    items: ['前端制品', '微应用制品', '后端组件镜像', '配置包', '数据库脚本', '部署清单', 'Helm Chart', 'Docker Compose', '应用制品包'],
+    outro: '如果没有明确构建产物，“构建应用”仍然停留在产品概念层。'
+  },
+  '10': {
+    sev: '高',
+    title: '应用配置与组件版本没有分离',
+    intro: '当前原型重点解决“组件版本”，但真实部署还需要处理数据库连接、Redis、MQ、API 地址、服务发现、密钥、环境变量、租户配置。',
+    needs: '需要明确：',
+    items: ['哪些属于组件固有配置？', '哪些属于环境配置？', '哪些属于应用配置？'],
+    outro: '特别需要避免将生产环境密钥打包进组件或应用制品。'
+  },
+  '11': {
+    sev: '高',
+    title: '组件升级缺少影响分析机制',
+    intro: '当前原型可以查看“被哪些微应用使用”，但还没有形成升级影响分析。',
+    needs: '需要支持：',
+    items: ['组件变更 → 受影响微应用', '受影响微应用 → 受影响应用', '契约变化 → 是否允许升级'],
+    outro: '否则组件复用越多，升级风险越大。'
+  },
+  '12': {
+    sev: '中高',
+    title: '构建/部署失败后的版本回滚机制未定义',
+    intro: '当前原型尚未定义构建或部署失败后的回滚路径。',
+    needs: '需要明确：',
+    items: ['构建失败是否生成版本？', '部署失败是否允许回滚？', '回滚对象是应用版本还是组件版本？', '运行时依赖是否跟随回滚？', '数据库变更如何处理？'],
+    outro: '版本锁定、构建、部署、回滚必须形成完整闭环。'
+  }
+};
+
+const BLOCKER_TABLE = [
+  { cat: '组件本身', name: '后端组件到底是什么交付物', sev: 'high', label: '高' },
+  { cat: '组件组装', name: '组件如何真正被微应用使用', sev: 'high', label: '高' },
+  { cat: '依赖', name: '依赖关系由谁定义、如何解析', sev: 'high', label: '高' },
+  { cat: '版本', name: '版本锁定到底锁什么', sev: 'high', label: '高' },
+  { cat: '微应用', name: '微应用的运行时边界如何形成', sev: 'high', label: '高' },
+  { cat: '应用构建', name: '最终应用到底生成什么', sev: 'high', label: '高' },
+  { cat: '部署运行', name: '构建产物如何部署和运行', sev: 'high', label: '高' },
+  { cat: '数据/配置', name: '环境配置、密钥、连接信息怎么处理', sev: 'high', label: '高' },
+  { cat: '跨组件契约', name: 'API/Event/SPI 如何保证兼容', sev: 'high', label: '高' },
+  { cat: '组件升级', name: '一个组件升级会影响哪些微应用', sev: 'high', label: '高' },
+  { cat: '共享依赖', name: '平台级共享依赖到底怎么注入', sev: 'high', label: '高' },
+  { cat: '回滚', name: '构建/部署失败后如何回滚', sev: 'mid', label: '中高' }
+];
+
 const PARSE_STEPS = [
   '扫描应用结构', '扫描微应用装配关系', '扫描后端组件', '展开传递依赖', '识别共享依赖', '检测版本冲突'
 ];
@@ -2427,6 +2646,55 @@ function escapeHtml(str) {
 }
 function icon(name, size = 14) {
   return `<svg width="${size}" height="${size}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+}
+function warnBadge(no, cls = '') {
+  const b = BLOCKERS[no];
+  const tip = `落地卡点 #${no}${b ? ' · ' + b.title : ''}`;
+  return `<button type="button" class="warn-badge ${cls}" data-blocker="${no}" title="${escapeHtml(tip)}" aria-label="查看${escapeHtml(tip)}">${icon('warn', 9)}</button>`;
+}
+function warnTag(no, cls = 'tiny') {
+  const b = BLOCKERS[no];
+  const tip = `落地卡点 #${no}${b ? ' · ' + b.title : ''}`;
+  return `<span class="warn-badge ${cls}" data-blocker="${no}" role="button" tabindex="0" title="${escapeHtml(tip)}" aria-label="查看${escapeHtml(tip)}">${icon('warn', 8)}</span>`;
+}
+function renderBlockers() {
+  const wrap = document.getElementById('blockerTableWrap');
+  if (!wrap || wrap.dataset.rendered === '1') return;
+  wrap.dataset.rendered = '1';
+  wrap.innerHTML = `<table class="blocker-table">
+    <thead><tr><th>类别</th><th>核心卡点</th><th>严重程度</th></tr></thead>
+    <tbody>${BLOCKER_TABLE.map((row, i) => `<tr>
+      <td><span class="blocker-cat"><span class="idx">${String(i + 1).padStart(2, '0')}</span>${escapeHtml(row.cat)}</span></td>
+      <td><span class="blocker-name">${escapeHtml(row.name)}</span></td>
+      <td class="blocker-sev"><span class="sev-pill ${row.sev}"><span class="sev-dot"></span>${row.label}</span></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+function openBlocker(no) {
+  const b = BLOCKERS[no];
+  const overlay = document.getElementById('blockerOverlay');
+  if (!b || !overlay) return;
+  const sev = document.getElementById('blockerModalSev');
+  sev.className = `sev-pill ${b.sev === '中高' ? 'mid' : 'high'}`;
+  sev.innerHTML = `<span class="sev-dot"></span>${escapeHtml(b.sev)}`;
+  document.getElementById('blockerModalKicker').textContent = `落地卡点 #${no}`;
+  document.getElementById('blockerModalTitle').textContent = b.title;
+  document.getElementById('blockerModalBody').innerHTML = `
+    <p class="blocker-intro">${escapeHtml(b.intro)}</p>
+    ${b.needs ? `<div class="blocker-needs-title">${escapeHtml(b.needs)}</div>` : ''}
+    ${b.items ? `<ul class="blocker-list">${b.items.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : ''}
+    ${b.extraTitle ? `<div class="blocker-needs-title">${escapeHtml(b.extraTitle)}</div>` : ''}
+    ${b.extraItems ? `<ul class="blocker-list">${b.extraItems.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : ''}
+    ${b.outro ? `<div class="blocker-outro">${escapeHtml(b.outro)}</div>` : ''}`;
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.getElementById('blockerModalClose').focus();
+}
+function closeBlocker() {
+  const overlay = document.getElementById('blockerOverlay');
+  if (!overlay || !overlay.classList.contains('open')) return;
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden', 'true');
 }
 function formatTime(date = new Date()) {
   const h = String(date.getHours()).padStart(2, '0');
@@ -2673,7 +2941,7 @@ function removeMicroFromApp(microId) {
 }
 
 function setView(view) {
-  if (!['components', 'microapps', 'app'].includes(view)) return;
+  if (!['components', 'microapps', 'app', 'blockers'].includes(view)) return;
   state.view = view;
   if (view !== 'app') state.poolDragId = null;
   renderView();
@@ -2685,6 +2953,7 @@ function renderView() {
   const ws = document.querySelector('.workspace');
   if (!ws) return;
   ws.dataset.view = state.view;
+  renderBlockers();
   document.querySelectorAll('.nav-item').forEach(btn => btn.classList.toggle('active', btn.dataset.view === state.view));
   const navComp = document.getElementById('navCountComponents');
   const navMicro = document.getElementById('navCountMicro');
@@ -3304,7 +3573,7 @@ function renderWizardFocus(app) {
         <div class="pipe-card ${state.lastAdded && state.lastAdded.microId === app.id ? 'is-new-target' : ''}" data-drop-target="${app.id}">
           <div class="pipe-card-header"></div>
           <div class="pipe-card-head">
-            <span class="pipe-card-title">组件装配</span>
+            <span class="pipe-card-title">组件装配</span>${warnBadge('03', 'head')}
             <span class="pipe-card-sub">${refs.length} 已装配 · ${available} 可选</span>
             <div class="pipe-card-tabs">
               <button class="pipe-card-tab ${showMounted ? 'active' : ''}" data-pipe-tab="mounted">已装配 ${refs.length}</button>
@@ -4292,7 +4561,7 @@ function renderBuildTab() {
     body = `
       <div class="build-body">
         <div class="build-gate-card">
-          <div class="build-gate-title">${icon('terminal', 11)} 构建执行日志</div>
+          <div class="build-gate-title">${icon('terminal', 11)} 构建执行日志${warnBadge('12', 'head')}</div>
           <div class="build-log">${logLines}${building ? '<div><span class="log-cursor">▌</span> 正在执行 ' + escapeHtml(BUILD_STEPS[Math.min(pid, BUILD_STEPS.length - 1)].label) + ' ...</div>' : '<div><span class="log-ok">✓</span> BUILD SUCCESS · 应用制品已生成</div>'}</div>
           <div class="build-progress"><span style="width:${(pid / BUILD_STEPS.length) * 100}%"></span></div>
           <div class="build-summary-foot">${building ? `${icon('refresh', 9)} 构建进行中 · ${pid}/${BUILD_STEPS.length}` : `${icon('check', 9)} 构建完成 · ${formatTime(state.builtAt || new Date())}`}</div>
@@ -4300,7 +4569,7 @@ function renderBuildTab() {
         <div class="build-summary-card">
           <div class="build-summary-head">
             <span class="build-success-badge">${icon(built ? 'check' : 'refresh', 8)} ${built ? 'SUCCESS' : 'BUILDING'}</span>
-            <span class="build-app-name">工厂能源管理平台</span><span class="build-app-version">v1.0.0</span>
+            <span class="build-app-name">工厂能源管理平台</span><span class="build-app-version">v1.0.0</span>${warnBadge('10', 'head')}
           </div>
           <div class="build-metrics">
             <div class="build-metric"><strong>${metrics.microapps}</strong><span>微应用</span></div>
@@ -4316,7 +4585,7 @@ function renderBuildTab() {
     body = `
       <div class="build-body">
         <div class="build-gate-card">
-          <div class="build-gate-title">${icon(ready ? 'check' : 'warn', 11)} 构建门禁</div>
+          <div class="build-gate-title">${icon(ready ? 'check' : 'warn', 11)} 构建门禁${warnBadge('12', 'head')}</div>
           <div class="build-gate-list">
             ${gateRows.map(row => `<div class="gate-row ${row.done ? 'done' : row.blocked ? 'blocked' : ''}">
               <span class="gate-check">${row.done ? icon('check', 8) : row.blocked ? icon('warn', 8) : icon('minus', 8)}</span>
@@ -4331,7 +4600,7 @@ function renderBuildTab() {
         <div class="build-summary-card" style="border-color:rgba(183, 121, 31, .16);background:linear-gradient(140deg,rgba(183, 121, 31, .045),rgba(16, 50, 62, .014))">
           <div class="build-summary-head">
             <span class="build-success-badge" style="color:var(--amber);border-color:rgba(183, 121, 31, .24);background:rgba(183, 121, 31, .07)">${icon('warn', 8)} ${ready ? 'READY' : 'BLOCKED'}</span>
-            <span class="build-app-name">构建制品预览</span><span class="build-app-version">v1.0.0</span>
+            <span class="build-app-name">构建制品预览</span><span class="build-app-version">v1.0.0</span>${warnBadge('10', 'head')}
           </div>
           <div class="build-metrics">
             <div class="build-metric"><strong>${metrics.microapps}</strong><span>微应用</span></div>
@@ -4402,7 +4671,7 @@ function openComponentDetail(compId, version, microId) {
         <div class="drawer-desc">${escapeHtml(comp.description)}</div>
       </div>
       <div class="drawer-section">
-        <div class="drawer-section-title">对外接口 · 供微应用插槽绑定<span class="line"></span></div>
+        <div class="drawer-section-title">对外接口 · 供微应用插槽绑定<span class="line"></span>${warnBadge('08', 'head')}</div>
         <div class="iface-list">
           ${comp.provides.map(p => `<div class="iface-row"><b class="iface-pill ${p.type.toLowerCase()}">${p.type}</b><code>${escapeHtml(p.path)}</code><span>${escapeHtml(p.desc)}</span></div>`).join('')}
         </div>
@@ -4418,7 +4687,7 @@ function openComponentDetail(compId, version, microId) {
         </div>
       </div>
       <div class="drawer-section">
-        <div class="drawer-section-title">被以下微应用使用<span class="line"></span></div>
+        <div class="drawer-section-title">被以下微应用使用<span class="line"></span>${warnBadge('11', 'head')}</div>
         <div class="detail-list">${refRows}</div>
       </div>
       <div class="drawer-section">
@@ -4464,7 +4733,7 @@ function openMicroappDetail(microId) {
     <div class="drawer-body">
       <div class="drawer-section"><div class="drawer-desc">${escapeHtml(app.description)}</div></div>
       <div class="drawer-section">
-        <div class="drawer-section-title">接入契约 · 注册到应用运行时<span class="line"></span></div>
+        <div class="drawer-section-title">接入契约 · 注册到应用运行时<span class="line"></span>${warnBadge('07', 'head')}</div>
         <div class="detail-grid">
           <div class="detail-cell"><span>路由</span><strong class="mono">${escapeHtml(app.contract.route)}</strong></div>
           <div class="detail-cell"><span>挂载点</span><strong class="mono">${escapeHtml(app.contract.mount)}</strong></div>
@@ -4802,7 +5071,27 @@ function bindEvents() {
   });
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && overlay.classList.contains('open')) closeDrawer();
+    if (event.key === 'Escape') closeBlocker();
   });
+
+  document.addEventListener('click', (event) => {
+    const badge = event.target.closest('[data-blocker]');
+    if (!badge) return;
+    event.preventDefault();
+    event.stopPropagation();
+    openBlocker(badge.dataset.blocker);
+  }, true);
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    const badge = event.target.closest ? event.target.closest('[data-blocker]') : null;
+    if (!badge) return;
+    event.preventDefault();
+    openBlocker(badge.dataset.blocker);
+  }, true);
+  const blockerOverlay = document.getElementById('blockerOverlay');
+  blockerOverlay.addEventListener('click', (event) => { if (event.target === blockerOverlay) closeBlocker(); });
+  document.getElementById('blockerModalClose').addEventListener('click', closeBlocker);
+  document.getElementById('blockerModalOk').addEventListener('click', closeBlocker);
 }
 
 bindEvents();
