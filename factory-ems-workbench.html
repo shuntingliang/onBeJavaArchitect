@@ -289,6 +289,60 @@ svg { display: block; }
   gap: 10px;
   overflow: hidden;
 }
+[hidden] { display: none !important; }
+.primary-nav { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.nav-item {
+  height: 32px;
+  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: .15s ease;
+}
+.nav-item:hover { color: var(--text); background: rgba(16, 50, 62, .04); }
+.nav-item.active { color: #0b4f4a; background: rgba(13, 148, 136, .09); border-color: rgba(13, 148, 136, .22); }
+.nav-count { min-width: 17px; height: 15px; padding: 0 4px; display: inline-grid; place-items: center; border-radius: 99px; background: rgba(16, 50, 62, .06); color: var(--muted-2); font: 8px var(--mono); }
+.nav-item.active .nav-count { background: rgba(13, 148, 136, .14); color: var(--cyan); }
+.workspace[data-view="components"] { grid-template-columns: minmax(0, 1fr); }
+.workspace[data-view="components"] .canvas-panel,
+.workspace[data-view="components"] .app-panel { display: none; }
+.workspace[data-view="components"] .component-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; align-content: start; }
+.workspace[data-view="microapps"] { grid-template-columns: minmax(280px, .82fr) minmax(0, 2fr); }
+.workspace[data-view="microapps"] .app-panel { display: none; }
+.workspace[data-view="app"] { grid-template-columns: minmax(300px, .86fr) minmax(0, 1.9fr); }
+.workspace[data-view="app"] .library-panel { display: none; }
+.app-pool { flex: 1; min-height: 0; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 5px; }
+.pool-group-label { display: flex; align-items: center; justify-content: space-between; padding: 2px 3px; color: var(--muted-2); font-size: 7.5px; letter-spacing: .05em; }
+.pool-list { display: flex; flex-direction: column; gap: 5px; }
+.pool-card { display: flex; align-items: center; gap: 7px; padding: 7px; border: 1px solid var(--line); border-radius: 8px; background: #fff; transition: .15s ease; }
+.pool-card[draggable="true"] { cursor: grab; }
+.pool-card[draggable="true"]:hover { border-color: rgba(13, 148, 136, .35); box-shadow: 0 6px 16px rgba(22, 52, 64, .07); }
+.pool-card[draggable="true"]:active { cursor: grabbing; }
+.pool-card.in-app { background: rgba(22, 138, 91, .025); border-color: rgba(22, 138, 91, .16); }
+.pool-card.is-dragging { opacity: .45; }
+.pool-grip { flex: 0 0 auto; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 6px; background: rgba(16, 50, 62, .04); }
+.pool-copy { flex: 1; min-width: 0; }
+.pool-name { display: flex; align-items: center; gap: 5px; font-size: 9px; font-weight: 650; }
+.pool-name span { color: var(--muted-2); font: 7px var(--mono); font-weight: 400; }
+.pool-meta { margin-top: 2px; color: var(--muted-2); font-size: 7.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pool-action { flex: 0 0 auto; height: 20px; padding: 0 6px; display: inline-flex; align-items: center; gap: 3px; border-radius: 4px; font-size: 7.5px; }
+.pool-action.add { border: 1px solid rgba(13, 148, 136, .28); background: rgba(13, 148, 136, .06); color: var(--cyan); }
+.pool-action.add:hover { background: rgba(13, 148, 136, .12); }
+.pool-action.remove { border: 1px solid rgba(214, 58, 82, .18); background: rgba(214, 58, 82, .03); color: #b03a4e; }
+.pool-action.remove:hover { background: rgba(214, 58, 82, .09); }
+.pool-empty { padding: 14px; border: 1px dashed var(--line); border-radius: 6px; color: var(--muted-2); font-size: 8px; text-align: center; }
+.app-drop-zone { flex: 0 0 auto; margin: 0 10px 7px; min-height: 32px; display: flex; align-items: center; justify-content: center; gap: 5px; border: 1px dashed rgba(13, 148, 136, .32); border-radius: 7px; background: rgba(13, 148, 136, .035); color: var(--cyan); font-size: 8px; transition: .15s ease; }
+.app-drop-zone.drop-active { border-color: rgba(13, 148, 136, .6); background: rgba(13, 148, 136, .1); }
+.app-panel.app-drop-ready { border-color: rgba(13, 148, 136, .5); box-shadow: 0 0 0 1px rgba(13, 148, 136, .22) inset, 0 16px 40px rgba(13, 148, 136, .08); }
+.app-remove-row { align-self: flex-start; margin: 5px 0 2px 14px; height: 20px; padding: 0 6px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid rgba(214, 58, 82, .18); border-radius: 4px; background: rgba(214, 58, 82, .03); color: #b03a4e; font-size: 7.5px; }
+.app-remove-row:hover { background: rgba(214, 58, 82, .09); }
 .panel {
   position: relative;
   min-width: 0;
@@ -1574,7 +1628,7 @@ svg { display: block; }
   .empty-scope { padding: 4px 0; gap: 4px; }
   .wizard-steps { padding: 4px 6px; }
   .wizard-step b { max-width: 64px; }
-  .wizard-micro-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; align-content: center; }
+  .wizard-micro-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; align-content: center; }
   .wizard-micro { padding: 6px; }
   .wizard-micro-comps, .wizard-micro-hint, .wizard-micro-count { display: none; }
   .wizard-micro-icon { width: 20px; height: 20px; border-radius: 5px; }
@@ -1639,13 +1693,11 @@ svg { display: block; }
         <div class="brand-crumb">APPLICATION FACTORY / ASSEMBLY WORKBENCH</div>
       </div>
     </div>
-    <div class="assembly-pipeline" aria-label="组装层级">
-      <div class="pipeline-step active"><i>01</i><span>后端组件</span></div>
-      <div class="pipeline-arrow"></div>
-      <div class="pipeline-step active"><i>02</i><span>微应用</span></div>
-      <div class="pipeline-arrow"></div>
-      <div class="pipeline-step active"><i>03</i><span>应用</span></div>
-    </div>
+    <nav class="primary-nav" id="primaryNav" aria-label="组装层级">
+      <button class="nav-item" data-view="components">后端组件 <span class="nav-count" id="navCountComponents">6</span></button>
+      <button class="nav-item active" data-view="microapps">微应用 <span class="nav-count" id="navCountMicro">5</span></button>
+      <button class="nav-item" data-view="app">应用 <span class="nav-count" id="navCountApp">1</span></button>
+    </nav>
     <div class="top-actions">
       <button class="btn btn-secondary" id="parseBtn"><svg><use href="#i-target"/></svg><span>解析依赖</span></button>
       <button class="btn btn-secondary" id="lockBtn"><svg><use href="#i-lock"/></svg><span>锁定版本</span></button>
@@ -1672,13 +1724,13 @@ svg { display: block; }
     <div class="key-hint">分步选择微应用与组件</div>
   </div>
 
-  <main class="workspace">
+  <main class="workspace" data-view="microapps">
     <section class="panel library-panel">
       <div class="panel-head">
         <div class="panel-step">01</div>
         <div class="panel-heading">
           <div class="panel-title">后端组件 <span class="count-badge" id="componentCount">06</span></div>
-          <div class="panel-desc">资源库 · 可拖拽到微应用，或选中后组装</div>
+          <div class="panel-desc" id="libraryDesc">资源库 · 选择组件后按向导组装到微应用</div>
         </div>
         <div class="panel-tools"><svg width="13" height="13" style="color:var(--muted-2)"><use href="#i-layers"/></svg></div>
       </div>
@@ -1707,13 +1759,14 @@ svg { display: block; }
       <div class="panel-head">
         <div class="panel-step">02</div>
         <div class="panel-heading">
-          <div class="panel-title">微应用组装区 <span class="count-badge">04</span></div>
-          <div class="panel-desc">选择微应用 → 选择组件 → 确认组装，版本随组装关系冻结</div>
+          <div class="panel-title" id="canvasTitle">微应用组装区 <span class="count-badge">05</span></div>
+          <div class="panel-desc" id="canvasDesc">选择微应用 → 选择组件 → 确认组装，版本随组装关系冻结</div>
         </div>
-        <div class="canvas-head-extra"><span class="pulse-dot"></span><span>ASSEMBLY CANVAS</span></div>
+        <div class="canvas-head-extra"><span class="pulse-dot"></span><span id="canvasKicker">ASSEMBLY CANVAS</span></div>
       </div>
       <div class="micro-grid" id="microGrid"></div>
-      <div class="panel-foot">
+      <div class="app-pool" id="appPool" hidden></div>
+      <div class="panel-foot" id="canvasFoot">
         <svg><use href="#i-cube"/></svg>
         <span>分步组装 · 先选微应用，再选组件并确认；也可从左侧直接拖入当前微应用</span>
       </div>
@@ -1737,7 +1790,7 @@ svg { display: block; }
           </div>
           <span class="lifecycle state-ready" style="height:18px;font-size:8px" id="appStateMini"><span class="status-dot"></span>已组装</span>
         </div>
-        <div class="app-hero-desc">面向工厂能源运营的一体化应用，由 4 个业务微应用组合而成。</div>
+        <div class="app-hero-desc" id="appHeroDesc">面向工厂能源运营的一体化应用，由 4 个业务微应用组合而成。</div>
         <div class="app-metrics">
           <div class="app-metric"><strong id="appMetricMicro">4</strong><span>微应用</span></div>
           <div class="app-metric"><strong id="appMetricComponents">9</strong><span>组件装配</span></div>
@@ -1747,6 +1800,10 @@ svg { display: block; }
       <div class="app-structure-wrap">
         <div class="app-section-label"><span>APPLICATION TREE</span><span class="line"></span><span id="appTreeCount">4 微应用</span></div>
         <div id="appStructure"></div>
+      </div>
+      <div class="app-drop-zone" id="appDropZone">
+        <svg width="11" height="11"><use href="#i-plus"/></svg>
+        <span>拖拽微应用到这里，或在上方微应用池中点击「加入应用」</span>
       </div>
       <div class="app-note" id="appDropNote">
         <svg><use href="#i-info"/></svg>
@@ -1860,6 +1917,14 @@ const MICRO_APPS = [
       { id: 'report', version: 'v1.2.0' },
       { id: 'metrics', version: 'v1.6.0' }
     ]
+  },
+  {
+    id: 'efficiency', name: '能效优化', version: 'v1.0.0', icon: 'chart', accent: '#0d7ea8',
+    description: '基于能耗基线识别节能机会并输出优化建议。',
+    components: [
+      { id: 'metrics', version: 'v1.6.0' },
+      { id: 'report', version: 'v1.2.0' }
+    ]
   }
 ];
 
@@ -1893,6 +1958,9 @@ function createInitialAssembly() {
 
 const state = {
   assembly: createInitialAssembly(),
+  view: 'microapps',
+  appMicroIds: ['monitor', 'analysis', 'alarm', 'report'],
+  poolDragId: null,
   selectedComponentId: null,
   assembleMicroId: null,
   assembleCompId: null,
@@ -1920,6 +1988,8 @@ const state = {
 };
 
 function getMicro(id) { return MICRO_APPS.find(m => m.id === id); }
+function getAppMicroApps() { return MICRO_APPS.filter(app => state.appMicroIds.includes(app.id)); }
+function isMicroInApp(id) { return state.appMicroIds.includes(id); }
 function getCompRef(microId, compId) { return (state.assembly[microId] || []).find(c => c.id === compId); }
 function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s]));
@@ -1936,7 +2006,7 @@ function formatTime(date = new Date()) {
 
 function getAllDirectComponentIds() {
   const set = new Set();
-  for (const app of MICRO_APPS) {
+  for (const app of getAppMicroApps()) {
     for (const c of state.assembly[app.id] || []) set.add(c.id);
   }
   for (const id of PLATFORM_INJECTED) set.add(id);
@@ -1945,12 +2015,12 @@ function getAllDirectComponentIds() {
 
 function getComponentRefs(compId) {
   const refs = [];
-  for (const app of MICRO_APPS) {
+  for (const app of getAppMicroApps()) {
     const ref = (state.assembly[app.id] || []).find(c => c.id === compId);
     if (ref) refs.push({ microId: app.id, version: ref.version, platform: false });
   }
   if (PLATFORM_INJECTED.has(compId)) {
-    for (const app of MICRO_APPS) {
+    for (const app of getAppMicroApps()) {
       if (!refs.some(r => r.microId === app.id)) {
         refs.push({ microId: app.id, version: COMPONENTS[compId].version, platform: true });
       }
@@ -1970,7 +2040,7 @@ function compareVersion(a, b) {
 
 function detectConflicts() {
   const grouped = {};
-  for (const app of MICRO_APPS) {
+  for (const app of getAppMicroApps()) {
     for (const ref of state.assembly[app.id] || []) {
       if (!grouped[ref.id]) grouped[ref.id] = {};
       if (!grouped[ref.id][ref.version]) grouped[ref.id][ref.version] = [];
@@ -2040,7 +2110,7 @@ function getSharedDependencies() {
 
 function getInfraUsage(nodeId) {
   const apps = [];
-  for (const app of MICRO_APPS) {
+  for (const app of getAppMicroApps()) {
     const closure = getMicroTransitiveIds(app.id);
     if (closure.includes(nodeId)) apps.push(app.id);
   }
@@ -2057,22 +2127,22 @@ function getBuildMetrics() {
     if (!PLATFORM_PROVIDED.has(id)) finalInstances++;
   }
   return {
-    microapps: MICRO_APPS.length,
+    microapps: getAppMicroApps().length,
     direct: directSet.size,
     transitive: transitive.length,
     shared: shared.length,
     finalInstances,
-    totalRefs: MICRO_APPS.reduce((sum, app) => sum + (state.assembly[app.id] || []).length, 0),
+    totalRefs: getAppMicroApps().reduce((sum, app) => sum + (state.assembly[app.id] || []).length, 0),
     componentTypes: new Set([...directSet, ...transitive]).size
   };
 }
 
 function getLockedDirectCount() {
-  return MICRO_APPS.reduce((sum, app) => sum + (state.assembly[app.id] || []).length, 0);
+  return getAppMicroApps().reduce((sum, app) => sum + (state.assembly[app.id] || []).length, 0);
 }
 
 function getSignature() {
-  return MICRO_APPS.map(app => app.id + ':' + (state.assembly[app.id] || []).map(c => c.id + '@' + c.version).sort().join(',')).join('|');
+  return getAppMicroApps().map(app => app.id + ':' + (state.assembly[app.id] || []).map(c => c.id + '@' + c.version).sort().join(',')).join('|');
 }
 
 function getActiveConflict() {
@@ -2137,6 +2207,86 @@ function markAssemblyDirty(message) {
   state.focusConflict = false;
   state.selectedConflictVersion = 'v2.0.0';
   if (hadParsed && message) showToast('组装已变更', message, 'warn');
+}
+
+function addMicroToApp(microId) {
+  if (isBusy()) return;
+  const micro = getMicro(microId);
+  if (!micro || isMicroInApp(microId)) return;
+  const hadParsed = state.parseState !== 'idle';
+  state.appMicroIds.push(microId);
+  state.expandedMicroapps.add(microId);
+  markAssemblyDirty(hadParsed ? `${micro.name} 已加入应用，解析结果、锁定与构建结果已失效。` : '');
+  renderAll();
+  if (!hadParsed) showToast('微应用已加入应用', `${micro.name} ${micro.version} 已加入工厂能源管理平台。`, 'success');
+}
+
+function removeMicroFromApp(microId) {
+  if (isBusy()) return;
+  const micro = getMicro(microId);
+  if (!micro || !isMicroInApp(microId)) return;
+  if (state.appMicroIds.length <= 1) {
+    showToast('无法移除', '应用至少需要保留一个微应用。', 'warn');
+    return;
+  }
+  const hadParsed = state.parseState !== 'idle';
+  state.appMicroIds = state.appMicroIds.filter(id => id !== microId);
+  state.expandedMicroapps.delete(microId);
+  if (state.assembleMicroId === microId) {
+    state.assembleMicroId = null;
+    state.assembleCompId = null;
+  }
+  markAssemblyDirty(hadParsed ? `${micro.name} 已移出应用，解析结果、锁定与构建结果已失效。` : '');
+  renderAll();
+  if (!hadParsed) showToast('微应用已移出应用', `${micro.name} 已从工厂能源管理平台移除。`, 'warn');
+}
+
+function setView(view) {
+  if (!['components', 'microapps', 'app'].includes(view)) return;
+  state.view = view;
+  if (view !== 'app') state.poolDragId = null;
+  renderView();
+}
+
+function pad2(num) { return String(num).padStart(2, '0'); }
+
+function renderView() {
+  const ws = document.querySelector('.workspace');
+  if (!ws) return;
+  ws.dataset.view = state.view;
+  document.querySelectorAll('.nav-item').forEach(btn => btn.classList.toggle('active', btn.dataset.view === state.view));
+  const navComp = document.getElementById('navCountComponents');
+  const navMicro = document.getElementById('navCountMicro');
+  const navApp = document.getElementById('navCountApp');
+  if (navComp) navComp.textContent = String(Object.keys(COMPONENTS).length);
+  if (navMicro) navMicro.textContent = String(MICRO_APPS.length);
+  if (navApp) navApp.textContent = '1';
+  const isApp = state.view === 'app';
+  const microGrid = document.getElementById('microGrid');
+  const pool = document.getElementById('appPool');
+  if (microGrid) microGrid.hidden = isApp;
+  if (pool) pool.hidden = !isApp;
+  const title = document.getElementById('canvasTitle');
+  const desc = document.getElementById('canvasDesc');
+  const kicker = document.getElementById('canvasKicker');
+  const foot = document.getElementById('canvasFoot');
+  if (isApp) {
+    if (title) title.innerHTML = `微应用池 <span class="count-badge">${pad2(MICRO_APPS.length - getAppMicroApps().length)}</span>`;
+    if (desc) desc.textContent = '应用仅由微应用组成 · 拖拽或点击加入应用，后端组件不可直接挂载';
+    if (kicker) kicker.textContent = 'MICRO-APP POOL';
+    if (foot) foot.innerHTML = `<svg><use href="#i-info"/></svg><span>应用层只接受微应用；成员变化会使解析、锁定与构建结果失效</span>`;
+    renderAppPool();
+  } else {
+    if (title) title.innerHTML = `微应用组装区 <span class="count-badge">${pad2(MICRO_APPS.length)}</span>`;
+    if (desc) desc.textContent = '选择微应用 → 选择组件 → 确认组装，版本随组装关系冻结';
+    if (kicker) kicker.textContent = 'ASSEMBLY CANVAS';
+    if (foot) foot.innerHTML = `<svg><use href="#i-cube"/></svg><span>分步组装 · 先选微应用，再选组件并确认；也可从左侧直接拖入当前微应用</span>`;
+    renderLibraryFoot();
+    renderMicroApps();
+  }
+  const libDesc = document.getElementById('libraryDesc');
+  if (libDesc) libDesc.textContent = state.view === 'components' ? '组件资源库 · 查看版本、直接依赖与被引用微应用' : '资源库 · 选择组件后按向导组装到微应用';
+  renderAppPanel();
 }
 
 function selectComponent(compId) {
@@ -2324,6 +2474,9 @@ function resetDemo() {
   state.buildTimer = null;
   state.highlightTimer = null;
   state.assembly = createInitialAssembly();
+  state.view = 'microapps';
+  state.appMicroIds = ['monitor', 'analysis', 'alarm', 'report'];
+  state.poolDragId = null;
   state.selectedComponentId = null;
   state.assembleMicroId = null;
   state.assembleCompId = null;
@@ -2365,16 +2518,15 @@ function locateMicro(microId) {
   state.expandedMicroapps.add(microId);
   state.assembleMicroId = microId;
   state.assembleCompId = null;
+  state.view = 'microapps';
   if (state.highlightTimer) clearTimeout(state.highlightTimer);
-  renderMicroApps();
-  renderAppPanel();
+  renderView();
   const card = document.querySelector(`[data-micro-card="${microId}"]`);
   if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   showToast('已定位引用方', `已高亮微应用「${getMicro(microId).name}」及其组件引用。`, 'info');
   state.highlightTimer = setTimeout(() => {
     state.highlightMicro = null;
-    renderMicroApps();
-    renderAppPanel();
+    renderView();
   }, 2200);
 }
 
@@ -2455,9 +2607,7 @@ function closeDrawer() {
 function renderAll() {
   renderTopState();
   renderLibrary();
-  renderLibraryFoot();
-  renderMicroApps();
-  renderAppPanel();
+  renderView();
   renderTabs();
   renderDock();
 }
@@ -2589,7 +2739,9 @@ function renderLibraryFoot() {
   const foot = document.getElementById('libraryFoot');
   if (!foot) return;
   const micro = state.assembleMicroId ? getMicro(state.assembleMicroId) : null;
-  if (state.selectedComponentId && COMPONENTS[state.selectedComponentId]) {
+  if (state.view === 'components') {
+    foot.innerHTML = `<svg><use href="#i-info"/></svg><span>点击组件查看详情与直接依赖；切换到「微应用」菜单进行组装</span>`;
+  } else if (state.selectedComponentId && COMPONENTS[state.selectedComponentId]) {
     const comp = COMPONENTS[state.selectedComponentId];
     const hint = micro ? `· 在中间「确认组装」步骤提交到 ${micro.name}` : '· 再点击中间微应用进入组装向导';
     foot.innerHTML = `<svg style="color:var(--cyan)"><use href="#i-target"/></svg><span class="selection-note">已选择 ${escapeHtml(comp.name)} ${escapeHtml(comp.version)}</span><span>${escapeHtml(hint)}</span>`;
@@ -2749,23 +2901,53 @@ function renderMicroApps() {
   grid.innerHTML = state.assembleCompId ? renderWizardConfirm(app, state.assembleCompId) : renderWizardFocus(app);
 }
 
+function renderAppPool() {
+  const pool = document.getElementById('appPool');
+  if (!pool) return;
+  const outside = MICRO_APPS.filter(m => !isMicroInApp(m.id));
+  const inside = getAppMicroApps();
+  const card = (micro, member) => {
+    const refs = state.assembly[micro.id] || [];
+    return `<div class="pool-card ${member ? 'in-app' : ''}" draggable="${member ? 'false' : 'true'}" data-pool-micro="${micro.id}">
+      <span class="pool-grip" style="color:${micro.accent}">${icon(micro.icon, 12)}</span>
+      <div class="pool-copy">
+        <div class="pool-name">${escapeHtml(micro.name)}<span>${escapeHtml(micro.version)}</span></div>
+        <div class="pool-meta">${refs.length} 个后端组件 · ${refs.map(r => COMPONENTS[r.id].name).slice(0, 2).join(' / ')}</div>
+      </div>
+      ${member
+        ? `<button class="pool-action remove" data-remove-micro="${micro.id}">${icon('x', 9)}移出</button>`
+        : `<button class="pool-action add" data-add-micro="${micro.id}">${icon('plus', 9)}加入</button>`}
+    </div>`;
+  };
+  pool.innerHTML = `
+    <div class="pool-group-label"><span>可加入应用 · ${outside.length}</span><span>拖拽到右侧应用</span></div>
+    <div class="pool-list">${outside.map(m => card(m, false)).join('') || '<div class="pool-empty">全部微应用已加入应用</div>'}</div>
+    <div class="pool-group-label"><span>已在应用中 · ${inside.length}</span><span>可随时移出</span></div>
+    <div class="pool-list">${inside.map(m => card(m, true)).join('')}</div>`;
+}
+
 function renderAppPanel() {
   const structure = document.getElementById('appStructure');
   if (!structure) return;
-  const totalRefs = MICRO_APPS.reduce((sum, app) => sum + (state.assembly[app.id] || []).length, 0);
+  const members = getAppMicroApps();
+  const totalRefs = members.reduce((sum, app) => sum + (state.assembly[app.id] || []).length, 0);
   const conflictCount = state.parseState === 'resolved' ? state.conflicts.length : 0;
   const mMicro = document.getElementById('appMetricMicro');
   const mComp = document.getElementById('appMetricComponents');
   const mConflict = document.getElementById('appMetricConflict');
   const mWrap = document.getElementById('appMetricConflictWrap');
-  if (mMicro) mMicro.textContent = String(MICRO_APPS.length);
+  if (mMicro) mMicro.textContent = String(members.length);
   if (mComp) mComp.textContent = String(totalRefs);
   if (mConflict) mConflict.textContent = String(conflictCount);
   if (mWrap) mWrap.className = `app-metric ${conflictCount ? 'alert' : 'ok'}`;
   const treeCount = document.getElementById('appTreeCount');
-  if (treeCount) treeCount.textContent = `${MICRO_APPS.length} 微应用`;
+  if (treeCount) treeCount.textContent = `${members.length} 微应用`;
+  const heroDesc = document.getElementById('appHeroDesc');
+  if (heroDesc) heroDesc.textContent = `面向工厂能源运营的一体化应用，由 ${members.length} 个业务微应用组合而成。`;
+  const dropZone = document.getElementById('appDropZone');
+  if (dropZone) dropZone.hidden = members.length === MICRO_APPS.length;
 
-  structure.innerHTML = MICRO_APPS.map(app => {
+  structure.innerHTML = members.map(app => {
     const refs = state.assembly[app.id] || [];
     const expanded = state.expandedMicroapps.has(app.id);
     const focus = state.highlightMicro === app.id || (state.parseState === 'resolved' && isMicroConflict(app.id));
@@ -2792,6 +2974,7 @@ function renderAppPanel() {
         <div class="app-children">
           ${children}
           <div class="app-platform-row">${icon('shield', 8)}平台注入 · 权限服务 v2.1.0</div>
+          <button class="app-remove-row" data-remove-micro="${app.id}">${icon('x', 8)}从应用移除该微应用</button>
         </div>
       </div>`;
   }).join('');
@@ -2910,7 +3093,7 @@ function handleDockAction(action, el) {
 }
 
 function renderOverviewEmpty() {
-  const count = MICRO_APPS.reduce((sum, app) => sum + (state.assembly[app.id] || []).length, 0);
+  const count = getAppMicroApps().reduce((sum, app) => sum + (state.assembly[app.id] || []).length, 0);
   const isDirty = state.parseState === 'dirty';
   return `
     <div class="dock-empty">
@@ -3111,14 +3294,18 @@ function renderGraphTab() {
 
 function renderDependencyGraph() {
   const width = 1100;
-  const centers = [130, 410, 690, 970];
-  const colWidth = 192;
+  const apps = getAppMicroApps();
+  const centers = apps.length === 1
+    ? [width / 2]
+    : apps.map((_, i) => 110 + (width - 220) * i / (apps.length - 1));
+  const infraCenters = [220, 440, 660, 880];
+  const colWidth = apps.length > 4 ? 168 : 192;
   const microY = 48;
   const microH = 32;
   const compStart = 96;
   const compH = 21;
   const compGap = 4;
-  const maxComponents = Math.max(...MICRO_APPS.map(app => (state.assembly[app.id] || []).length), 1);
+  const maxComponents = Math.max(...getAppMicroApps().map(app => (state.assembly[app.id] || []).length), 1);
   const sharedY = compStart + maxComponents * (compH + compGap) + 23;
   const sharedH = 22;
   const height = sharedY + sharedH + 14;
@@ -3159,7 +3346,7 @@ function renderDependencyGraph() {
     <title>工厂能源管理平台 · v1.0.0</title>
   </g>`;
 
-  MICRO_APPS.forEach((app, ai) => {
+  apps.forEach((app, ai) => {
     const cx = centers[ai];
     const microKey = `micro:${app.id}`;
     const microDim = focus && !focusNodes.has(microKey);
@@ -3197,7 +3384,7 @@ function renderDependencyGraph() {
       infraDeps.forEach(depId => {
         const targetIndex = ['storage', 'auth', 'device-master', 'file'].indexOf(depId);
         if (targetIndex < 0) return;
-        const tx = centers[targetIndex];
+        const tx = infraCenters[targetIndex];
         const path = `M ${cx} ${y + compH} C ${cx} ${y + compH + 20}, ${tx} ${sharedY - 18}, ${tx} ${sharedY}`;
         const conflictEdge = focus && isConflictRef && focusInfra.has(depId);
         const compDim = focus && !(focusNodes.has(compKey) && focusNodes.has(`infra:${depId}`));
@@ -3213,7 +3400,7 @@ function renderDependencyGraph() {
     { id: 'file', name: '文件服务', version: INFRA.file.version }
   ];
   infraPositions.forEach((infra, i) => {
-    const cx = centers[i];
+    const cx = infraCenters[i];
     const usage = getInfraUsage(infra.id).length;
     const isFocus = focus && focusInfra.has(infra.id);
     const dim = focus && !focusNodes.has(`infra:${infra.id}`);
@@ -3374,7 +3561,7 @@ function renderLockTab() {
           <div class="lock-preview-title">VERSION SNAPSHOT · 锁定内容预览</div>
           <div class="lock-preview-grid">
             <div class="lock-preview-item">${icon('layers', 11)}<div>应用版本<span>工厂能源管理平台 v1.0.0</span></div></div>
-            <div class="lock-preview-item">${icon('cube', 11)}<div>微应用版本<span>4 个微应用</span></div></div>
+            <div class="lock-preview-item">${icon('cube', 11)}<div>微应用版本<span>${getAppMicroApps().length} 个微应用</span></div></div>
             <div class="lock-preview-item">${icon('data', 11)}<div>组件版本<span>直接 + 传递依赖</span></div></div>
             <div class="lock-preview-item">${icon('lock', 11)}<div>不可变快照<span>SHA256 校验摘要</span></div></div>
           </div>
@@ -3392,7 +3579,7 @@ function renderLockTab() {
         <button class="ghost-btn" data-action="build" ${canBuild() ? '' : 'disabled'}>${icon('build', 11)} 构建应用</button>
       </div>
       <div class="lock-columns">
-        ${MICRO_APPS.map(app => {
+        ${getAppMicroApps().map(app => {
           const refs = state.assembly[app.id] || [];
           return `<div class="lock-col">
             <div class="lock-col-head"><span class="lock-col-dot" style="background:${app.accent}"></span><span class="lock-col-name">${escapeHtml(app.name)}</span><span class="lock-col-version">${app.version}</span></div>
@@ -3662,6 +3849,10 @@ function bindEvents() {
   document.getElementById('lockBtn').addEventListener('click', lockVersions);
   document.getElementById('buildBtn').addEventListener('click', startBuild);
   document.getElementById('resetBtn').addEventListener('click', resetDemo);
+  document.getElementById('primaryNav').addEventListener('click', (event) => {
+    const btn = event.target.closest('.nav-item');
+    if (btn) setView(btn.dataset.view);
+  });
 
   document.getElementById('gateParse').addEventListener('click', () => {
     if (state.parseState === 'idle' || state.parseState === 'dirty') parseDependencies();
@@ -3727,6 +3918,30 @@ function bindEvents() {
     if (card) card.classList.remove('is-dragging');
     state.dragId = null;
     document.querySelectorAll('[data-drop-target].drop-active').forEach(el => el.classList.remove('drop-active'));
+  });
+
+  const appPool = document.getElementById('appPool');
+  appPool.addEventListener('click', (event) => {
+    const add = event.target.closest('[data-add-micro]');
+    if (add) { addMicroToApp(add.dataset.addMicro); return; }
+    const remove = event.target.closest('[data-remove-micro]');
+    if (remove) removeMicroFromApp(remove.dataset.removeMicro);
+  });
+  appPool.addEventListener('dragstart', (event) => {
+    const card = event.target.closest('[data-pool-micro]');
+    if (!card || card.getAttribute('draggable') !== 'true' || isBusy()) { event.preventDefault(); return; }
+    state.poolDragId = card.dataset.poolMicro;
+    card.classList.add('is-dragging');
+    event.dataTransfer.effectAllowed = 'copy';
+    try { event.dataTransfer.setData('text/plain', 'micro:' + state.poolDragId); } catch (e) { /* noop */ }
+  });
+  appPool.addEventListener('dragend', (event) => {
+    const card = event.target.closest('[data-pool-micro]');
+    if (card) card.classList.remove('is-dragging');
+    state.poolDragId = null;
+    const zone = document.getElementById('appDropZone');
+    if (zone) zone.classList.remove('drop-active');
+    document.getElementById('appPanel').classList.remove('app-drop-ready');
   });
 
   const microGrid = document.getElementById('microGrid');
@@ -3805,11 +4020,35 @@ function bindEvents() {
 
   const appPanel = document.getElementById('appPanel');
   appPanel.addEventListener('dragover', (event) => {
+    if (state.poolDragId) {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'copy';
+      appPanel.classList.add('app-drop-ready');
+      const zone = document.getElementById('appDropZone');
+      if (zone) zone.classList.add('drop-active');
+      return;
+    }
     if (!state.dragId && !event.dataTransfer.types.includes('text/plain')) return;
     event.preventDefault();
     event.dataTransfer.dropEffect = 'none';
   });
+  appPanel.addEventListener('dragleave', (event) => {
+    if (appPanel.contains(event.relatedTarget)) return;
+    appPanel.classList.remove('app-drop-ready');
+    const zone = document.getElementById('appDropZone');
+    if (zone) zone.classList.remove('drop-active');
+  });
   appPanel.addEventListener('drop', (event) => {
+    const zone = document.getElementById('appDropZone');
+    if (zone) zone.classList.remove('drop-active');
+    appPanel.classList.remove('app-drop-ready');
+    if (state.poolDragId) {
+      event.preventDefault();
+      const microId = state.poolDragId;
+      state.poolDragId = null;
+      addMicroToApp(microId);
+      return;
+    }
     event.preventDefault();
     appPanel.classList.remove('app-drop-deny');
     void appPanel.offsetWidth;
@@ -3821,6 +4060,11 @@ function bindEvents() {
   });
 
   document.getElementById('appStructure').addEventListener('click', (event) => {
+    const remove = event.target.closest('[data-remove-micro]');
+    if (remove) {
+      removeMicroFromApp(remove.dataset.removeMicro);
+      return;
+    }
     const toggle = event.target.closest('[data-app-toggle]');
     if (toggle) {
       const id = toggle.dataset.appToggle;
