@@ -2086,22 +2086,32 @@ svg { display: block; }
 .asset-source-tag i { font-style: normal; color: var(--line-strong); }
 .asset-source-tag:hover { border-color: rgba(13, 148, 136, .55); background: rgba(13, 148, 136, .07); }
 
-.compose-graph { margin-top: 6px; padding: 8px 8px 7px; border: 1px solid rgba(20, 52, 64, .09); border-radius: 8px; background: linear-gradient(180deg, #fbfdfe, #f4f9fa); }
-.cg-sources { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
-.cg-node { min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 5px 4px; border: 1px solid rgba(20, 52, 64, .1); border-radius: 6px; background: #fff; }
-.cg-node i { display: inline-flex; }
-.cg-node span { font-size: 8.8px; color: var(--muted-2); white-space: nowrap; }
-.cg-node b { font: 11.2px var(--mono); color: #22424c; }
-.cg-node.model { border-top: 2px solid #0d9488; } .cg-node.model i { color: #0d9488; }
-.cg-node.script { border-top: 2px solid #b7791f; } .cg-node.script i { color: #b7791f; }
-.cg-node.api { border-top: 2px solid #3b63d8; } .cg-node.api i { color: #3b63d8; }
-.cg-merge { position: relative; height: 24px; margin: 0 16px; border: 1px dashed rgba(13, 148, 136, .28); border-top: 0; border-radius: 0 0 6px 6px; }
-.cg-merge::before { content: ""; position: absolute; left: 50%; top: 0; width: 1px; height: 13px; background: rgba(13, 148, 136, .4); }
-.cg-merge::after { content: ""; position: absolute; left: 50%; bottom: -4px; border-left: 3.5px solid transparent; border-right: 3.5px solid transparent; border-top: 4px solid rgba(13, 148, 136, .55); transform: translateX(-50%); }
-.cg-merge em { position: absolute; left: 50%; top: 2px; transform: translateX(-50%); padding: 0 4px; background: #f8fcfc; color: var(--muted-2); font-size: 8.8px; font-style: normal; white-space: nowrap; }
-.cg-target { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border: 1px solid rgba(13, 148, 136, .35); border-radius: 7px; background: linear-gradient(135deg, rgba(13, 148, 136, .1), rgba(59, 99, 216, .06)); }
+.compose-graph { margin-top: 6px; padding: 8px 8px 9px; border: 1px solid rgba(20, 52, 64, .09); border-radius: 8px; background: linear-gradient(180deg, #fbfdfe, #f4f9fa); }
+.cg-head { display: flex; align-items: center; gap: 5px; margin-bottom: 7px; color: var(--muted); font-size: 9.2px; }
+.cg-layer-tag { height: 18px; padding: 0 6px; display: inline-flex; align-items: center; border-radius: 4px; font-size: 8.8px; font-weight: 650; color: #0b6e64; background: rgba(13, 148, 136, .09); border: 1px solid rgba(13, 148, 136, .22); white-space: nowrap; }
+.cg-layer-tag.target { color: #9b2c3f; background: rgba(214, 58, 82, .07); border-color: rgba(214, 58, 82, .2); }
+.cg-chain { display: flex; flex-direction: column; }
+.cg-step { display: flex; align-items: center; gap: 7px; padding: 6px 8px; border: 1px solid rgba(20, 52, 64, .1); border-left: 3px solid var(--cyan); border-radius: 6px; background: #fff; }
+.cg-step-index { flex: 0 0 auto; width: 17px; height: 17px; display: grid; place-items: center; border-radius: 50%; background: rgba(13, 148, 136, .08); color: var(--cyan); font: 8.8px var(--mono); }
+.cg-step-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.cg-step-name { font-size: 11px; font-weight: 700; color: #1b3742; }
+.cg-step-desc { font-size: 8.8px; color: var(--muted-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cg-step-count { flex: 0 0 auto; text-align: right; }
+.cg-step-count b { display: block; font: 12px var(--mono); color: #22424c; line-height: 1.1; }
+.cg-step-count span { font-size: 8.8px; color: var(--muted-2); }
+.cg-step.model { border-left-color: #0d9488; }
+.cg-step.script { border-left-color: #b7791f; }
+.cg-step.script .cg-step-index { color: #b7791f; background: rgba(183, 121, 31, .1); }
+.cg-step.api { border-left-color: #3b63d8; }
+.cg-step.api .cg-step-index { color: #3b63d8; background: rgba(59, 99, 216, .09); }
+.cg-connector { position: relative; height: 25px; margin-left: 18px; border-left: 1.5px dashed rgba(13, 148, 136, .42); }
+.cg-connector span { position: absolute; left: 9px; top: 3px; padding: 1px 5px; border: 1px solid rgba(20, 52, 64, .1); border-radius: 4px; background: #fff; color: var(--muted); font-size: 8.8px; line-height: 1.25; white-space: nowrap; }
+.cg-connector::after { content: ""; position: absolute; left: -5px; bottom: 0; border-top: 6px solid rgba(13, 148, 136, .5); border-left: 4px solid transparent; border-right: 4px solid transparent; }
+.cg-connector.merge { border-left-color: rgba(13, 148, 136, .58); }
+.cg-connector.merge span { color: #0b6e64; background: rgba(13, 148, 136, .05); border-color: rgba(13, 148, 136, .22); }
+.cg-target { display: flex; align-items: center; gap: 8px; padding: 7px 9px; border: 1px solid rgba(13, 148, 136, .4); border-radius: 7px; background: linear-gradient(135deg, rgba(13, 148, 136, .1), rgba(59, 99, 216, .06)); }
 .cg-target-icon { display: inline-flex; color: var(--cyan); }
-.cg-target-copy { display: flex; flex-direction: column; min-width: 0; }
+.cg-target-copy { display: flex; flex-direction: column; min-width: 0; flex: 1; gap: 3px; }
 .cg-target-copy span { font-size: 8.8px; color: var(--muted-2); }
 .cg-target-copy b { font-size: 10.8px; color: #17343d; }
 .compose-note { margin-top: 6px; padding: 5px 7px; border-left: 2px solid rgba(13, 148, 136, .35); border-radius: 0 4px 4px 0; background: rgba(13, 148, 136, .035); color: var(--muted); font-size: 8.8px; line-height: 1.5; }
@@ -2149,6 +2159,7 @@ svg { display: block; }
 .assemble-canvas .wizard-tree-row { height: auto; min-height: 32px; padding: 4px 8px; }
 .row-assets { display: flex; align-items: center; gap: 3px; flex: 0 0 auto; margin-left: 2px; }
 .row-assets i { font-style: normal; font-size: 8.8px; color: #5b7681; border: 1px solid rgba(20, 52, 64, .1); border-radius: 3px; padding: 0 3px; background: #f7fbfb; white-space: nowrap; }
+.row-assets em { font-style: normal; font-size: 8.8px; color: var(--muted-2); }
 .assemble-canvas .wizard-tree-row .tv { font-size: 8.8px; }
 
 </style>
@@ -2823,18 +2834,33 @@ function renderComponentComposition(compId, comp, displayVersion) {
       </button>`).join('')
     : '<div class="asset-empty">暂无设计资产</div>';
   return `<div class="compose-graph">
-      <div class="cg-sources">
-        <div class="cg-node model"><i>${icon('layers', 10)}</i><span>业务模型</span><b>${a.models.length}</b></div>
-        <div class="cg-node script"><i>${icon('terminal', 10)}</i><span>脚本管理</span><b>${a.scripts.length}</b></div>
-        <div class="cg-node api"><i>${icon('shared', 10)}</i><span>API 管理</span><b>${a.apis.length}</b></div>
-      </div>
-      <div class="cg-merge"><em>组装 / 封装</em></div>
-      <div class="cg-target">
-        <span class="cg-target-icon">${icon('cube', 11)}</span>
-        <span class="cg-target-copy"><span>后端组件</span><b>${escapeHtml(comp.name)} ${escapeHtml(displayVersion)}</b></span>
+      <div class="cg-head"><span class="cg-layer-tag">设计资产</span>组件由以下资产逐步构建形成</div>
+      <div class="cg-chain">
+        <div class="cg-step model">
+          <span class="cg-step-index">01</span>
+          <span class="cg-step-main"><span class="cg-step-name">业务模型</span><span class="cg-step-desc">业务对象 · 数据结构 · 业务关系</span></span>
+          <span class="cg-step-count"><b>${a.models.length}</b><span>个资产</span></span>
+        </div>
+        <div class="cg-connector"><span>提供业务结构与对象</span></div>
+        <div class="cg-step script">
+          <span class="cg-step-index">02</span>
+          <span class="cg-step-main"><span class="cg-step-name">脚本管理</span><span class="cg-step-desc">计算 · 规则 · 扩展逻辑</span></span>
+          <span class="cg-step-count"><b>${a.scripts.length}</b><span>个脚本</span></span>
+        </div>
+        <div class="cg-connector"><span>提供业务处理逻辑</span></div>
+        <div class="cg-step api">
+          <span class="cg-step-index">03</span>
+          <span class="cg-step-main"><span class="cg-step-name">API 管理</span><span class="cg-step-desc">接口契约 · 调用能力</span></span>
+          <span class="cg-step-count"><b>${a.apis.length}</b><span>个接口</span></span>
+        </div>
+        <div class="cg-connector merge"><span>封装为标准组件能力</span></div>
+        <div class="cg-target">
+          <span class="cg-target-icon">${icon('cube', 12)}</span>
+          <span class="cg-target-copy"><span class="cg-layer-tag target" style="align-self:flex-start">标准化资产</span><b>${escapeHtml(comp.name)} ${escapeHtml(displayVersion)}</b></span>
+        </div>
       </div>
     </div>
-    <div class="compose-note">业务模型、脚本和 API 是组件的设计资产来源；后端组件是面向微应用复用的标准化资产。</div>
+    <div class="compose-note">业务模型 → 脚本 → API 是设计期的构建链路，表示资产如何汇聚成组件，不代表运行时调用顺序；组件再进入微应用组装。</div>
     <div class="asset-groups">
       <div class="asset-group">
         <div class="asset-group-head"><span class="ag-dot model"></span>业务模型<b>${a.models.length} 个</b></div>
@@ -3854,7 +3880,7 @@ function renderLibrary() {
         </div>
         <button class="asset-source-tag" data-detail-component="${id}" title="来源资产 · 点击查看组件构成">
           ${icon('layers', 9)}<span>来源资产</span>
-          <b>业务模型 ${assets.models.length}</b><i>·</i><b>脚本 ${assets.scripts.length}</b><i>·</i><b>API ${assets.apis.length}</b>
+          <b>业务模型 ${assets.models.length}</b><i>›</i><b>脚本 ${assets.scripts.length}</b><i>›</i><b>API ${assets.apis.length}</b>
         </button>
       </article>`;
   }).join('');
@@ -3939,7 +3965,7 @@ function renderWizardFocus(app) {
       <span class="tdot" style="background:${comp.accent}"></span>
       <span class="tnm">${escapeHtml(comp.name)}</span>
       <span class="tv">${escapeHtml(ref.version)}</span>
-      <span class="row-assets" aria-hidden="true"><i>模型 ${assets.models.length}</i><i>脚本 ${assets.scripts.length}</i><i>API ${assets.apis.length}</i></span>
+      <span class="row-assets" aria-hidden="true"><i>模型 ${assets.models.length}</i><em>›</em><i>脚本 ${assets.scripts.length}</i><em>›</em><i>API ${assets.apis.length}</i></span>
       ${isConflict ? icon('warn', 9) : ''}
       <span class="tgo">${icon('chevron', 8)}</span>
     </button>`;
