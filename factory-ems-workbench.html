@@ -2053,6 +2053,74 @@ svg { display: block; }
 .workspace[data-view="blockers"] .app-panel { display: none; }
 .blocker-panel { display: none; }
 .workspace[data-view="blockers"] .blocker-panel { display: flex; }
+#blockerOverlay { z-index: 80; }
+
+/* Design assets layer */
+.design-panel { display: none; }
+.workspace[data-view="design"] { grid-template-columns: minmax(0, 1fr); }
+.workspace[data-view="design"] .library-panel,
+.workspace[data-view="design"] .canvas-panel,
+.workspace[data-view="design"] .app-panel { display: none; }
+.workspace[data-view="design"] .design-panel { display: flex; }
+.nav-item[data-view="design"] { border-color: rgba(183, 121, 31, .22); background: rgba(183, 121, 31, .055); color: #8a5a12; }
+.design-flow { display: flex; align-items: center; gap: 5px; color: var(--muted-2); font-size: 8.8px; flex-wrap: wrap; justify-content: flex-end; }
+.design-flow span { padding: 2px 6px; border: 1px solid var(--line); border-radius: 4px; background: #fff; white-space: nowrap; }
+.design-flow span:nth-of-type(1) { color: #8a5a12; border-color: rgba(183, 121, 31, .22); background: rgba(183, 121, 31, .05); }
+.design-flow span:last-of-type { color: #9b2c3f; border-color: rgba(214, 58, 82, .2); background: rgba(214, 58, 82, .05); }
+.design-tabs { flex: 0 0 auto; display: flex; gap: 5px; padding: 8px 12px 0; }
+.design-tab { height: 28px; padding: 0 11px; border: 1px solid var(--line); border-bottom: 0; border-radius: 7px 7px 0 0; background: rgba(16, 50, 62, .025); color: var(--muted); font-size: 10px; font-weight: 600; }
+.design-tab:hover { color: var(--text); }
+.design-tab.active { background: #fff; color: var(--cyan); border-color: rgba(13, 148, 136, .28); }
+.design-body { flex: 1; min-height: 0; overflow-y: auto; padding: 10px 12px 12px; }
+.design-legend { margin-bottom: 8px; padding: 7px 9px; border: 1px solid rgba(13, 148, 136, .18); border-radius: 7px; background: rgba(13, 148, 136, .03); color: var(--muted); font-size: 8.8px; line-height: 1.5; }
+.design-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 8px; align-content: start; }
+.design-card { text-align: left; border: 1px solid var(--line); border-radius: 9px; background: #fff; padding: 9px 10px; display: flex; flex-direction: column; gap: 5px; transition: .15s ease; }
+.design-card:hover { border-color: rgba(13, 148, 136, .38); box-shadow: 0 6px 18px rgba(22, 52, 64, .06); transform: translateY(-1px); }
+.design-card-head { display: flex; align-items: center; gap: 6px; }
+.design-card-name { font-size: 11.2px; font-weight: 700; color: #1b3742; }
+.design-card-ver { margin-left: auto; font: 9px var(--mono); color: var(--muted-2); }
+.design-type { display: inline-flex; align-items: center; height: 17px; padding: 0 6px; border-radius: 4px; font-size: 8.8px; font-weight: 600; color: #0b6e64; background: rgba(13, 148, 136, .08); border: 1px solid rgba(13, 148, 136, .18); white-space: nowrap; }
+.design-type.script { color: #8a5a12; background: rgba(183, 121, 31, .08); border-color: rgba(183, 121, 31, .18); }
+.design-type.api { color: #2b4f9a; background: rgba(59, 99, 216, .07); border-color: rgba(59, 99, 216, .18); }
+.design-type.agg { color: #9b2c3f; background: rgba(214, 58, 82, .06); border-color: rgba(214, 58, 82, .18); }
+.design-card-desc { color: var(--muted-2); font-size: 8.8px; line-height: 1.45; }
+.design-agg-mix { display: flex; flex-wrap: wrap; gap: 3px; }
+.design-agg-mix span { font-size: 8.8px; color: #4c6773; border: 1px solid rgba(20, 52, 64, .1); border-radius: 3px; padding: 0 4px; background: #f8fbfc; }
+.design-agg-mix b { color: var(--muted-2); font-weight: 600; margin-right: 2px; }
+.design-card-foot { display: flex; align-items: center; gap: 5px; margin-top: 2px; padding-top: 5px; border-top: 1px dashed var(--line); color: var(--muted-2); font-size: 8.8px; }
+.design-usage { margin-left: auto; color: var(--cyan); font-weight: 600; }
+.design-empty { grid-column: 1 / -1; padding: 30px; text-align: center; color: var(--muted-2); font-size: 9.5px; }
+
+/* Component source section */
+.source-cards { display: flex; flex-direction: column; gap: 5px; }
+.source-card { display: flex; align-items: center; gap: 7px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px; background: #fff; text-align: left; }
+.source-card:hover { border-color: rgba(13, 148, 136, .38); background: rgba(13, 148, 136, .02); }
+.source-kind { flex: 0 0 auto; height: 18px; padding: 0 6px; display: inline-flex; align-items: center; border-radius: 4px; font-size: 8.8px; font-weight: 650; background: rgba(214, 58, 82, .06); color: #9b2c3f; border: 1px solid rgba(214, 58, 82, .18); white-space: nowrap; }
+.source-kind.cap { background: rgba(59, 99, 216, .06); color: #2b4f9a; border-color: rgba(59, 99, 216, .18); }
+.source-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.source-main b { font-size: 9.8px; color: #203c46; }
+.source-main span { font-size: 8.8px; color: var(--muted-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.source-ver { font: 8.8px var(--mono); color: var(--muted-2); flex: 0 0 auto; }
+.source-flow { margin-top: 6px; padding: 5px 7px; border: 1px dashed rgba(13, 148, 136, .28); border-radius: 5px; background: rgba(13, 148, 136, .03); font-size: 8.8px; color: var(--muted); }
+.build-comp-row { margin-top: 7px; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.build-comp-status { color: var(--muted-2); font-size: 8.8px; }
+.build-comp-status.ok { color: var(--green); }
+.src-chain { display: flex; flex-direction: column; gap: 3px; margin-top: 7px; }
+.src-chain-row { display: flex; align-items: center; gap: 6px; padding: 3px 6px; border-left: 2px solid rgba(13, 148, 136, .35); background: #f8fbfc; border-radius: 0 4px 4px 0; font-size: 8.8px; color: #31515c; }
+.src-chain-row b { font-weight: 650; }
+.src-chain-row span { margin-left: auto; font: 8.8px var(--mono); color: var(--muted-2); }
+
+/* App tree: component source expansion */
+.app-comp-wrap { display: flex; flex-direction: column; width: 100%; }
+.app-comp-wrap .app-child { width: 100%; }
+.app-src-chevron { margin-left: auto; display: inline-flex; color: var(--muted-2); transition: transform .15s ease; }
+.app-comp-wrap.expanded .app-src-chevron { transform: rotate(180deg); }
+.app-comp-sources { margin: 0 0 3px 20px; padding: 5px 7px; border: 1px dashed rgba(13, 148, 136, .25); border-top: 0; border-radius: 0 0 6px 6px; background: rgba(13, 148, 136, .025); display: flex; flex-direction: column; gap: 4px; }
+.app-comp-source-row { display: flex; align-items: center; gap: 5px; font-size: 8.8px; color: var(--muted); }
+.app-comp-source-row b { color: #2a4a55; }
+.app-comp-source-row span { font: 8.8px var(--mono); color: var(--muted-2); }
+.app-comp-source-assets { font-size: 8.8px; color: var(--muted-2); line-height: 1.45; }
+.app-comp-link { align-self: flex-start; color: var(--cyan); font-size: 8.8px; font-weight: 600; background: none; border: 0; padding: 0; }
 .blocker-summary { display: flex; align-items: center; gap: 6px; font-size: 10.6px; color: var(--muted-2); }
 .blocker-summary b { color: var(--red); font-weight: 650; }
 .blocker-summary .sep { width: 1px; height: 12px; background: var(--line); }
@@ -2148,6 +2216,7 @@ svg { display: block; }
 .trace-row.lv1 { margin-left: 16px; }
 .trace-row.lv2 { margin-left: 32px; }
 .trace-row.lv3 { margin-left: 48px; background: #f7fbfa; }
+.trace-row.lv4 { margin-left: 64px; background: #f7fbfa; }
 .trace-tag { flex: 0 0 auto; height: 17px; padding: 0 6px; display: inline-flex; align-items: center; border-radius: 4px; font-size: 8.8px; font-weight: 650; white-space: nowrap; }
 .trace-tag.app { color: #9b2c3f; background: rgba(214, 58, 82, .08); }
 .trace-tag.micro { color: #2b4f9a; background: rgba(59, 99, 216, .08); }
@@ -2211,10 +2280,11 @@ svg { display: block; }
       </div>
     </div>
     <nav class="primary-nav" id="primaryNav" aria-label="组装层级">
+      <button class="nav-item" data-view="design">设计资产</button>
       <button class="nav-item" data-view="components">后端组件 <span class="nav-count" id="navCountComponents">6</span></button>
       <button class="nav-item active" data-view="microapps">微应用 <span class="nav-count" id="navCountMicro">5</span></button>
       <button class="nav-item" data-view="app">应用 <span class="nav-count" id="navCountApp">1</span></button>
-      <button class="nav-item" data-view="blockers">卡点清单 <span class="nav-count">13</span></button>
+      <button class="nav-item" data-view="blockers">卡点清单 <span class="nav-count">16</span></button>
     </nav>
     <div class="top-actions">
       <button class="btn btn-secondary" id="parseBtn"><svg><use href="#i-target"/></svg><span>解析依赖</span></button>
@@ -2330,15 +2400,37 @@ svg { display: block; }
       </div>
     </section>
 
+  <section class="panel design-panel" id="designPanel">
+    <div class="panel-head">
+      <div class="panel-step">00</div>
+      <div class="panel-heading">
+        <div class="panel-title">设计资产 <span class="count-badge" id="designCount">—</span> <button type="button" class="warn-badge head" data-blocker="14" title="落地卡点 #14 · 设计资产如何形成聚合/能力" aria-label="查看落地卡点 #14"><b class="wb-mark" aria-hidden="true">!</b><span class="wb-txt">卡点</span></button></div>
+        <div class="panel-desc">业务模型 / 脚本 / API 不直接进入微应用；先组织为聚合或独立能力，再封装为后端组件</div>
+      </div>
+      <div class="design-flow"><span>设计资产</span>${icon('chevron', 8)}<span>能力组织</span>${icon('chevron', 8)}<span>后端组件</span>${icon('chevron', 8)}<span>微应用</span>${icon('chevron', 8)}<span>应用</span></div>
+    </div>
+    <div class="design-tabs" id="designTabs">
+      <button class="design-tab active" data-design-tab="model">业务模型</button>
+      <button class="design-tab" data-design-tab="script">脚本</button>
+      <button class="design-tab" data-design-tab="api">API</button>
+      <button class="design-tab" data-design-tab="agg">聚合</button>
+    </div>
+    <div class="design-body" id="designBody"></div>
+    <div class="panel-foot">
+      <svg><use href="#i-info"/></svg>
+      <span>设计资产只描述来源与组织关系，不参与运行时依赖解析；后端组件才是进入微应用组装的标准化资产</span>
+    </div>
+  </section>
+
   <section class="panel blocker-panel" id="blockerPanel">
     <div class="panel-head">
       <div class="panel-step">04</div>
       <div class="panel-heading">
-        <div class="panel-title">卡点清单 <span class="count-badge">13</span></div>
-        <div class="panel-desc">原型落地前必须定义清楚的技术边界 · 点击页面中的 ⚠ 标记查看详细卡点</div>
+        <div class="panel-title">卡点清单 <span class="count-badge">16</span></div>
+        <div class="panel-desc">原型落地前必须定义清楚的技术边界 · 点击页面中的卡点标记查看详细说明</div>
       </div>
       <div class="panel-tools blocker-summary">
-        <span><b>11</b> 项高</span><span class="sep"></span><span><b style="color:#a3660f">2</b> 项中高</span>
+        <span><b>14</b> 项高</span><span class="sep"></span><span><b style="color:#a3660f">2</b> 项中高</span>
       </div>
     </div>
     <div class="blocker-table-wrap" id="blockerTableWrap"></div>
@@ -2697,6 +2789,56 @@ const BLOCKERS = {
     extraTitle: '建议确认方案：',
     extraItems: ['明确“设计资产 → 后端组件”的构建规则，并建立组件版本与来源资产版本之间的关联关系。'],
     outro: '影响范围：业务模型 / 脚本管理 / API管理 / 后端组件 / 微应用 / 应用构建。严重程度：中高。'
+  },
+  '14': {
+    sev: '高',
+    title: '设计资产如何形成聚合/能力',
+    intro: '当前原型体现：业务模型、脚本、API 可以形成聚合，脚本/API 也可以形成独立能力。',
+    needs: '需要确认：',
+    items: [
+      '聚合的边界由谁定义？',
+      '一个业务模型是否可以进入多个聚合？',
+      '一个脚本是否可以被多个聚合复用？',
+      'API 是否必须绑定聚合？',
+      '聚合是否需要独立版本？',
+      '聚合是否可以直接被组件引用？',
+      '聚合内部的业务模型、脚本、API 是否需要版本锁定？'
+    ],
+    outro: '影响范围：业务模型 / 脚本 / API / 聚合 / 后端组件。严重程度：高。'
+  },
+  '15': {
+    sev: '高',
+    title: '能力如何形成后端组件',
+    intro: '当前原型体现：聚合、脚本能力、API能力可以形成后端组件。',
+    needs: '需要确认：',
+    items: [
+      '什么情况下需要创建后端组件？',
+      '聚合是否必须完整封装才能成为组件？',
+      '脚本是否可以直接封装成组件？',
+      'API 是否可以直接封装成组件？',
+      '一个组件是否允许包含多个聚合？',
+      '一个组件是否允许同时包含聚合、脚本、API？',
+      '组件是否保存来源资产版本快照？',
+      '来源资产升级后是否自动产生新的组件版本？'
+    ],
+    outro: '影响范围：聚合 / 脚本 / API / 后端组件 / 微应用。严重程度：高。'
+  },
+  '16': {
+    sev: '高',
+    title: '设计资产版本与组件版本如何关联',
+    intro: '当前原型体现：组件具有独立版本，但其来源资产也具有自己的版本。',
+    needs: '需要确认：',
+    items: [
+      '组件版本是否固化来源资产版本？',
+      '业务模型升级是否必须升级组件？',
+      '脚本升级是否必须升级组件？',
+      'API 非兼容升级是否强制升级组件？',
+      '聚合升级是否影响组件版本？',
+      '组件是否保存来源资产快照？'
+    ],
+    extraTitle: '建议至少能够追溯：',
+    extraItems: ['组件版本 → 聚合版本 → 业务模型/脚本/API 版本。'],
+    outro: '严重程度：高。'
   }
 };
 
@@ -2713,7 +2855,10 @@ const BLOCKER_TABLE = [
   { cat: '组件升级', name: '一个组件升级会影响哪些微应用', sev: 'high', label: '高' },
   { cat: '共享依赖', name: '平台级共享依赖到底怎么注入', sev: 'high', label: '高' },
   { cat: '回滚', name: '构建/部署失败后如何回滚', sev: 'mid', label: '中高' },
-  { cat: '设计资产', name: '后端组件与业务模型/脚本/API 的构建关系', sev: 'mid', label: '中高' }
+  { cat: '设计资产', name: '后端组件与业务模型/脚本/API 的构建关系', sev: 'mid', label: '中高' },
+  { cat: '设计资产', name: '设计资产如何形成聚合/能力', sev: 'high', label: '高' },
+  { cat: '能力组织', name: '聚合/脚本/API 如何形成后端组件', sev: 'high', label: '高' },
+  { cat: '版本', name: '设计资产版本与组件版本如何关联', sev: 'high', label: '高' }
 ];
 
 const DESIGN_ASSETS = {
@@ -2824,8 +2969,77 @@ const DESIGN_ASSETS = {
 function getAssets(compId) {
   return DESIGN_ASSETS[compId] || { models: [], scripts: [], apis: [] };
 }
+
+const AGGREGATIONS = {
+  'agg-energy': {
+    name: '能源数据聚合', version: 'v1.5.0',
+    desc: '围绕能源数据查询与处理边界，组织设备、测点、数据模型及清洗聚合脚本。',
+    models: ['能源设备', '能源测点', '能源数据'],
+    scripts: ['数据清洗', '能耗聚合'],
+    apis: ['GET /api/v2/energy/realtime', 'GET /api/v2/energy/history', 'POST /api/v2/energy/query']
+  },
+  'agg-metric': {
+    name: '能源指标聚合', version: 'v1.4.0',
+    desc: '组织指标定义、口径与计算脚本，形成统一的指标计算与查询能力。',
+    models: ['指标定义', '指标结果'],
+    scripts: ['指标计算', '同比环比'],
+    apis: ['POST /api/v1/metrics/calc', 'GET /api/v1/metrics/trend']
+  },
+  'agg-device': {
+    name: '设备上下文聚合', version: 'v1.3.0',
+    desc: '组织设备台账、设备状态与同步脚本，为上层提供统一设备上下文。',
+    models: ['设备台账', '设备状态'],
+    scripts: ['状态同步', '设备分组'],
+    apis: ['GET /api/v1/devices', 'GET /api/v1/devices/{id}/status']
+  }
+};
+
+const CAPABILITIES = {
+  'cap-clean': { name: '数据清洗能力', type: '脚本能力', version: 'v1.0.0', detail: '数据清洗', refLabel: '脚本' },
+  'cap-query': { name: '能源查询能力', type: 'API能力', version: 'v2.0', detail: 'GET /api/v2/energy/realtime', refLabel: 'API' },
+  'cap-metric-calc': { name: '指标计算能力', type: '脚本能力', version: 'v1.4.0', detail: '指标计算', refLabel: '脚本' },
+  'cap-alarm': { name: '告警判定能力', type: '脚本能力', version: 'v1.2.0', detail: '规则匹配 + 告警去重', refLabel: '脚本' },
+  'cap-report': { name: '报表生成能力', type: 'API能力', version: 'v1.1', detail: 'POST /api/v1/reports/generate', refLabel: 'API' },
+  'cap-auth': { name: '统一鉴权能力', type: 'API能力', version: 'v2.1', detail: 'POST /api/v1/auth/verify', refLabel: 'API' }
+};
+
+const COMPONENT_SOURCES = {
+  'energy-data': [{ kind: 'aggregation', id: 'agg-energy' }, { kind: 'capability', id: 'cap-clean' }, { kind: 'capability', id: 'cap-query' }],
+  metrics: [{ kind: 'aggregation', id: 'agg-metric' }, { kind: 'capability', id: 'cap-metric-calc' }],
+  device: [{ kind: 'aggregation', id: 'agg-device' }],
+  alarm: [{ kind: 'capability', id: 'cap-alarm' }],
+  report: [{ kind: 'capability', id: 'cap-report' }],
+  permission: [{ kind: 'capability', id: 'cap-auth' }]
+};
+
+function getComponentSources(compId) {
+  return (COMPONENT_SOURCES[compId] || []).map(src => {
+    if (src.kind === 'aggregation') {
+      const agg = AGGREGATIONS[src.id];
+      return { ...agg, type: '聚合', sourceKind: 'aggregation', sourceId: src.id };
+    }
+    const cap = CAPABILITIES[src.id];
+    return { ...cap, sourceKind: 'capability', sourceId: src.id };
+  });
+}
+function collectDesignAssets(kind) {
+  const map = new Map();
+  Object.entries(DESIGN_ASSETS).forEach(([compId, group]) => {
+    (group[kind] || []).forEach(item => {
+      if (!map.has(item.name)) map.set(item.name, { ...item, components: [] });
+      if (!map.get(item.name).components.includes(compId)) map.get(item.name).components.push(compId);
+    });
+  });
+  return [...map.values()];
+}
+function getCompUsage(compIds) {
+  const micros = MICRO_APPS.filter(m => (state.assembly[m.id] || []).some(r => compIds.includes(r.id)));
+  const inApp = micros.some(m => isMicroInApp(m.id));
+  return { micros, inApp };
+}
 function renderComponentComposition(compId, comp, displayVersion) {
   const a = getAssets(compId);
+  const sources = getComponentSources(compId);
   const rows = (kind, list, metaFn) => list.length
     ? list.map((item, i) => `<button class="asset-row" data-asset="${compId}" data-asset-kind="${kind}" data-asset-index="${i}">
         <span class="asset-name">${escapeHtml(item.name)}</span>
@@ -2834,24 +3048,18 @@ function renderComponentComposition(compId, comp, displayVersion) {
       </button>`).join('')
     : '<div class="asset-empty">暂无设计资产</div>';
   return `<div class="compose-graph">
-      <div class="cg-head"><span class="cg-layer-tag">设计资产</span>组件由以下资产逐步构建形成</div>
+      <div class="cg-head"><span class="cg-layer-tag">设计资产</span>经能力组织后封装为后端组件</div>
       <div class="cg-chain">
         <div class="cg-step model">
           <span class="cg-step-index">01</span>
-          <span class="cg-step-main"><span class="cg-step-name">业务模型</span><span class="cg-step-desc">业务对象 · 数据结构 · 业务关系</span></span>
-          <span class="cg-step-count"><b>${a.models.length}</b><span>个资产</span></span>
+          <span class="cg-step-main"><span class="cg-step-name">设计资产</span><span class="cg-step-desc">业务模型 ${a.models.length} · 脚本 ${a.scripts.length} · API ${a.apis.length}</span></span>
+          <span class="cg-step-count"><b>${a.models.length + a.scripts.length + a.apis.length}</b><span>个资产</span></span>
         </div>
-        <div class="cg-connector"><span>提供业务结构与对象</span></div>
+        <div class="cg-connector"><span>按能力边界组织 · 或直接形成能力</span></div>
         <div class="cg-step script">
           <span class="cg-step-index">02</span>
-          <span class="cg-step-main"><span class="cg-step-name">脚本管理</span><span class="cg-step-desc">计算 · 规则 · 扩展逻辑</span></span>
-          <span class="cg-step-count"><b>${a.scripts.length}</b><span>个脚本</span></span>
-        </div>
-        <div class="cg-connector"><span>提供业务处理逻辑</span></div>
-        <div class="cg-step api">
-          <span class="cg-step-index">03</span>
-          <span class="cg-step-main"><span class="cg-step-name">API 管理</span><span class="cg-step-desc">接口契约 · 调用能力</span></span>
-          <span class="cg-step-count"><b>${a.apis.length}</b><span>个接口</span></span>
+          <span class="cg-step-main"><span class="cg-step-name">能力组织</span><span class="cg-step-desc">${escapeHtml(sources.map(s => s.name).join(' + ') || '直接构建')}</span></span>
+          <span class="cg-step-count"><b>${sources.length}</b><span>个能力单元</span></span>
         </div>
         <div class="cg-connector merge"><span>封装为标准组件能力</span></div>
         <div class="cg-target">
@@ -2860,7 +3068,7 @@ function renderComponentComposition(compId, comp, displayVersion) {
         </div>
       </div>
     </div>
-    <div class="compose-note">业务模型 → 脚本 → API 是设计期的构建链路，表示资产如何汇聚成组件，不代表运行时调用顺序；组件再进入微应用组装。</div>
+    <div class="compose-note">业务模型 / 脚本 / API 先组织为聚合或独立能力，再封装为后端组件；这是设计期构建关系，不代表运行时调用顺序。</div>
     <div class="asset-groups">
       <div class="asset-group">
         <div class="asset-group-head"><span class="ag-dot model"></span>业务模型<b>${a.models.length} 个</b></div>
@@ -2884,6 +3092,7 @@ const PARSE_STEPS = [
 const BUILD_STEPS = [
   { label: '应用结构解析', short: '结构' },
   { label: '微应用解析', short: '微应用' },
+  { label: '组件来源校验', short: '来源' },
   { label: '组件依赖解析', short: '组件' },
   { label: '传递依赖展开', short: '传递' },
   { label: '版本冲突处理', short: '冲突' },
@@ -2929,6 +3138,9 @@ const state = {
   dockCollapsed: false,
   contractMicroId: null,
   expandedMicroapps: new Set(['monitor']),
+  expandedAppComps: new Set(),
+  componentBuild: {},
+  designTab: 'model',
   focusConflict: false,
   highlightMicro: null,
   highlightTimer: null,
@@ -3097,11 +3309,13 @@ function renderVersionTrace() {
       if (!comp) return;
       const assets = getAssets(ref.id);
       html += `<div class="trace-row lv2"><span class="trace-tag comp">后端组件</span><span class="trace-name">${escapeHtml(comp.name)}</span><span class="trace-sub">${escapeHtml(ref.version)}</span></div>`;
+      const sources = getComponentSources(ref.id);
+      html += `<div class="trace-row lv3"><span class="trace-tag asset">能力组织</span><span class="trace-name">${escapeHtml(sources.map(s => `${s.type} ${s.name} ${s.version}`).join(' · ') || '直接构建')}</span></div>`;
       const bits = [];
       if (assets.models[0]) bits.push(`业务模型 ${assets.models[0].name} ${assets.models[0].version}`);
       if (assets.scripts[0]) bits.push(`脚本 ${assets.scripts[0].name} ${assets.scripts[0].version}`);
       if (assets.apis[0]) bits.push(`API ${assets.apis[0].name} ${assets.apis[0].version}`);
-      if (bits.length) html += `<div class="trace-row lv3"><span class="trace-tag asset">设计资产</span><span class="trace-name">${escapeHtml(bits.join(' · '))}</span></div>`;
+      if (bits.length) html += `<div class="trace-row lv4"><span class="trace-tag asset">设计资产</span><span class="trace-name">${escapeHtml(bits.join(' · '))}</span></div>`;
     });
   });
   return `<div class="trace-tree">${html}</div>
@@ -3366,7 +3580,7 @@ function removeMicroFromApp(microId) {
 }
 
 function setView(view) {
-  if (!['components', 'microapps', 'app', 'blockers'].includes(view)) return;
+  if (!['design', 'components', 'microapps', 'app', 'blockers'].includes(view)) return;
   state.view = view;
   if (view !== 'app') state.poolDragId = null;
   renderView();
@@ -3405,13 +3619,14 @@ function renderView() {
     if (title) title.innerHTML = `微应用组装区 <span class="count-badge">${pad2(MICRO_APPS.length)}</span>`;
     if (desc) desc.textContent = '选择微应用 → 选择组件 → 确认组装，版本随组装关系冻结';
     if (kicker) kicker.textContent = 'ASSEMBLY CANVAS';
-    if (foot) foot.innerHTML = `<svg><use href="#i-cube"/></svg><span>分步组装 · 先选微应用，再选组件并确认；也可从左侧直接拖入当前微应用</span>`;
+    if (foot) foot.innerHTML = `<svg><use href="#i-cube"/></svg><span>分步组装 · 先选微应用，再选组件并确认；点击已装配组件可追溯其能力来源与设计资产</span>`;
     renderLibraryFoot();
     renderMicroApps();
   }
   const libDesc = document.getElementById('libraryDesc');
   if (libDesc) libDesc.textContent = state.view === 'components' ? '组件资源库 · 查看版本、直接依赖与被引用微应用' : '资源库 · 选择组件后按向导组装到微应用';
   renderAppPanel();
+  if (state.view === 'design') renderDesignAssets();
 }
 
 function selectComponent(compId) {
@@ -4164,6 +4379,185 @@ function renderAppPool() {
     <div class="pool-list">${inside.map(m => card(m, true)).join('')}</div>`;
 }
 
+function compIdsUsingAgg(aggId) {
+  return Object.keys(COMPONENT_SOURCES).filter(compId =>
+    COMPONENT_SOURCES[compId].some(s => s.kind === 'aggregation' && s.id === aggId));
+}
+function compIdsUsingCap(capId) {
+  return Object.keys(COMPONENT_SOURCES).filter(compId =>
+    COMPONENT_SOURCES[compId].some(s => s.kind === 'capability' && s.id === capId));
+}
+function designTypeClass(kind) {
+  return kind === 'script' ? 'script' : kind === 'api' ? 'api' : kind === 'agg' ? 'agg' : '';
+}
+function designTypeLabel(kind) {
+  return kind === 'model' ? '业务模型' : kind === 'script' ? '脚本' : kind === 'api' ? 'API' : kind === 'agg' ? '聚合' : '能力';
+}
+function designCard(r) {
+  const comps = r.kind === 'agg' ? compIdsUsingAgg(r.id) : r.kind === 'cap' ? compIdsUsingCap(r.id) : r.components;
+  const usage = getCompUsage(comps);
+  const desc = r.kind === 'api' ? `${r.method} ${r.path}` : r.kind === 'agg' || r.kind === 'cap' ? (r.desc || r.detail || '') : (r.type || '');
+  const mix = r.kind === 'agg'
+    ? `<div class="design-agg-mix"><span><b>模型</b>${r.models.length}</span><span><b>脚本</b>${r.scripts.length}</span><span><b>API</b>${r.apis.length}</span></div>`
+    : '';
+  return `<button class="design-card" data-asset-tab="${r.kind}" data-asset-key="${escapeHtml(r.kind === 'agg' ? r.id : r.kind === 'cap' ? r.id : r.name)}">
+    <div class="design-card-head">
+      <span class="design-type ${designTypeClass(r.kind)}">${designTypeLabel(r.kind)}</span>
+      <span class="design-card-name">${escapeHtml(r.name)}</span>
+      <span class="design-card-ver">${escapeHtml(r.version)}</span>
+    </div>
+    <div class="design-card-desc">${escapeHtml(desc)}</div>
+    ${mix}
+    <div class="design-card-foot">${icon('cube', 9)}被 ${comps.length} 个组件使用<span class="design-usage">${usage.micros.length} 微应用${usage.inApp ? ' · 已进应用' : ''} →</span></div>
+  </button>`;
+}
+function renderDesignAssets() {
+  const body = document.getElementById('designBody');
+  if (!body) return;
+  document.querySelectorAll('.design-tab').forEach(tab => tab.classList.toggle('active', tab.dataset.designTab === state.designTab));
+  let records = [];
+  let legend = '';
+  if (state.designTab === 'agg') {
+    records = Object.entries(AGGREGATIONS).map(([id, agg]) => ({ ...agg, id, kind: 'agg' }));
+    legend = '聚合按业务能力边界组织业务模型、脚本与 API，是「设计资产 → 后端组件」之间的能力单元，本身不是后端组件。';
+  } else {
+    const plural = state.designTab === 'model' ? 'models' : state.designTab === 'script' ? 'scripts' : 'apis';
+    records = collectDesignAssets(plural).map(item => ({ ...item, kind: state.designTab }));
+    legend = state.designTab === 'model'
+      ? '业务模型描述业务对象、属性与关系，不直接进入微应用；可被多个聚合或脚本复用。'
+      : state.designTab === 'script'
+        ? '脚本承载计算、规则与扩展逻辑；可进入聚合成组，也可单独形成脚本能力并封装为组件。'
+        : 'API 描述对外接口契约与调用能力；可进入聚合，也可单独形成 API 能力并封装为组件。';
+  }
+  const count = document.getElementById('designCount');
+  if (count) count.textContent = pad2(records.length);
+  body.innerHTML = `<div class="design-legend">${escapeHtml(legend)}</div><div class="design-grid">${records.length ? records.map(designCard).join('') : '<div class="design-empty">暂无设计资产</div>'}</div>`;
+}
+function openDesignAssetDetail(kind, key) {
+  let rec = null;
+  let comps = [];
+  let tagLabel = '';
+  let kicker = '';
+  let composition = '';
+  let assetSummary = '';
+  if (kind === 'agg') {
+    rec = AGGREGATIONS[key];
+    if (!rec) return;
+    comps = compIdsUsingAgg(key);
+    tagLabel = '聚合';
+    kicker = 'AGGREGATION';
+    assetSummary = `业务模型 ${rec.models.length} · 脚本 ${rec.scripts.length} · API ${rec.apis.length}`;
+    composition = `<div class="asset-group-head" style="margin-top:4px">聚合包含</div>
+      <div class="design-agg-mix" style="margin-top:2px">
+        ${rec.models.map(n => `<span><b>模型</b>${escapeHtml(n)}</span>`).join('')}
+        ${rec.scripts.map(n => `<span><b>脚本</b>${escapeHtml(n)}</span>`).join('')}
+        ${rec.apis.map(n => `<span><b>API</b>${escapeHtml(n)}</span>`).join('')}
+      </div>`;
+  } else if (kind === 'cap') {
+    rec = CAPABILITIES[key];
+    if (!rec) return;
+    comps = compIdsUsingCap(key);
+    tagLabel = rec.type;
+    kicker = 'CAPABILITY';
+    assetSummary = `${rec.refLabel}：${rec.detail}`;
+  } else {
+    const plural = kind === 'model' ? 'models' : kind === 'script' ? 'scripts' : 'apis';
+    rec = collectDesignAssets(plural).find(item => item.name === key);
+    if (!rec) return;
+    comps = rec.components;
+    tagLabel = designTypeLabel(kind);
+    kicker = kind === 'model' ? 'BUSINESS MODEL' : kind === 'script' ? 'BUSINESS SCRIPT' : 'API CONTRACT';
+    assetSummary = kind === 'api' ? `${rec.method} ${rec.path}` : (rec.type || '');
+  }
+  const usage = getCompUsage(comps);
+  const tag = document.getElementById('assetModalTag');
+  tag.className = `trace-tag ${kind === 'api' ? 'comp' : 'asset'}`;
+  tag.textContent = tagLabel;
+  document.getElementById('assetModalKicker').textContent = kicker;
+  document.getElementById('assetModalTitle').textContent = rec.name;
+  const row = (label, value) => `<div class="asset-detail-row"><span>${label}</span><i>=</i><code>${escapeHtml(value)}</code></div>`;
+  const compRows = comps.length
+    ? `<div class="asset-used">${comps.map(id => {
+        const c = COMPONENTS[id];
+        return c ? `<div class="asset-used-row">${icon('check', 9)}<span>${escapeHtml(c.name)}</span><b>${escapeHtml(c.version)}</b></div>` : '';
+      }).join('')}</div>`
+    : '<div class="drawer-desc">暂未被组件使用。</div>';
+  document.getElementById('assetModalBody').innerHTML = `<div class="asset-body">
+    ${row('类型', tagLabel)}
+    ${row('版本', rec.version)}
+    ${assetSummary ? row('说明', assetSummary) : ''}
+    ${composition}
+    <div class="asset-group-head" style="margin-top:6px">被以下后端组件使用</div>
+    ${compRows}
+    <div class="asset-group-head" style="margin-top:6px">反向追溯</div>
+    <div class="src-chain">
+      <div class="src-chain-row"><b>设计资产</b><span>${escapeHtml(kind === 'agg' ? assetSummary : rec.name)}</span></div>
+      <div class="src-chain-row"><b>能力组织</b><span>${escapeHtml(kind === 'agg' ? rec.name : kind === 'cap' ? rec.name : '由组件直接引用')}</span></div>
+      <div class="src-chain-row"><b>后端组件</b><span>${escapeHtml(comps.map(id => COMPONENTS[id]?.name).filter(Boolean).join('、') || '—')}</span></div>
+      <div class="src-chain-row"><b>微应用</b><span>${escapeHtml(usage.micros.map(m => m.name).join('、') || '—')}</span></div>
+      <div class="src-chain-row"><b>应用</b><span>${usage.inApp ? '工厂能源管理平台 v1.0.0' : '未进入应用'}</span></div>
+    </div>
+    ${kind === 'agg' ? `<div style="margin-top:6px">${warnBadge('14', '')}</div>` : ''}
+  </div>`;
+  const overlay = document.getElementById('assetOverlay');
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.getElementById('assetModalClose').focus();
+}
+function renderComponentSources(compId, comp, displayVersion) {
+  const sources = getComponentSources(compId);
+  const refs = MICRO_APPS.filter(m => (state.assembly[m.id] || []).some(r => r.id === compId));
+  const inApp = refs.some(m => isMicroInApp(m.id));
+  const assets = getAssets(compId);
+  const build = state.componentBuild[compId];
+  const cards = sources.length ? sources.map(src => {
+    const isAgg = src.sourceKind === 'aggregation';
+    const sub = isAgg
+      ? `模型 ${src.models.length} · 脚本 ${src.scripts.length} · API ${src.apis.length}`
+      : `${src.refLabel}：${src.detail}`;
+    return `<button class="source-card" data-asset-tab="${isAgg ? 'agg' : 'cap'}" data-asset-key="${src.sourceId}">
+      <span class="source-kind ${isAgg ? '' : 'cap'}">${isAgg ? '聚合' : src.type}</span>
+      <span class="source-main"><b>${escapeHtml(src.name)}</b><span>${escapeHtml(sub)}</span></span>
+      <span class="source-ver">${escapeHtml(src.version)}</span>
+    </button>`;
+  }).join('') : '<div class="drawer-desc">暂无来源，组件可能直接构建。</div>';
+  const srcNames = sources.map(s => s.name).join(' + ') || '设计资产';
+  const status = build?.status === 'built'
+    ? `<span class="build-comp-status ok" id="compBuildStatus">${icon('check', 9)} 已构建 · 来源快照已固化 · ${escapeHtml(formatTime(build.at || new Date()))}</span>`
+    : build?.status === 'building'
+      ? '<span class="build-comp-status" id="compBuildStatus">构建中 · 正在固化来源快照…</span>'
+      : '<span class="build-comp-status" id="compBuildStatus">未构建 · 来源快照未固化</span>';
+  return `<div class="source-cards">${cards}</div>
+    <div class="source-flow">${escapeHtml(srcNames)} ${icon('arrow-down', 8)} 组件构建 ${icon('arrow-down', 8)} ${escapeHtml(comp.name)} ${escapeHtml(displayVersion)}</div>
+    <div class="build-comp-row">
+      <button class="btn btn-secondary btn-sm" data-build-component="${compId}">${icon('build', 11)} 构建组件</button>
+      ${status}
+    </div>
+    <div class="src-chain">
+      <div class="src-chain-row"><b>设计资产</b><span>业务模型 ${assets.models.length} · 脚本 ${assets.scripts.length} · API ${assets.apis.length}</span></div>
+      <div class="src-chain-row"><b>能力组织</b><span>${escapeHtml(srcNames)}</span></div>
+      <div class="src-chain-row"><b>后端组件</b><span>${escapeHtml(comp.name)} ${escapeHtml(displayVersion)}</span></div>
+      <div class="src-chain-row"><b>微应用</b><span>${escapeHtml(refs.map(m => m.name + ' ' + m.version).join('、') || '—')}</span></div>
+      <div class="src-chain-row"><b>应用</b><span>${inApp ? '工厂能源管理平台 v1.0.0' : '未进入应用'}</span></div>
+    </div>`;
+}
+function buildComponent(compId) {
+  if (!COMPONENTS[compId] || state.componentBuild[compId]?.status === 'building') return;
+  state.componentBuild[compId] = { status: 'building' };
+  const status = document.getElementById('compBuildStatus');
+  const btn = document.querySelector(`[data-build-component="${compId}"]`);
+  if (status) status.textContent = '构建中 · 正在固化来源快照…';
+  if (btn) { btn.disabled = true; btn.textContent = '构建中…'; }
+  setTimeout(() => {
+    state.componentBuild[compId] = { status: 'built', at: new Date() };
+    const s = document.getElementById('compBuildStatus');
+    const b = document.querySelector(`[data-build-component="${compId}"]`);
+    if (s) { s.classList.add('ok'); s.innerHTML = `${icon('check', 9)} 已构建 · 来源快照已固化 · ${escapeHtml(formatTime(new Date()))}`; }
+    if (b) { b.disabled = false; b.innerHTML = `${icon('check', 11)} 已构建`; }
+    showToast('组件构建完成', `${COMPONENTS[compId].name} 已固化来源资产版本快照。`, 'success');
+  }, 900);
+}
+
 function renderAppPanel() {
   const structure = document.getElementById('appStructure');
   if (!structure) return;
@@ -4192,12 +4586,29 @@ function renderAppPanel() {
     const children = refs.map(ref => {
       const comp = COMPONENTS[ref.id];
       const conflict = state.parseState === 'resolved' && isRefConflict(app.id, ref.id, ref.version);
-      return `<button class="app-child ${conflict ? 'conflict' : ''}" data-open-component="${ref.id}" data-version="${ref.version}" data-micro-id="${app.id}" style="--accent:${comp.accent}">
-        <span class="app-child-dot"></span>
-        <span class="app-child-name">${escapeHtml(comp.name)}</span>
-        <span class="app-child-version">${escapeHtml(ref.version)}</span>
-        ${conflict ? icon('warn', 9) : ''}
-      </button>`;
+      const key = `${app.id}:${ref.id}`;
+      const expandedComp = state.expandedAppComps.has(key);
+      const sources = getComponentSources(ref.id);
+      const assets = getAssets(ref.id);
+      const sourceRows = sources.length
+        ? sources.map(s => `<div class="app-comp-source-row"><span class="trace-tag ${s.sourceKind === 'aggregation' ? 'asset' : 'comp'}" style="height:16px;font-size:8px">${s.type}</span><b>${escapeHtml(s.name)}</b><span>${escapeHtml(s.version)}</span></div>`).join('')
+        : '<div class="app-comp-source-assets">无能力来源（直接构建）</div>';
+      return `<div class="app-comp-wrap ${expandedComp ? 'expanded' : ''}">
+        <button class="app-child ${conflict ? 'conflict' : ''}" data-app-comp="${key}" style="--accent:${comp.accent}" aria-expanded="${expandedComp}">
+          <span class="app-child-dot"></span>
+          <span class="app-child-name">${escapeHtml(comp.name)}</span>
+          <span class="app-child-version">${escapeHtml(ref.version)}</span>
+          ${conflict ? icon('warn', 9) : ''}
+          <span class="app-src-chevron">${icon('chevron', 8)}</span>
+        </button>
+        ${expandedComp ? `<div class="app-comp-sources">
+          ${sourceRows}
+          <div class="app-comp-source-assets"><b>业务模型</b> ${escapeHtml(assets.models.map(m => m.name).join('、'))}</div>
+          <div class="app-comp-source-assets"><b>脚本</b> ${escapeHtml(assets.scripts.map(s => s.name).join('、'))}</div>
+          <div class="app-comp-source-assets"><b>API</b> ${escapeHtml(assets.apis.map(a => a.name).join('、'))}</div>
+          <button class="app-comp-link" data-open-component="${ref.id}" data-version="${ref.version}" data-micro-id="${app.id}">查看组件详情与来源链路 →</button>
+        </div>` : ''}
+      </div>`;
     }).join('');
     return `
       <div class="app-micro ${expanded ? 'expanded' : ''} ${focus ? 'conflict-focus' : ''}">
@@ -5110,13 +5521,19 @@ function openComponentDetail(compId, version, microId) {
         <div class="iface-slot">${icon('shared', 9)}<span>绑定插槽：<b>${escapeHtml(comp.slot.label)}</b> · 协议 ${escapeHtml(comp.slot.protocol)}</span></div>
       </div>
       <div class="drawer-section">
-        <div class="drawer-section-title">组件信息<span class="line"></span></div>
+        <div class="drawer-section-title">组件信息<span class="line"></span>${warnBadge('16', 'head')}</div>
         <div class="detail-grid">
           <div class="detail-cell"><span>版本</span><strong class="mono">${escapeHtml(displayVersion)}</strong></div>
           <div class="detail-cell"><span>来源</span><strong>${escapeHtml(source)}</strong></div>
           <div class="detail-cell"><span>装配引用</span><strong>${refs.length} 个微应用</strong></div>
           <div class="detail-cell"><span>组件状态</span><strong style="color:${isConflict ? 'var(--red)' : comp.platform ? 'var(--blue)' : refs.length > 1 ? 'var(--green)' : 'var(--muted)'}">${statusText}</strong></div>
+          <div class="detail-cell"><span>来源快照</span><strong style="color:${state.componentBuild[compId]?.status === 'built' ? 'var(--green)' : 'var(--muted-2)'}">${state.componentBuild[compId]?.status === 'built' ? '已固化' : '未固化'}</strong></div>
+          <div class="detail-cell"><span>能力来源</span><strong>${getComponentSources(compId).length} 个</strong></div>
         </div>
+      </div>
+      <div class="drawer-section">
+        <div class="drawer-section-title">组件来源 · 能力组织<span class="line"></span>${warnBadge('15', 'head')}</div>
+        ${renderComponentSources(compId, comp, displayVersion)}
       </div>
       <div class="drawer-section">
         <div class="drawer-section-title">组件构成 · 由设计资产组装形成<span class="line"></span>${warnBadge('13', 'head')}</div>
@@ -5256,6 +5673,13 @@ function bindEvents() {
   document.getElementById('primaryNav').addEventListener('click', (event) => {
     const btn = event.target.closest('.nav-item');
     if (btn) setView(btn.dataset.view);
+  });
+  const designTabs = document.getElementById('designTabs');
+  if (designTabs) designTabs.addEventListener('click', (event) => {
+    const tab = event.target.closest('[data-design-tab]');
+    if (!tab) return;
+    state.designTab = tab.dataset.designTab;
+    renderDesignAssets();
   });
 
   document.getElementById('gateParse').addEventListener('click', () => {
@@ -5490,6 +5914,14 @@ function bindEvents() {
       openContract(contract.dataset.openContract);
       return;
     }
+    const compNode = event.target.closest('[data-app-comp]');
+    if (compNode) {
+      const key = compNode.dataset.appComp;
+      if (state.expandedAppComps.has(key)) state.expandedAppComps.delete(key);
+      else state.expandedAppComps.add(key);
+      renderAppPanel();
+      return;
+    }
     const child = event.target.closest('[data-open-component]');
     if (child) openComponentDetail(child.dataset.openComponent, child.dataset.version, child.dataset.microId);
   });
@@ -5533,6 +5965,20 @@ function bindEvents() {
       event.preventDefault();
       event.stopPropagation();
       openVersionTrace();
+      return;
+    }
+    const designCard = event.target.closest('[data-asset-tab]');
+    if (designCard) {
+      event.preventDefault();
+      event.stopPropagation();
+      openDesignAssetDetail(designCard.dataset.assetTab, designCard.dataset.assetKey);
+      return;
+    }
+    const buildComp = event.target.closest('[data-build-component]');
+    if (buildComp) {
+      event.preventDefault();
+      event.stopPropagation();
+      buildComponent(buildComp.dataset.buildComponent);
     }
   }, true);
   document.addEventListener('keydown', (event) => {
