@@ -2066,6 +2066,83 @@ svg { display: block; }
 .sev-pill.mid { color: #a3660f; background: rgba(183, 121, 31, .09); border: 1px solid rgba(183, 121, 31, .24); }
 .sev-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 
+/* Design assets — component source */
+.asset-source-tag {
+  margin-top: 6px; width: 100%; height: 23px; padding: 0 7px;
+  display: flex; align-items: center; gap: 5px;
+  border: 1px dashed rgba(13, 148, 136, .3); border-radius: 5px;
+  background: rgba(13, 148, 136, .035); color: var(--cyan); font-size: 8.2px; font-weight: 600;
+}
+.asset-source-tag svg { width: 9px; height: 9px; }
+.asset-source-tag b { font-weight: 600; color: #27505a; }
+.asset-source-tag i { font-style: normal; color: var(--line-strong); }
+.asset-source-tag:hover { border-color: rgba(13, 148, 136, .55); background: rgba(13, 148, 136, .07); }
+
+.compose-graph { margin-top: 6px; padding: 8px 8px 7px; border: 1px solid rgba(20, 52, 64, .09); border-radius: 8px; background: linear-gradient(180deg, #fbfdfe, #f4f9fa); }
+.cg-sources { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+.cg-node { min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 5px 4px; border: 1px solid rgba(20, 52, 64, .1); border-radius: 6px; background: #fff; }
+.cg-node i { display: inline-flex; }
+.cg-node span { font-size: 7.6px; color: var(--muted-2); white-space: nowrap; }
+.cg-node b { font: 10px var(--mono); color: #22424c; }
+.cg-node.model { border-top: 2px solid #0d9488; } .cg-node.model i { color: #0d9488; }
+.cg-node.script { border-top: 2px solid #b7791f; } .cg-node.script i { color: #b7791f; }
+.cg-node.api { border-top: 2px solid #3b63d8; } .cg-node.api i { color: #3b63d8; }
+.cg-merge { position: relative; height: 24px; margin: 0 16px; border: 1px dashed rgba(13, 148, 136, .28); border-top: 0; border-radius: 0 0 6px 6px; }
+.cg-merge::before { content: ""; position: absolute; left: 50%; top: 0; width: 1px; height: 13px; background: rgba(13, 148, 136, .4); }
+.cg-merge::after { content: ""; position: absolute; left: 50%; bottom: -4px; border-left: 3.5px solid transparent; border-right: 3.5px solid transparent; border-top: 4px solid rgba(13, 148, 136, .55); transform: translateX(-50%); }
+.cg-merge em { position: absolute; left: 50%; top: 2px; transform: translateX(-50%); padding: 0 4px; background: #f8fcfc; color: var(--muted-2); font-size: 6.8px; font-style: normal; white-space: nowrap; }
+.cg-target { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border: 1px solid rgba(13, 148, 136, .35); border-radius: 7px; background: linear-gradient(135deg, rgba(13, 148, 136, .1), rgba(59, 99, 216, .06)); }
+.cg-target-icon { display: inline-flex; color: var(--cyan); }
+.cg-target-copy { display: flex; flex-direction: column; min-width: 0; }
+.cg-target-copy span { font-size: 7.2px; color: var(--muted-2); }
+.cg-target-copy b { font-size: 9.6px; color: #17343d; }
+.compose-note { margin-top: 6px; padding: 5px 7px; border-left: 2px solid rgba(13, 148, 136, .35); border-radius: 0 4px 4px 0; background: rgba(13, 148, 136, .035); color: var(--muted); font-size: 7.8px; line-height: 1.5; }
+.asset-groups { margin-top: 8px; display: flex; flex-direction: column; gap: 7px; }
+.asset-group-head { display: flex; align-items: center; gap: 5px; font-size: 8.6px; font-weight: 650; color: #25454f; }
+.asset-group-head b { margin-left: auto; font: 7.6px var(--mono); color: var(--muted-2); font-weight: 400; }
+.ag-dot { width: 6px; height: 6px; border-radius: 2px; background: var(--cyan); }
+.ag-dot.script { background: #b7791f; } .ag-dot.api { background: #3b63d8; }
+.asset-list { margin-top: 3px; display: flex; flex-direction: column; gap: 3px; }
+.asset-row { width: 100%; min-height: 25px; padding: 3px 7px; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(20, 52, 64, .1); border-radius: 5px; background: #fff; text-align: left; }
+.asset-row:hover { border-color: rgba(13, 148, 136, .4); background: rgba(13, 148, 136, .03); }
+.asset-name { font-size: 8.6px; font-weight: 600; color: #29454f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 38%; }
+.asset-meta { font: 7.4px var(--mono); color: var(--muted-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+.asset-view { margin-left: auto; display: inline-flex; align-items: center; gap: 2px; color: var(--cyan); font-size: 7.4px; flex: 0 0 auto; }
+.asset-empty { font-size: 8px; color: var(--muted-2); padding: 3px 6px; }
+
+.asset-kicker { color: var(--cyan); font: 8.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.asset-body { display: flex; flex-direction: column; gap: 4px; }
+.asset-detail-row { display: grid; grid-template-columns: 64px 12px minmax(0, 1fr); align-items: center; gap: 2px; font-size: 10.5px; }
+.asset-detail-row > span { color: var(--muted-2); }
+.asset-detail-row i { font: 8px var(--mono); color: var(--cyan); font-style: normal; text-align: center; }
+.asset-detail-row code { font: 10px var(--mono); color: #24525c; background: rgba(13, 148, 136, .06); padding: 2px 6px; border-radius: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.asset-used { display: flex; flex-direction: column; gap: 3px; }
+.asset-used-row { display: flex; align-items: center; gap: 5px; padding: 4px 7px; border: 1px solid rgba(20, 52, 64, .09); border-radius: 5px; background: #fafcfd; font-size: 9.4px; color: #29454f; }
+.asset-used-row svg { color: var(--green); }
+.asset-used-row b { margin-left: auto; font: 8px var(--mono); color: var(--muted-2); font-weight: 400; }
+.asset-state { display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 8px; border-radius: 99px; font-size: 8.4px; font-weight: 650; color: var(--green); background: rgba(22, 138, 91, .08); border: 1px solid rgba(22, 138, 91, .22); }
+
+.trace-btn { height: 23px; padding: 0 8px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid rgba(13, 148, 136, .35); border-radius: 5px; background: rgba(13, 148, 136, .06); color: var(--cyan); font-size: 8px; font-weight: 600; white-space: nowrap; }
+.trace-btn:hover { background: rgba(13, 148, 136, .1); }
+.trace-btn svg { width: 9px; height: 9px; }
+.trace-tree { display: flex; flex-direction: column; gap: 5px; }
+.trace-row { display: flex; align-items: flex-start; gap: 7px; padding: 5px 8px; border: 1px solid rgba(20, 52, 64, .09); border-radius: 6px; background: #fbfdfe; }
+.trace-row.lv1 { margin-left: 16px; }
+.trace-row.lv2 { margin-left: 32px; }
+.trace-row.lv3 { margin-left: 48px; background: #f7fbfa; }
+.trace-tag { flex: 0 0 auto; height: 17px; padding: 0 6px; display: inline-flex; align-items: center; border-radius: 4px; font-size: 7.4px; font-weight: 650; white-space: nowrap; }
+.trace-tag.app { color: #9b2c3f; background: rgba(214, 58, 82, .08); }
+.trace-tag.micro { color: #2b4f9a; background: rgba(59, 99, 216, .08); }
+.trace-tag.comp { color: #0b6e64; background: rgba(13, 148, 136, .09); }
+.trace-tag.asset { color: #8a5a12; background: rgba(183, 121, 31, .09); }
+.trace-name { font-size: 9.4px; color: #29454f; font-weight: 600; min-width: 0; }
+.trace-sub { margin-left: auto; font: 7.6px var(--mono); color: var(--muted-2); flex: 0 0 auto; }
+
+.assemble-canvas .wizard-tree-row { height: auto; min-height: 32px; padding: 4px 8px; }
+.row-assets { display: flex; align-items: center; gap: 3px; flex: 0 0 auto; margin-left: 2px; }
+.row-assets i { font-style: normal; font-size: 7px; color: #5b7681; border: 1px solid rgba(20, 52, 64, .1); border-radius: 3px; padding: 0 3px; background: #f7fbfb; white-space: nowrap; }
+.assemble-canvas .wizard-tree-row .tv { font-size: 7.6px; }
+
 </style>
 </head>
 <body>
@@ -2118,7 +2195,7 @@ svg { display: block; }
       <button class="nav-item" data-view="components">后端组件 <span class="nav-count" id="navCountComponents">6</span></button>
       <button class="nav-item active" data-view="microapps">微应用 <span class="nav-count" id="navCountMicro">5</span></button>
       <button class="nav-item" data-view="app">应用 <span class="nav-count" id="navCountApp">1</span></button>
-      <button class="nav-item" data-view="blockers">卡点清单 <span class="nav-count">12</span></button>
+      <button class="nav-item" data-view="blockers">卡点清单 <span class="nav-count">13</span></button>
     </nav>
     <div class="top-actions">
       <button class="btn btn-secondary" id="parseBtn"><svg><use href="#i-target"/></svg><span>解析依赖</span></button>
@@ -2238,11 +2315,11 @@ svg { display: block; }
     <div class="panel-head">
       <div class="panel-step">04</div>
       <div class="panel-heading">
-        <div class="panel-title">卡点清单 <span class="count-badge">12</span></div>
+        <div class="panel-title">卡点清单 <span class="count-badge">13</span></div>
         <div class="panel-desc">原型落地前必须定义清楚的技术边界 · 点击页面中的 ⚠ 标记查看详细卡点</div>
       </div>
       <div class="panel-tools blocker-summary">
-        <span><b>11</b> 项高</span><span class="sep"></span><span><b style="color:#a3660f">1</b> 项中高</span>
+        <span><b>11</b> 项高</span><span class="sep"></span><span><b style="color:#a3660f">2</b> 项中高</span>
       </div>
     </div>
     <div class="blocker-table-wrap" id="blockerTableWrap"></div>
@@ -2291,6 +2368,38 @@ svg { display: block; }
     <div class="blocker-modal-body" id="blockerModalBody"></div>
     <div class="blocker-modal-foot">
       <button class="btn btn-secondary btn-sm" id="blockerModalOk">知道了</button>
+    </div>
+  </div>
+</div>
+<div class="blocker-overlay" id="assetOverlay" aria-hidden="true">
+  <div class="blocker-modal" role="dialog" aria-modal="true" aria-labelledby="assetModalTitle">
+    <div class="blocker-modal-head">
+      <span class="trace-tag asset" id="assetModalTag" style="height:22px;font-size:9px;padding:0 9px">业务模型</span>
+      <div class="blocker-modal-head-copy">
+        <div class="asset-kicker" id="assetModalKicker">DESIGN ASSET</div>
+        <h3 id="assetModalTitle"></h3>
+      </div>
+      <button class="drawer-close" id="assetModalClose" aria-label="关闭"><svg width="13" height="13"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="blocker-modal-body" id="assetModalBody"></div>
+    <div class="blocker-modal-foot">
+      <button class="btn btn-secondary btn-sm" id="assetModalOk">关闭</button>
+    </div>
+  </div>
+</div>
+<div class="blocker-overlay" id="traceOverlay" aria-hidden="true">
+  <div class="blocker-modal" role="dialog" aria-modal="true" aria-labelledby="traceModalTitle" style="width:min(680px,94vw)">
+    <div class="blocker-modal-head">
+      <span class="trace-tag comp" style="height:22px;font-size:9px;padding:0 9px">版本追溯</span>
+      <div class="blocker-modal-head-copy">
+        <div class="asset-kicker">VERSION LINEAGE</div>
+        <h3 id="traceModalTitle">来源版本追溯</h3>
+      </div>
+      <button class="drawer-close" id="traceModalClose" aria-label="关闭"><svg width="13" height="13"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="blocker-modal-body" id="traceModalBody"></div>
+    <div class="blocker-modal-foot">
+      <button class="btn btn-secondary btn-sm" id="traceModalOk">关闭</button>
     </div>
   </div>
 </div>
@@ -2550,6 +2659,25 @@ const BLOCKERS = {
     needs: '需要明确：',
     items: ['构建失败是否生成版本？', '部署失败是否允许回滚？', '回滚对象是应用版本还是组件版本？', '运行时依赖是否跟随回滚？', '数据库变更如何处理？'],
     outro: '版本锁定、构建、部署、回滚必须形成完整闭环。'
+  },
+  '13': {
+    sev: '中高',
+    title: '后端组件与设计资产的构建关系',
+    intro: '当前原型体现：业务模型、脚本管理、API管理最终形成后端组件，后端组件再被微应用引用。',
+    needs: '需要确认：',
+    items: [
+      '后端组件是否由业务模型、脚本、API 直接构建？',
+      '三类资产是否必须全部存在？',
+      '后端组件是否保存这些资产的版本快照？',
+      '组件升级时，业务模型/脚本/API 变化如何影响组件版本？',
+      'API 是否由 API 管理统一生成，还是组件内部自行定义？',
+      '脚本运行环境由组件提供还是平台统一提供？',
+      '组件是否可以只包含 API 而不包含业务模型或脚本？',
+      '一个业务模型是否可以被多个后端组件复用？'
+    ],
+    extraTitle: '建议确认方案：',
+    extraItems: ['明确“设计资产 → 后端组件”的构建规则，并建立组件版本与来源资产版本之间的关联关系。'],
+    outro: '影响范围：业务模型 / 脚本管理 / API管理 / 后端组件 / 微应用 / 应用构建。严重程度：中高。'
   }
 };
 
@@ -2565,8 +2693,155 @@ const BLOCKER_TABLE = [
   { cat: '跨组件契约', name: 'API/Event/SPI 如何保证兼容', sev: 'high', label: '高' },
   { cat: '组件升级', name: '一个组件升级会影响哪些微应用', sev: 'high', label: '高' },
   { cat: '共享依赖', name: '平台级共享依赖到底怎么注入', sev: 'high', label: '高' },
-  { cat: '回滚', name: '构建/部署失败后如何回滚', sev: 'mid', label: '中高' }
+  { cat: '回滚', name: '构建/部署失败后如何回滚', sev: 'mid', label: '中高' },
+  { cat: '设计资产', name: '后端组件与业务模型/脚本/API 的构建关系', sev: 'mid', label: '中高' }
 ];
+
+const DESIGN_ASSETS = {
+  'energy-data': {
+    models: [
+      { name: '能源设备', type: '业务对象', version: 'v1.2', usedBy: ['energy-data', 'device'], status: '已发布' },
+      { name: '能源测点', type: '业务对象', version: 'v1.1', usedBy: ['energy-data'], status: '已发布' },
+      { name: '能源数据', type: '业务对象', version: 'v1.5', usedBy: ['energy-data', 'metrics'], status: '已发布' }
+    ],
+    scripts: [
+      { name: '能耗计算', type: '业务处理脚本', version: 'v1.3', api: 'GET /api/v2/energy/realtime' },
+      { name: '能耗聚合', type: '聚合计算脚本', version: 'v1.1', api: 'GET /api/v2/energy/history' },
+      { name: '数据清洗', type: '数据加工脚本', version: 'v1.0', api: 'POST /api/v2/energy/query' },
+      { name: '异常处理', type: '规则处理脚本', version: 'v1.0', api: 'POST /api/v2/energy/batch' },
+      { name: '指标归档', type: '定时任务脚本', version: 'v1.0', api: 'GET /api/v2/energy/snapshot' }
+    ],
+    apis: [
+      { name: '实时能源数据查询', method: 'GET', path: '/api/v2/energy/realtime', version: 'v2', script: '能耗计算' },
+      { name: '历史能源数据查询', method: 'GET', path: '/api/v2/energy/history', version: 'v2', script: '能耗聚合' },
+      { name: '能源数据复合查询', method: 'POST', path: '/api/v2/energy/query', version: 'v2', script: '数据清洗' },
+      { name: '能源统计查询', method: 'GET', path: '/api/v2/energy/statistics', version: 'v1', script: '能耗聚合' },
+      { name: '设备能源明细', method: 'GET', path: '/api/v2/energy/devices', version: 'v1', script: '能耗计算' },
+      { name: '测点遥测数据', method: 'GET', path: '/api/v2/energy/telemetry', version: 'v1', script: '数据清洗' },
+      { name: '能源指标快照', method: 'GET', path: '/api/v2/energy/snapshot', version: 'v1', script: '指标归档' },
+      { name: '批量能源写入', method: 'POST', path: '/api/v2/energy/batch', version: 'v1', script: '异常处理' }
+    ]
+  },
+  metrics: {
+    models: [
+      { name: '指标定义', type: '业务对象', version: 'v1.3', usedBy: ['metrics'], status: '已发布' },
+      { name: '指标结果', type: '业务对象', version: 'v1.1', usedBy: ['metrics', 'report'], status: '已发布' }
+    ],
+    scripts: [
+      { name: '指标计算', type: '业务处理脚本', version: 'v1.4', api: 'POST /api/v1/metrics/calc' },
+      { name: '同比环比', type: '计算脚本', version: 'v1.1', api: 'GET /api/v1/metrics/trend' },
+      { name: '阈值判定', type: '规则脚本', version: 'v1.0', api: 'GET /api/v1/metrics/values' }
+    ],
+    apis: [
+      { name: '指标定义查询', method: 'GET', path: '/api/v1/metrics/definitions', version: 'v1', script: '指标计算' },
+      { name: '指标结果查询', method: 'GET', path: '/api/v1/metrics/values', version: 'v1', script: '阈值判定' },
+      { name: '指标计算触发', method: 'POST', path: '/api/v1/metrics/calc', version: 'v1', script: '指标计算' },
+      { name: '指标趋势查询', method: 'GET', path: '/api/v1/metrics/trend', version: 'v1', script: '同比环比' }
+    ]
+  },
+  device: {
+    models: [
+      { name: '设备台账', type: '业务对象', version: 'v1.2', usedBy: ['device', 'energy-data'], status: '已发布' },
+      { name: '设备状态', type: '业务对象', version: 'v1.1', usedBy: ['device', 'alarm'], status: '已发布' }
+    ],
+    scripts: [
+      { name: '状态同步', type: '同步脚本', version: 'v1.1', api: 'POST /api/v1/devices/sync' },
+      { name: '生命周期校验', type: '校验脚本', version: 'v1.0', api: 'GET /api/v1/devices' },
+      { name: '设备分组', type: '业务处理脚本', version: 'v1.0', api: 'GET /api/v1/devices/{id}/status' }
+    ],
+    apis: [
+      { name: '设备列表', method: 'GET', path: '/api/v1/devices', version: 'v1', script: '生命周期校验' },
+      { name: '设备状态', method: 'GET', path: '/api/v1/devices/{id}/status', version: 'v1', script: '设备分组' },
+      { name: '设备同步', method: 'POST', path: '/api/v1/devices/sync', version: 'v1', script: '状态同步' }
+    ]
+  },
+  alarm: {
+    models: [
+      { name: '告警规则', type: '业务对象', version: 'v1.2', usedBy: ['alarm'], status: '已发布' },
+      { name: '告警记录', type: '业务对象', version: 'v1.1', usedBy: ['alarm', 'report'], status: '已发布' }
+    ],
+    scripts: [
+      { name: '规则匹配', type: '规则脚本', version: 'v1.2', api: 'GET /api/v1/alarms' },
+      { name: '告警去重', type: '处理脚本', version: 'v1.0', api: 'POST /api/v1/alarms/rules' },
+      { name: '通知分发', type: '分发脚本', version: 'v1.0', api: 'POST /api/v1/alarms/{id}/ack' }
+    ],
+    apis: [
+      { name: '告警列表', method: 'GET', path: '/api/v1/alarms', version: 'v1', script: '规则匹配' },
+      { name: '告警规则配置', method: 'POST', path: '/api/v1/alarms/rules', version: 'v1', script: '告警去重' },
+      { name: '告警确认', method: 'POST', path: '/api/v1/alarms/{id}/ack', version: 'v1', script: '通知分发' }
+    ]
+  },
+  report: {
+    models: [
+      { name: '报表模板', type: '业务对象', version: 'v1.1', usedBy: ['report'], status: '已发布' },
+      { name: '报表实例', type: '业务对象', version: 'v1.0', usedBy: ['report'], status: '已发布' }
+    ],
+    scripts: [
+      { name: '报表渲染', type: '渲染脚本', version: 'v1.2', api: 'POST /api/v1/reports/generate' },
+      { name: '导出生成', type: '导出脚本', version: 'v1.0', api: 'GET /api/v1/reports/{id}' }
+    ],
+    apis: [
+      { name: '报表模板列表', method: 'GET', path: '/api/v1/reports/templates', version: 'v1', script: '报表渲染' },
+      { name: '报表生成', method: 'POST', path: '/api/v1/reports/generate', version: 'v1', script: '报表渲染' },
+      { name: '报表下载', method: 'GET', path: '/api/v1/reports/{id}', version: 'v1', script: '导出生成' }
+    ]
+  },
+  permission: {
+    models: [
+      { name: '用户', type: '业务对象', version: 'v2.0', usedBy: ['permission'], status: '已发布' },
+      { name: '角色', type: '业务对象', version: 'v2.0', usedBy: ['permission'], status: '已发布' }
+    ],
+    scripts: [
+      { name: '鉴权校验', type: '安全脚本', version: 'v2.1', api: 'POST /api/v1/auth/verify' },
+      { name: '令牌签发', type: '安全脚本', version: 'v2.1', api: 'POST /api/v1/auth/token' }
+    ],
+    apis: [
+      { name: '令牌签发', method: 'POST', path: '/api/v1/auth/token', version: 'v2', script: '令牌签发' },
+      { name: '鉴权校验', method: 'POST', path: '/api/v1/auth/verify', version: 'v2', script: '鉴权校验' }
+    ]
+  }
+};
+
+function getAssets(compId) {
+  return DESIGN_ASSETS[compId] || { models: [], scripts: [], apis: [] };
+}
+function renderComponentComposition(compId, comp, displayVersion) {
+  const a = getAssets(compId);
+  const rows = (kind, list, metaFn) => list.length
+    ? list.map((item, i) => `<button class="asset-row" data-asset="${compId}" data-asset-kind="${kind}" data-asset-index="${i}">
+        <span class="asset-name">${escapeHtml(item.name)}</span>
+        <span class="asset-meta">${escapeHtml(metaFn(item))}</span>
+        <span class="asset-view">查看${icon('chevron', 8)}</span>
+      </button>`).join('')
+    : '<div class="asset-empty">暂无设计资产</div>';
+  return `<div class="compose-graph">
+      <div class="cg-sources">
+        <div class="cg-node model"><i>${icon('layers', 10)}</i><span>业务模型</span><b>${a.models.length}</b></div>
+        <div class="cg-node script"><i>${icon('terminal', 10)}</i><span>脚本管理</span><b>${a.scripts.length}</b></div>
+        <div class="cg-node api"><i>${icon('shared', 10)}</i><span>API 管理</span><b>${a.apis.length}</b></div>
+      </div>
+      <div class="cg-merge"><em>组装 / 封装</em></div>
+      <div class="cg-target">
+        <span class="cg-target-icon">${icon('cube', 11)}</span>
+        <span class="cg-target-copy"><span>后端组件</span><b>${escapeHtml(comp.name)} ${escapeHtml(displayVersion)}</b></span>
+      </div>
+    </div>
+    <div class="compose-note">业务模型、脚本和 API 是组件的设计资产来源；后端组件是面向微应用复用的标准化资产。</div>
+    <div class="asset-groups">
+      <div class="asset-group">
+        <div class="asset-group-head"><span class="ag-dot model"></span>业务模型<b>${a.models.length} 个</b></div>
+        <div class="asset-list">${rows('model', a.models, m => `${m.type} · ${m.version}`)}</div>
+      </div>
+      <div class="asset-group">
+        <div class="asset-group-head"><span class="ag-dot script"></span>脚本管理<b>${a.scripts.length} 个</b></div>
+        <div class="asset-list">${rows('script', a.scripts, s => `${s.type} · ${s.version}`)}</div>
+      </div>
+      <div class="asset-group">
+        <div class="asset-group-head"><span class="ag-dot api"></span>API 管理<b>${a.apis.length} 个</b></div>
+        <div class="asset-list">${rows('api', a.apis, p => `${p.method} ${p.path} · ${p.version}`)}</div>
+      </div>
+    </div>`;
+}
 
 const PARSE_STEPS = [
   '扫描应用结构', '扫描微应用装配关系', '扫描后端组件', '展开传递依赖', '识别共享依赖', '检测版本冲突'
@@ -2718,6 +2993,96 @@ function openBlocker(no) {
 }
 function closeBlocker() {
   const overlay = document.getElementById('blockerOverlay');
+  if (!overlay || !overlay.classList.contains('open')) return;
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden', 'true');
+}
+function openAssetDetail(compId, kind, index) {
+  const assets = getAssets(compId);
+  const list = kind === 'model' ? assets.models : kind === 'script' ? assets.scripts : assets.apis;
+  const item = list[index];
+  const comp = COMPONENTS[compId];
+  if (!item || !comp) return;
+  const labels = { model: '业务模型', script: '脚本', api: 'API' };
+  const tag = document.getElementById('assetModalTag');
+  tag.className = `trace-tag ${kind === 'api' ? 'comp' : 'asset'}`;
+  tag.textContent = labels[kind];
+  document.getElementById('assetModalKicker').textContent = kind === 'model' ? 'BUSINESS MODEL' : kind === 'script' ? 'BUSINESS SCRIPT' : 'API CONTRACT';
+  document.getElementById('assetModalTitle').textContent = item.name;
+  const row = (label, value) => `<div class="asset-detail-row"><span>${label}</span><i>=</i><code>${escapeHtml(value)}</code></div>`;
+  let body = '';
+  if (kind === 'model') {
+    body = `<div class="asset-body">
+      ${row('类型', item.type)}
+      ${row('版本', item.version)}
+      <div class="asset-group-head" style="margin-top:4px">被组件使用</div>
+      <div class="asset-used">${item.usedBy.map(id => {
+        const c = COMPONENTS[id];
+        return c ? `<div class="asset-used-row">${icon('check', 9)}<span>${escapeHtml(c.name)}</span><b>${escapeHtml(c.version)}</b></div>` : '';
+      }).join('')}</div>
+      <div class="asset-group-head" style="margin-top:4px">状态</div>
+      <div><span class="asset-state">${icon('check', 8)}${escapeHtml(item.status || '已发布')}</span></div>
+    </div>`;
+  } else if (kind === 'script') {
+    body = `<div class="asset-body">
+      ${row('类型', item.type)}
+      ${row('版本', item.version)}
+      ${row('所属组件', `${comp.name} ${comp.version}`)}
+      ${row('调用 API', item.api || '—')}
+    </div>`;
+  } else {
+    body = `<div class="asset-body">
+      ${row('名称', item.name)}
+      ${row('Method', item.method)}
+      ${row('Path', item.path)}
+      ${row('版本', item.version)}
+      ${row('所属组件', `${comp.name} ${comp.version}`)}
+      ${row('关联脚本', item.script || '—')}
+    </div>`;
+  }
+  document.getElementById('assetModalBody').innerHTML = body;
+  const overlay = document.getElementById('assetOverlay');
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.getElementById('assetModalClose').focus();
+}
+function closeAssetDetail() {
+  const overlay = document.getElementById('assetOverlay');
+  if (!overlay || !overlay.classList.contains('open')) return;
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden', 'true');
+}
+function renderVersionTrace() {
+  const members = getAppMicroApps();
+  let html = `<div class="trace-row lv0"><span class="trace-tag app">应用</span><span class="trace-name">工厂能源管理平台</span><span class="trace-sub">v1.0.0</span></div>`;
+  members.forEach(m => {
+    html += `<div class="trace-row lv1"><span class="trace-tag micro">微应用</span><span class="trace-name">${escapeHtml(m.name)}</span><span class="trace-sub">${escapeHtml(m.version)}</span></div>`;
+    const refs = state.assembly[m.id] || [];
+    refs.forEach(ref => {
+      const comp = COMPONENTS[ref.id];
+      if (!comp) return;
+      const assets = getAssets(ref.id);
+      html += `<div class="trace-row lv2"><span class="trace-tag comp">后端组件</span><span class="trace-name">${escapeHtml(comp.name)}</span><span class="trace-sub">${escapeHtml(ref.version)}</span></div>`;
+      const bits = [];
+      if (assets.models[0]) bits.push(`业务模型 ${assets.models[0].name} ${assets.models[0].version}`);
+      if (assets.scripts[0]) bits.push(`脚本 ${assets.scripts[0].name} ${assets.scripts[0].version}`);
+      if (assets.apis[0]) bits.push(`API ${assets.apis[0].name} ${assets.apis[0].version}`);
+      if (bits.length) html += `<div class="trace-row lv3"><span class="trace-tag asset">设计资产</span><span class="trace-name">${escapeHtml(bits.join(' · '))}</span></div>`;
+    });
+  });
+  return `<div class="trace-tree">${html}</div>
+    <div class="compose-note" style="margin-top:8px">应用版本 → 微应用版本 → 后端组件版本 → 设计资产版本；该追溯不改变现有依赖解析与版本锁定机制。</div>`;
+}
+function openVersionTrace() {
+  const overlay = document.getElementById('traceOverlay');
+  if (!overlay) return;
+  document.getElementById('traceModalBody').innerHTML = renderVersionTrace();
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.getElementById('traceModalClose').focus();
+}
+function closeVersionTrace() {
+  const overlay = document.getElementById('traceOverlay');
   if (!overlay || !overlay.classList.contains('open')) return;
   overlay.classList.remove('open');
   overlay.setAttribute('aria-hidden', 'true');
@@ -3458,6 +3823,7 @@ function renderLibrary() {
     const deps = (comp.depIds || []).map(depId => NODES[depId]?.name || depId);
     const depTags = deps.slice(0, 2).map(name => `<span class="dep-tag">${escapeHtml(name)}</span>`).join('');
     const more = deps.length > 2 ? `<span class="dep-tag more">+${deps.length - 2}</span>` : '';
+    const assets = getAssets(id);
     return `
       <article class="component-card ${state.selectedComponentId === id ? 'selected' : ''} ${state.dragId === id ? 'is-dragging' : ''}"
         data-component-card="${id}" draggable="true" style="--accent:${comp.accent}" tabindex="0" role="button" aria-label="选择组件 ${escapeHtml(comp.name)}">
@@ -3478,6 +3844,10 @@ function renderLibrary() {
           <span class="dep-count">${deps.length} 个直接依赖</span>
           <div class="dep-tags">${depTags}${more}</div>
         </div>
+        <button class="asset-source-tag" data-detail-component="${id}" title="来源资产 · 点击查看组件构成">
+          ${icon('layers', 9)}<span>来源资产</span>
+          <b>业务模型 ${assets.models.length}</b><i>·</i><b>脚本 ${assets.scripts.length}</b><i>·</i><b>API ${assets.apis.length}</b>
+        </button>
       </article>`;
   }).join('');
 }
@@ -3553,13 +3923,15 @@ function renderWizardFocus(app) {
   const conflict = state.parseState === 'resolved' && isMicroConflict(app.id);
   const rows = refs.map(ref => {
     const comp = COMPONENTS[ref.id];
+    const assets = getAssets(ref.id);
     const isConflict = state.parseState === 'resolved' && isRefConflict(app.id, ref.id, ref.version);
     const isAdded = state.lastAdded && state.lastAdded.microId === app.id && state.lastAdded.compId === ref.id;
     return `<button class="wizard-tree-row ${isConflict ? 'version-conflict' : ''} ${isAdded ? 'added-flash' : ''}"
-      data-open-component="${ref.id}" data-version="${ref.version}" data-micro-id="${app.id}" title="查看 ${escapeHtml(comp.name)} ${ref.version} 详情">
+      data-open-component="${ref.id}" data-version="${ref.version}" data-micro-id="${app.id}" title="查看 ${escapeHtml(comp.name)} ${ref.version} 详情 · 来源资产：业务模型 ${assets.models.length} / 脚本 ${assets.scripts.length} / API ${assets.apis.length}">
       <span class="tdot" style="background:${comp.accent}"></span>
       <span class="tnm">${escapeHtml(comp.name)}</span>
       <span class="tv">${escapeHtml(ref.version)}</span>
+      <span class="row-assets" aria-hidden="true"><i>模型 ${assets.models.length}</i><i>脚本 ${assets.scripts.length}</i><i>API ${assets.apis.length}</i></span>
       ${isConflict ? icon('warn', 9) : ''}
       <span class="tgo">${icon('chevron', 8)}</span>
     </button>`;
@@ -4595,7 +4967,7 @@ function renderBuildTab() {
         <div class="build-summary-card">
           <div class="build-summary-head">
             <span class="build-success-badge">${icon(built ? 'check' : 'refresh', 8)} ${built ? 'SUCCESS' : 'BUILDING'}</span>
-            <span class="build-app-name">工厂能源管理平台</span><span class="build-app-version">v1.0.0</span>${warnBadge('10', 'head')}
+            <span class="build-app-name">工厂能源管理平台</span><span class="build-app-version">v1.0.0</span>${warnBadge('10', 'head')}<button class="trace-btn" data-trace-version title="查看应用→微应用→组件→设计资产的来源版本">${icon('layers', 9)}查看来源版本</button>
           </div>
           <div class="build-metrics">
             <div class="build-metric"><strong>${metrics.microapps}</strong><span>微应用</span></div>
@@ -4626,7 +4998,7 @@ function renderBuildTab() {
         <div class="build-summary-card" style="border-color:rgba(183, 121, 31, .16);background:linear-gradient(140deg,rgba(183, 121, 31, .045),rgba(16, 50, 62, .014))">
           <div class="build-summary-head">
             <span class="build-success-badge" style="color:var(--amber);border-color:rgba(183, 121, 31, .24);background:rgba(183, 121, 31, .07)">${icon('warn', 8)} ${ready ? 'READY' : 'BLOCKED'}</span>
-            <span class="build-app-name">构建制品预览</span><span class="build-app-version">v1.0.0</span>${warnBadge('10', 'head')}
+            <span class="build-app-name">构建制品预览</span><span class="build-app-version">v1.0.0</span>${warnBadge('10', 'head')}<button class="trace-btn" data-trace-version title="查看应用→微应用→组件→设计资产的来源版本">${icon('layers', 9)}查看来源版本</button>
           </div>
           <div class="build-metrics">
             <div class="build-metric"><strong>${metrics.microapps}</strong><span>微应用</span></div>
@@ -4711,6 +5083,10 @@ function openComponentDetail(compId, version, microId) {
           <div class="detail-cell"><span>装配引用</span><strong>${refs.length} 个微应用</strong></div>
           <div class="detail-cell"><span>组件状态</span><strong style="color:${isConflict ? 'var(--red)' : comp.platform ? 'var(--blue)' : refs.length > 1 ? 'var(--green)' : 'var(--muted)'}">${statusText}</strong></div>
         </div>
+      </div>
+      <div class="drawer-section">
+        <div class="drawer-section-title">组件构成 · 由设计资产组装形成<span class="line"></span>${warnBadge('13', 'head')}</div>
+        ${renderComponentComposition(compId, comp, displayVersion)}
       </div>
       <div class="drawer-section">
         <div class="drawer-section-title">被以下微应用使用<span class="line"></span>${warnBadge('11', 'head')}</div>
@@ -5096,16 +5472,34 @@ function bindEvents() {
     if (event.target === overlay) closeDrawer();
   });
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && overlay.classList.contains('open')) closeDrawer();
-    if (event.key === 'Escape') closeBlocker();
+    if (event.key !== 'Escape') return;
+    if (document.getElementById('traceOverlay').classList.contains('open')) { closeVersionTrace(); return; }
+    if (document.getElementById('assetOverlay').classList.contains('open')) { closeAssetDetail(); return; }
+    if (document.getElementById('blockerOverlay').classList.contains('open')) { closeBlocker(); return; }
+    if (overlay.classList.contains('open')) closeDrawer();
   });
 
   document.addEventListener('click', (event) => {
     const badge = event.target.closest('[data-blocker]');
-    if (!badge) return;
-    event.preventDefault();
-    event.stopPropagation();
-    openBlocker(badge.dataset.blocker);
+    if (badge) {
+      event.preventDefault();
+      event.stopPropagation();
+      openBlocker(badge.dataset.blocker);
+      return;
+    }
+    const asset = event.target.closest('[data-asset]');
+    if (asset) {
+      event.preventDefault();
+      event.stopPropagation();
+      openAssetDetail(asset.dataset.asset, asset.dataset.assetKind, Number(asset.dataset.assetIndex));
+      return;
+    }
+    const traceBtn = event.target.closest('[data-trace-version]');
+    if (traceBtn) {
+      event.preventDefault();
+      event.stopPropagation();
+      openVersionTrace();
+    }
   }, true);
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Enter' && event.key !== ' ') return;
@@ -5118,6 +5512,14 @@ function bindEvents() {
   blockerOverlay.addEventListener('click', (event) => { if (event.target === blockerOverlay) closeBlocker(); });
   document.getElementById('blockerModalClose').addEventListener('click', closeBlocker);
   document.getElementById('blockerModalOk').addEventListener('click', closeBlocker);
+  const assetOverlay = document.getElementById('assetOverlay');
+  assetOverlay.addEventListener('click', (event) => { if (event.target === assetOverlay) closeAssetDetail(); });
+  document.getElementById('assetModalClose').addEventListener('click', closeAssetDetail);
+  document.getElementById('assetModalOk').addEventListener('click', closeAssetDetail);
+  const traceOverlay = document.getElementById('traceOverlay');
+  traceOverlay.addEventListener('click', (event) => { if (event.target === traceOverlay) closeVersionTrace(); });
+  document.getElementById('traceModalClose').addEventListener('click', closeVersionTrace);
+  document.getElementById('traceModalOk').addEventListener('click', closeVersionTrace);
 }
 
 bindEvents();
